@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  icons: {
+    icon: "/icons/icon.png",
+  },
 };
 
 import GDPRBanner from "@/components/GDPRBanner";
