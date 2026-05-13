@@ -1,0 +1,73 @@
+{
+  "name": "paygidi-server",
+  "version": "1.0.0",
+  "description": "Robust backend for PayGidi - AI-powered escrow and trust infrastructure.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node dist/app.js",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/app.ts",
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "keywords": [
+    "ai-support",
+    "chat-widget",
+    "customer-support",
+    "knowledge-base",
+    "analytics"
+  ],
+  "author": "Orello",
+  "license": "ISC",
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.67",
+    "@google/genai": "^1.14.0",
+    "@workstudio/integrations": "^1.0.1",
+    "@workstudio/utilities": "^1.0.1",
+    "ai": "^6.0.175",
+    "auth-validify": "^1.0.11",
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.14.0",
+    "bcrypt": "^6.0.0",
+    "cheerio": "^1.2.0",
+    "cloudinary": "^2.9.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.5.1",
+    "firebase": "^10.14.1",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "md5": "^2.3.0",
+    "mongoose": "^8.19.4",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "nodemailer": "^8.0.7",
+    "socket.io": "^4.8.1",
+    "twilio": "^6.0.2",
+    "typescript": "^5.9.2",
+    "uuid": "^11.1.0",
+    "winston": "^3.19.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.23",
+    "@types/express-rate-limit": "^6.0.2",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^20.10.0",
+    "@types/nodemailer": "^8.0.0",
+    "@vercel/node": "^5.3.24",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt",
+      "protobufjs"
+    ]
+  }
+}

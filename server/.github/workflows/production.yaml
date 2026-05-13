@@ -1,0 +1,71 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Write SSH key to file
+        run: |
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ec2key.pem
+          chmod 600 ec2key.pem
+
+      - name: Add EC2 to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Copy dist folder using rsync
+        run: |
+          sudo rsync -avz --delete \
+            --chown=ubuntu:www-data \
+            --chmod=Dg=rwx,Fg=rwX \
+            -e "ssh -i ec2key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+            dist package.json \
+            ubuntu@${{ secrets.EC2_HOST }}:/var/www/apps/paygidi/api/production
+
+      - name: SSH and install/update on EC2
+        run: |
+          ssh -i ec2key.pem ubuntu@${{ secrets.EC2_HOST }} \
+            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null << 'EOF'
+          cd /var/www/apps/paygidi/api/production
+          sudo pnpm install --prod
+          sudo pm2 restart paygidi-production-service || sudo pm2 start dist/src/app.js --name paygidi-production-service
+          EOF
+
+      - name: Restart Nginx and PM2 service
+        run: |
+          ssh -i ec2key.pem ubuntu@${{ secrets.EC2_HOST }} \
+            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null << 'EOF'
+            sudo systemctl restart nginx
+            sudo pm2 restart paygidi-production-service
+          EOF
+
+      - name: Clean up SSH key
+        run: rm ec2key.pem

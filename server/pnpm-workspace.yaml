@@ -1,0 +1,5 @@
+allowBuilds:
+  aws-sdk: true
+  bcrypt: true
+  esbuild: true
+  protobufjs: true
