@@ -32,6 +32,7 @@ export const metadata: Metadata = {
 };
 
 import GDPRBanner from "@/components/GDPRBanner";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function RootLayout({
   children,
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans">
         {children}
         <GDPRBanner />
+        <Analytics />
       </body>
     </html>
   );

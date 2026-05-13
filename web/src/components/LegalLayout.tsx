@@ -14,12 +14,9 @@ interface LegalLayoutProps {
 export default function LegalLayout({ title, lastUpdated, children }: LegalLayoutProps) {
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* Background Grid */}
-      <div className="absolute inset-0 z-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-white via-transparent to-white"></div>
-
-      <Navbar />
       
+      <Navbar />
+
       <main className="relative z-10 pt-40 pb-24">
         <div className="max-w-4xl mx-auto px-6">
           <motion.div
@@ -27,12 +24,12 @@ export default function LegalLayout({ title, lastUpdated, children }: LegalLayou
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="inline-flex items-center gap-2 text-zinc-400 hover:text-[#FA4821] mb-8 transition-colors text-sm font-medium"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               Back to Home
             </Link>
@@ -45,8 +42,8 @@ export default function LegalLayout({ title, lastUpdated, children }: LegalLayou
               ))}
             </h1>
             <p className="text-zinc-500 mb-16 font-medium tracking-wide uppercase text-xs">Last updated: {lastUpdated}</p>
-            
-            <div className="prose prose-zinc max-w-none prose-h2:text-2xl prose-h2:font-bold prose-h2:mt-12 prose-h2:mb-6 prose-p:text-zinc-800 prose-p:leading-relaxed prose-li:text-zinc-800 prose-strong:text-black">
+
+            <div className="prose prose-zinc max-w-none prose-h2:text-2xl prose-h2:font-bold prose-h2:mt-12 prose-h2:mb-6 prose-p:text-zinc-800 prose-p:leading-relaxed prose-li:text-zinc-800 prose-strong:text-blac flex flex-col gap-10">
               {children}
             </div>
           </motion.div>

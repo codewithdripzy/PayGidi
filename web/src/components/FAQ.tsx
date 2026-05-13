@@ -27,24 +27,24 @@ const itemVariants: Variants = {
 
 const faqs = [
   {
-    question: "How do I open a PayGidi account?",
-    answer: "Opening an account is easy and takes less than 3 minutes. Just download the app or click 'Get Started', fill in your details, and verify your identity with your BVN or NIN."
+    question: "How does the AI-powered escrow work?",
+    answer: "PayGidi holds your funds in a secure escrow account when you initiate a purchase. The money is only released to the merchant once you confirm receipt of the goods or services, or when our AI trust engine verifies a successful delivery."
   },
   {
-    question: "Is PayGidi secure?",
-    answer: "Yes, PayGidi is powered by Squad (a GTCO company) and uses bank-grade encryption to ensure your money is always safe. We are fully licensed and regulated."
+    question: "What is the PayGidi Trust Score?",
+    answer: "The Trust Score is a dynamic rating assigned to every merchant based on their transaction history, delivery speed, dispute rates, and KYB verification status. High-scoring merchants benefit from faster payouts."
   },
   {
-    question: "How do Virtual Dollar Cards work?",
-    answer: "Our virtual cards allow you to pay for global services like Netflix, Apple Music, and Amazon. You can create a card instantly and fund it from your Naira wallet at competitive rates."
+    question: "How do you verify merchants?",
+    answer: "We perform rigorous Know Your Business (KYB) checks, including legal registration verification, physical address confirmation, and historical performance analysis to ensure you only deal with legitimate businesses."
   },
   {
-    question: "What are the transaction fees?",
-    answer: "We believe in transparency. Basic transfers are incredibly cheap, and there are zero maintenance fees on your wallet. You'll always see the exact fee before you confirm any transaction."
+    question: "What happens if there's a dispute?",
+    answer: "Our automated dispute resolution system analyzes delivery evidence and transaction data to reach a fair conclusion quickly. Both buyers and sellers are protected by our transparent escrow rules."
   },
   {
-    question: "How do I contact support?",
-    answer: "Our support team is available 24/7. You can reach us via the in-app chat, email at hello@paygidi.com, or call us directly for urgent matters."
+    question: "Can I integrate PayGidi into my own store?",
+    answer: "Yes! We provide robust, developer-friendly APIs that allow you to add an escrow trust layer to your custom e-commerce platform or mobile app with just a few lines of code."
   }
 ];
 

@@ -8,12 +8,12 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  CreditCardIcon,
-  ArrowRight02Icon,
-  CheckmarkBadge01Icon,
-  SmartPhone01Icon,
-  ChartLineData01Icon,
-  Globe02Icon
+  Shield01Icon,
+  Store01Icon,
+  ArtificialIntelligence01Icon,
+  BubbleChatQuestionIcon,
+  CodeIcon,
+  GlobalIcon
 } from "@hugeicons/core-free-icons";
 
 // Note: Metadata cannot be in a client component in Next.js 13+ App Router.
@@ -29,34 +29,34 @@ import {
 
 const features = [
   {
-    title: "Virtual Dollar Cards",
-    desc: "Create instant virtual cards to pay for Netflix, Spotify, and shop globally with zero stress.",
-    icon: CreditCardIcon
+    title: "AI-Powered Escrow",
+    desc: "Hold funds securely until delivery is verified and both parties are satisfied with the transaction.",
+    icon: Shield01Icon
   },
   {
-    title: "Instant Bank Transfers",
-    desc: "Send money to any Nigerian bank account in seconds, with 99.9% uptime guaranteed.",
-    icon: ArrowRight02Icon
+    title: "Merchant KYB",
+    desc: "Every business is rigorously verified through deep KYB checks to eliminate fraud and build trust.",
+    icon: Store01Icon
   },
   {
-    title: "Squad success rates",
-    desc: "Powered by Squad's industry-leading infrastructure for the fastest payment processing.",
-    icon: CheckmarkBadge01Icon
+    title: "Trust Scoring",
+    desc: "AI-driven trust scores determine payment release logic based on merchant behavior and risk.",
+    icon: ArtificialIntelligence01Icon
   },
   {
-    title: "Bills & Airtime",
-    desc: "Pay your electricity bills and top up airtime for all networks directly from your dashboard.",
-    icon: SmartPhone01Icon
+    title: "Dispute Resolution",
+    desc: "Fast and fair resolution for buyers and sellers, powered by transparent transaction data.",
+    icon: BubbleChatQuestionIcon
   },
   {
-    title: "Smart Budgeting",
-    desc: "Track every kobo with automated spending categories and real-time financial insights.",
-    icon: ChartLineData01Icon
+    title: "Secure Commerce APIs",
+    desc: "Integrate trust into your own platform with our developer-first secure payment APIs.",
+    icon: CodeIcon
   },
   {
-    title: "Multi-Currency Wallet",
-    desc: "Hold, receive and manage multiple currencies in one secure place with ease.",
-    icon: Globe02Icon
+    title: "Modern Trust Layer",
+    desc: "Solving the major trust barrier in African digital commerce through behavior-driven security.",
+    icon: GlobalIcon
   }
 ];
 
@@ -80,10 +80,10 @@ export default function Home() {
           >
             <div className="flex flex-col justify-center items-center text-center">
               <h1 className="text-6xl md:text-8xl font-bold text-black leading-[1.1] mb-6 tracking-tight">
-                Payments made <span className="text-[#FA4821]">simple</span> for everyone.
+                Building <span className="text-[#FA4821]">trust</span> for African commerce.
               </h1>
               <p className="text-xl text-zinc-600 mb-10 leading-relaxed max-w-lg">
-                PayGidi is the all-in-one digital wallet that lets you send money, pay bills, and manage your finances with ease.
+                PayGidi is an AI-powered escrow and trust infrastructure that enables secure payments between buyers and businesses.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 items-center">
@@ -191,7 +191,7 @@ export default function Home() {
               transition={{ duration: 0.6 }}
               className="text-4xl md:text-7xl font-bold text-white mb-8 leading-tight tracking-tight"
             >
-              Experience the future <br className="hidden md:block" /> of <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FA4821] to-[#9E0261]">digital banking.</span>
+              Experience the future <br className="hidden md:block" /> of <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FA4821] to-[#9E0261]">trust-based commerce.</span>
             </motion.h2>
 
             <motion.p
@@ -201,7 +201,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-zinc-400 text-xl md:text-2xl mb-12 max-w-2xl mx-auto"
             >
-              Join thousands of smart Nigerians who are already using PayGidi to power their financial lives.
+              Join thousands of verified businesses and smart buyers who are already using PayGidi to power secure transactions.
             </motion.p>
 
             <motion.div
