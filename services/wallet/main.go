@@ -8,6 +8,8 @@ import (
 	grpcserver "github.com/PayGidi/WalletService/connection/grpc"
 	"github.com/PayGidi/WalletService/core/constants"
 	"github.com/PayGidi/WalletService/proto/connection/pb"
+	"github.com/PayGidi/WalletService/router"
+	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
 
@@ -38,6 +40,16 @@ func main() {
 
 	grpcSrv := grpc.NewServer()
 	pb.RegisterWalletServiceServer(grpcSrv, grpcserver.NewWalletServer(db))
+
+	// Start Gin HTTP server
+	r := gin.Default()
+	router.SetupRoutes(r, db)
+	go func() {
+		log.Printf("Wallet HTTP service listening on :%s", constants.HTTP_PORT)
+		if err := r.Run(":" + constants.HTTP_PORT); err != nil {
+			log.Fatalf("failed to start HTTP server: %v", err)
+		}
+	}()
 
 	log.Printf("Wallet gRPC service listening on :%s", constants.GRPC_PORT)
 	if err := grpcSrv.Serve(lis); err != nil {
