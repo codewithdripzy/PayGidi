@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package notification.v1;
+
+option go_package = "github.com/PayGidi/NotificationService/proto/notificationpb;notificationpb";
+
+message Notification {
+  uint32 id = 1;
+  string user_id = 2;
+  string title = 3;
+  string message = 4;
+  string type = 5;
+  string channel = 6;
+  string status = 7;
+  bool read = 8;
+  bool archived = 9;
+  string recipient = 10;
+  string metadata = 11;
+  int64 created_at = 12;
+  int64 updated_at = 13;
+}
+
+message CreateNotificationRequest {
+  string user_id = 1;
+  string title = 2;
+  string message = 3;
+  string type = 4;
+  string channel = 5;
+  string recipient = 6;
+  string metadata = 7;
+}
+
+message CreateNotificationResponse {
+  Notification notification = 1;
+}
+
+message GetNotificationsRequest {
+  string user_id = 1;
+  string channel = 2;
+  string type = 3;
+  string status = 4;
+  optional bool read = 5;
+  optional bool archived = 6;
+}
+
+message GetNotificationsResponse {
+  repeated Notification notifications = 1;
+}
+
+message MarkAsReadRequest {
+  string id = 1;
+}
+
+message MarkAsReadResponse {
+  Notification notification = 1;
+}
+
+message ArchiveNotificationRequest {
+  string id = 1;
+}
+
+message ArchiveNotificationResponse {
+  Notification notification = 1;
+}
+
+message DeleteNotificationRequest {
+  string id = 1;
+}
+
+message DeleteNotificationResponse {
+  bool deleted = 1;
+}
+
+service NotificationService {
+  rpc CreateNotification (CreateNotificationRequest) returns (CreateNotificationResponse);
+  rpc GetNotifications (GetNotificationsRequest) returns (GetNotificationsResponse);
+  rpc MarkAsRead (MarkAsReadRequest) returns (MarkAsReadResponse);
+  rpc ArchiveNotification (ArchiveNotificationRequest) returns (ArchiveNotificationResponse);
+  rpc DeleteNotification (DeleteNotificationRequest) returns (DeleteNotificationResponse);
+}

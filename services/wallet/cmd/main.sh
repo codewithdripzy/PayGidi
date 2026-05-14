@@ -1,0 +1,1 @@
+mkdir -p proto && protoc --proto_path=connection --go_out=proto --go-grpc_out=proto wallet.proto

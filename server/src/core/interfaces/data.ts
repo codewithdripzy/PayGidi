@@ -49,10 +49,21 @@ export interface CurrentUserData {
 
 export interface RequestUserData {
     _id: string;
-    name: string;
-    email: string;
-    phoneNumber: string;
-    isPhoneVerified: boolean;
+    uid: string;
+    firstName: string;
+    lastName: string;
+    email: {
+        address: string;
+        verified: boolean;
+    };
+    phoneNumber: {
+        number: string;
+        verified: boolean;
+    };
+    metadata: {
+        isFirstTime: boolean;
+        profileColors: string[]
+    };
     role: string;
 }
 

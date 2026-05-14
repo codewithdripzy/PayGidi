@@ -1,0 +1,78 @@
+package main
+
+import (
+	// "os"
+
+	"log"
+	"net"
+
+	"github.com/PayGidi/AccountService/config"
+	"github.com/PayGidi/AccountService/core/constants"
+	"github.com/PayGidi/AccountService/proto/connection/pb"
+	"github.com/PayGidi/AccountService/router"
+	"github.com/PayGidi/AccountService/services/auth"
+	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	// "google.golang.org/grpc/grpclog"
+)
+
+func main() {
+	app := gin.Default()
+
+	// Load environment variables
+	if err := constants.ConfigDotenv(); err != nil {
+		panic("Error loading .env file: " + err.Error())
+	}
+
+	// Initialize database connection
+	db, err := config.GetDBConnection()
+	if err != nil {
+		panic("Error connecting to database: " + err.Error())
+	}
+
+	// Middleware to inject db into context
+	app.Use(func(c *gin.Context) {
+		c.Set("db", db)
+		c.Next()
+	})
+
+	// Run automigrations if in development mode
+	if constants.IsDevMode() {
+		if err := config.RunAutoMigrations(db); err != nil {
+			panic("Error running auto migrations: " + err.Error())
+		}
+		log.Println("Running WalletService in development mode")
+		gin.SetMode(gin.DebugMode)
+	} else {
+		log.Println("Running WalletService in production mode")
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	// Setup routes
+	router.SetupRoutes(app)
+
+	// Start gRPC server in a separate goroutine
+	go func() {
+		lis, err := net.Listen("tcp", ":50051")
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+
+		grpcServer := grpc.NewServer()
+		authServer := &auth.AuthServer{
+			App: app,
+		}
+		pb.RegisterAuthServiceServer(grpcServer, authServer)
+
+		log.Println("gRPC server listening on :50051")
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	// Start HTTP server
+	log.Println("HTTP server listening on :8080")
+	if err := app.Run(":8080"); err != nil {
+		log.Fatalf("failed to run HTTP server: %v", err)
+	}
+}

@@ -31,16 +31,21 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
         const requestUser: RequestUserData = {
             _id: apiUser._id,
             uid: apiUser.uid ?? apiUser.id ?? "",
-            firstName: apiUser.firstName,
-            lastName: apiUser.lastName,
+            firstName: apiUser.firstName ?? "",
+            lastName: apiUser.lastName ?? "",
             email: {
                 address: apiUser.email?.address ?? validation.user?.email ?? "",
                 verified: Boolean(apiUser.email?.verified),
+            },
+            phoneNumber: {
+                number: "",
+                verified: false,
             },
             metadata: {
                 isFirstTime: Boolean(apiUser.metadata?.isFirstTime),
                 profileColors: apiUser.metadata?.profileColors ?? [],
             },
+            role: "user",
         };
 
         req.user = requestUser;

@@ -1,0 +1,1 @@
+mkdir -p pb && protoc --proto_path=connection --go_out=pb --go-grpc_out=pb connection/notification.proto
