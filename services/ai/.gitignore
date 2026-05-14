@@ -1,0 +1,23 @@
+.env*
+data.txt
+tmp/
+*.log
+*.key
+*.pem
+*.crt
+*.csr
+spirit
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+build
+
+# Go vendor directory
+vendor/
+PROMPTS.txt
