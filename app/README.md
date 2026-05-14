@@ -1,14 +1,14 @@
 # PayGidi
 
-pay smart. trust first. trade safe.
+Pay smart. Trust first. Trade safe.
 
 PayGidi is a modern Nigerian fintech platform that combines escrow payments, AI-powered trust scoring, and KYB verification into a single mobile-first infrastructure product.
 
-The platform helps buyers and businesses transact safely by holding payments securely until trust and verification conditions are met.
+The platform helps buyers and businesses transact safely by safeguarding payments until trust and verification conditions are met.
 
 ---
 
-## overview
+## Overview
 
 Traditional digital commerce across Africa still struggles with:
 
@@ -30,9 +30,9 @@ Instead of instantly releasing funds, PayGidi intelligently evaluates trust and 
 
 ---
 
-# core concept
+# Core concept
 
-Buyer sends payment → funds held securely → merchant verification + AI trust analysis → payout released conditionally.
+Buyer sends payment → transaction processing → merchant verification + AI trust analysis → payout released conditionally.
 
 PayGidi is not a bank.
 
@@ -40,11 +40,11 @@ Funds are orchestrated through secure payment infrastructure and conditional rel
 
 ---
 
-# key features
+# Key features
 
-## escrow payments
+## Escrow payments
 
-- secure transaction holding
+- secure transaction safeguarding
 - conditional fund release
 - transaction state tracking
 - buyer protection layer
@@ -121,7 +121,7 @@ Handles:
 Handles:
 - payment lifecycle
 - release conditions
-- hold logic
+- escrow logic
 - dispute locking
 
 ### trust engine
@@ -168,7 +168,7 @@ Handles:
 # product principles
 
 - trust before money moves
-- explain every hold or delay
+- explain every pause or delay
 - clarity over complexity
 - minimal fintech UX
 - infrastructure-grade reliability

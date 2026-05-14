@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PayGidi (Debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main/main.dart"
+        },
+        {
+            "name": "PayGidi (Profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main/main.dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "PayGidi (Release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main/main.dart",
+            "flutterMode": "release"
+        }
+    ]
+}
