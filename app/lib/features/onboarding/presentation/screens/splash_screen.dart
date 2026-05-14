@@ -1,0 +1,51 @@
+import 'package:app/core/theme/pg_colors.dart';
+import 'package:app/core/widgets/pg_annotated_region.dart';
+import 'package:app/routes/pg_route_names.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      Future.delayed(const Duration(seconds: 3), () {
+        if (!mounted) return;
+        context.goNamed(PgRouteNames.onboardingPage);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return buildPGAnnotatedRegion(
+      brightness: Brightness.light,
+      color: PgColors.scaffoldBackground,
+      child: Scaffold(
+        backgroundColor: PgColors.scaffoldBackground,
+        body: SizedBox.expand(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Spacer(),
+              SvgPicture.asset('assets/logo/full logo.svg', width: 188),
+              Spacer(),
+              SvgPicture.asset('assets/logo/squad logo.svg', width: 80),
+              heightSpacing(45),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
