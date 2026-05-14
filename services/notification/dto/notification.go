@@ -15,6 +15,7 @@ type SendEmailDTO struct {
 	Subject string `json:"subject" validate:"required,min=3,max=150"`
 	Body    string `json:"body" validate:"required,min=3,max=5000"`
 	UserID  string `json:"userId" validate:"omitempty"`
+	Type    string `json:"type" validate:"omitempty,max=50"`
 }
 
 type SendSMSDTO struct {

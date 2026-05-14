@@ -3,9 +3,10 @@ package utils
 import (
 	"time"
 
-	"github.com/PayGidi/WalletService/core/constants"
+	"github.com/PayGidi/AIService/core/constants"
 	"github.com/golang-jwt/jwt/v5"
 )
+
 
 // GenerateJWT generates a JWT token for the given user ID and email
 func GenerateJWTtokens(userID uint, email string) (string, string, error) {

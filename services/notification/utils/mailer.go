@@ -2,23 +2,49 @@ package utils
 
 import (
 	"errors"
-	"fmt"
-	"net/smtp"
 	"os"
+
+	"github.com/resend/resend-go/v3"
 )
 
-func SendEmail(to, subject, body string) error {
-	from := os.Getenv("SMTP_FROM")
-	password := os.Getenv("SMTP_PASSWORD")
-	smtpHost := os.Getenv("SMTP_HOST")
-	smtpPort := os.Getenv("SMTP_PORT")
+func SendEmail(to, subject, body, emailType string) error {
+	apiKey := os.Getenv("RESEND_API_KEY")
+	var from string
 
-	if from == "" || password == "" || smtpHost == "" || smtpPort == "" {
-		return errors.New("smtp credentials are not fully configured")
+	switch emailType {
+	case "register":
+		from = os.Getenv("RESEND_REGISTER_FROM_EMAIL")
+	case "notification":
+		from = os.Getenv("RESEND_NOTIFICATION_FROM_EMAIL")
+	default:
+		from = os.Getenv("RESEND_DEFAULT_FROM_EMAIL")
 	}
 
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-	msg := []byte(fmt.Sprintf("To: %s\r\nSubject: %s\r\n\r\n%s\r\n", to, subject, body))
+	if from == "" {
+		from = os.Getenv("RESEND_DEFAULT_FROM_EMAIL")
+	}
 
-	return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, msg)
+	if from == "" {
+		from = "PayGidi <noreply@send.paygidi.site>"
+	}
+
+	if apiKey == "" {
+		return errors.New("RESEND_API_KEY is not configured")
+	}
+
+	client := resend.NewClient(apiKey)
+
+	params := &resend.SendEmailRequest{
+		From:    from,
+		To:      []string{to},
+		Html:    body,
+		Subject: subject,
+	}
+
+	_, err := client.Emails.Send(params)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

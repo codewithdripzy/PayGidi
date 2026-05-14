@@ -23,6 +23,8 @@ func (a *GeminiAnalyzer) AnalyzeRisk(ctx context.Context, business *models.Busin
 		business.Name, business.RegistrationNumber, signals["summary"])
 	
 	// Mock response
-	return fmt.Sprintf("AI ANALYSIS: The business %s appears legitimate based on CAC verification. %s", 
-		business.Name, signals["summary"]), nil
+	return fmt.Sprintf("AI ANALYSIS (Prompt: %s): The business %s appears legitimate based on CAC verification. %s", 
+		prompt, business.Name, signals["summary"]), nil
+
+
 }

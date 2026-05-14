@@ -128,7 +128,7 @@ func (s *NotificationService) DeleteNotification(id string) error {
 }
 
 func (s *NotificationService) SendEmail(payload *dto.SendEmailDTO) (*models.Notification, error) {
-	if err := utils.SendEmail(payload.To, payload.Subject, payload.Body); err != nil {
+	if err := utils.SendEmail(payload.To, payload.Subject, payload.Body, payload.Type); err != nil {
 		return nil, err
 	}
 
