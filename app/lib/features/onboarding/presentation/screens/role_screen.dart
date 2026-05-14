@@ -3,8 +3,10 @@ import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class RoleScreen extends StatefulWidget {
@@ -31,10 +33,7 @@ class _RoleScreenState extends State<RoleScreen> {
             children: [
               heightSpacing(40),
               // Logo
-              SvgPicture.asset(
-                "assets/logo/app cowry icon.svg",
-                width: 50,
-              ),
+              SvgPicture.asset("assets/logo/app cowry icon.svg", width: 50),
               heightSpacing(32),
               // Title
               PgTexts.text700(
@@ -68,7 +67,7 @@ class _RoleScreenState extends State<RoleScreen> {
                 child: PgScaleButton(
                   onTap: () {
                     if (_selectedRole != null) {
-                      // Navigate to respective signup flow
+                      context.pushNamed(PgRouteNames.individualSignUp);
                     }
                   },
                   child: Container(
@@ -131,8 +130,8 @@ class _RoleScreenState extends State<RoleScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? PgColors.primary.withValues(alpha: 0.1) 
+                color: isSelected
+                    ? PgColors.primary.withValues(alpha: 0.1)
                     : PgColors.scaffoldBackground,
                 shape: BoxShape.circle,
               ),
@@ -165,11 +164,7 @@ class _RoleScreenState extends State<RoleScreen> {
               ),
             ),
             if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: PgColors.primary,
-                size: 24,
-              ),
+              const Icon(Icons.check_circle, color: PgColors.primary, size: 24),
           ],
         ),
       ),

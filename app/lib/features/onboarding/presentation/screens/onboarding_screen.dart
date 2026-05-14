@@ -76,12 +76,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
 
                   // Dark Overlay
-                  Transform.scale(
-                    scale: scale,
-                    child: Positioned.fill(
-                      child: Container(
-                        color: Colors.black.withValues(alpha: 0.4),
-                      ),
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.4),
                     ),
                   ),
 
