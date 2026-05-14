@@ -1,9 +1,8 @@
 package router
 
 import (
-	"github.com/PayGidi/AccountService/controllers"
-	"github.com/PayGidi/AccountService/dto"
-	"github.com/PayGidi/AccountService/middlewares"
+	"github.com/PayGidi/TransactionService/controllers"
+	"github.com/PayGidi/TransactionService/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,11 +13,8 @@ func SetupRoutes(app *gin.Engine) {
 	// add middleware to check version
 	api.Use(middlewares.VerifyVersion)
 
-	api.POST("/account/new", middlewares.ValidateDTO(&dto.CreateAccountDto{}), controllers.CreateAccount)
-
-	// wallet routes
-	api.POST("/wallet/new", middlewares.Authenticate(), middlewares.ValidateDTO(&dto.CreateWalletDto{}), controllers.CreateWallet)
-	api.POST("/wallet/send", middlewares.Authenticate(), middlewares.ValidateDTO(&dto.SendMoneyDto{}), controllers.SendMoney)
+	// transactions
+	api.GET("/transactions/:customerIdentifier", middlewares.Authenticate(), controllers.GetCustomerTransactions)
 
 	api.GET("/health", controllers.HealthCheck)
 }

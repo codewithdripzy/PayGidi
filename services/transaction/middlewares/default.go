@@ -3,9 +3,9 @@ package middlewares
 import (
 	"net/http"
 
-	payGidiErrors "github.com/PayGidi/AccountService/core/interfaces/errors"
+	payGidiErrors "github.com/PayGidi/TransactionService/core/interfaces/errors"
 	"github.com/gin-gonic/gin"
-	// "github.com/PayGidi/AccountService/utils"
+	// "github.com/PayGidi/TransactionService/utils"
 )
 
 // VerifyVersion is a middleware that checks if the API version is valid

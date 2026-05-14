@@ -1,19 +1,14 @@
 package main
 
 import (
-	// "os"
-
 	"log"
 	"net"
 
-	"github.com/PayGidi/AccountService/config"
-	"github.com/PayGidi/AccountService/core/constants"
-	"github.com/PayGidi/AccountService/proto/connection/pb"
-	"github.com/PayGidi/AccountService/router"
-	"github.com/PayGidi/AccountService/services/auth"
+	"github.com/PayGidi/TransactionService/config"
+	"github.com/PayGidi/TransactionService/core/constants"
+	"github.com/PayGidi/TransactionService/router"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
-	// "google.golang.org/grpc/grpclog"
 )
 
 func main() {
@@ -41,10 +36,10 @@ func main() {
 		if err := config.RunAutoMigrations(db); err != nil {
 			panic("Error running auto migrations: " + err.Error())
 		}
-		log.Println("Running WalletService in development mode")
+		log.Println("Running TransactionService in development mode")
 		gin.SetMode(gin.DebugMode)
 	} else {
-		log.Println("Running WalletService in production mode")
+		log.Println("Running TransactionService in production mode")
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -53,18 +48,14 @@ func main() {
 
 	// Start gRPC server in a separate goroutine
 	go func() {
-		lis, err := net.Listen("tcp", ":50051")
+		lis, err := net.Listen("tcp", ":50053")
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
 
 		grpcServer := grpc.NewServer()
-		authServer := &auth.AuthServer{
-			App: app,
-		}
-		pb.RegisterAuthServiceServer(grpcServer, authServer)
 
-		log.Println("gRPC server listening on :50051")
+		log.Println("gRPC server listening on :50053")
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}

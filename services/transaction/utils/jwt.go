@@ -6,7 +6,7 @@ import (
 
 	"database/sql"
 
-	"github.com/PayGidi/AccountService/core/constants"
+	"github.com/PayGidi/TransactionService/core/constants"
 	"github.com/golang-jwt/jwt/v5"
 )
 

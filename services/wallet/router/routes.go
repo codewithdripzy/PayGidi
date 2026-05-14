@@ -14,6 +14,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	walletGroup := r.Group("/wallet")
 	walletGroup.Use(middlewares.Authenticate())
 	{
+		walletGroup.GET("/banks", walletController.GetBanksHttp)
 		walletGroup.GET("", walletController.GetWalletHttp)
 		walletGroup.GET("/:accountNumber", walletController.GetWalletHttp)
 		walletGroup.GET("/:accountNumber/transactions", walletController.GetTransactionsHttp)
@@ -21,6 +22,16 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		// Transfers
 		walletGroup.POST("/transfer/lookup", walletController.ResolveAccountHttp)
 		walletGroup.POST("/transfer", walletController.InitiateTransferHttp)
+		walletGroup.GET("/transfer/list", walletController.GetAllTransfersHttp)
+		walletGroup.POST("/transfer/requery", walletController.RequeryTransferHttp)
+
+		// Disputes
+		walletGroup.GET("/disputes", walletController.GetAllDisputesHttp)
+		walletGroup.GET("/disputes/upload-url/:ticketId/:fileName", walletController.GetDisputeUploadURLHttp)
+		walletGroup.POST("/disputes/:ticketId/resolve", walletController.ResolveDisputeHttp)
+
+		// Create Wallet
+		walletGroup.POST("/create", walletController.CreateWalletHttp)
 
 		if constants.IsDevMode() {
 			walletGroup.POST("/deposit/simulate", walletController.SimulatePaymentHttp)

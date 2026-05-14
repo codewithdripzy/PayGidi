@@ -217,3 +217,15 @@ type SquadBankData struct {
 	BankName string `json:"bank_name"`
 	BankCode string `json:"bank_code"`
 }
+
+type SquadTransferRecord struct {
+	AccountNumberCredited string `json:"account_number_credited"`
+	AmountDebited         string `json:"amount_debited"`
+	TotalAmountDebited    string `json:"total_amount_debited"`
+	Success               bool   `json:"success"`
+	Recipient             string `json:"recipient"`
+	BankCode              string `json:"bank_code"`
+	TransactionReference  string `json:"transaction_reference"`
+	TransactionStatus     string `json:"transaction_status"`
+	SwitchTransaction     any    `json:"switch_transaction"`
+}

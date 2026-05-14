@@ -55,3 +55,12 @@ type SimulateSquadPaymentPayload struct {
 	VirtualAccountNumber string `json:"virtual_account_number"`
 	Amount               string `json:"amount,omitempty"`
 }
+
+type ResolveDisputePayload struct {
+	Action   string `json:"action"`
+	FileName string `json:"file_name"`
+}
+
+type SquadRequeryTransferPayload struct {
+	TransactionReference string `json:"transaction_reference"`
+}

@@ -452,3 +452,242 @@ func (wc *WalletController) InitiateTransferHttp(c *gin.Context) {
 		"data":    data,
 	})
 }
+
+// GetBanksHttp handles the GET /wallet/banks HTTP request
+func (wc *WalletController) GetBanksHttp(c *gin.Context) {
+	success, errMsg, data := squadService.GetBanks(c.Request.Context())
+
+	if !success {
+		msg := "Failed to retrieve bank list"
+		if errMsg != nil {
+			msg = *errMsg
+		}
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": msg,
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  200,
+		"success": true,
+		"message": "Success",
+		"data":    data,
+	})
+}
+
+// GetAllDisputesHttp handles GET /wallet/disputes
+func (wc *WalletController) GetAllDisputesHttp(c *gin.Context) {
+	success, errMsg, data := squadService.GetAllDisputes(c.Request.Context())
+
+	if !success {
+		msg := "Failed to retrieve disputes"
+		if errMsg != nil {
+			msg = *errMsg
+		}
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": msg,
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  200,
+		"success": true,
+		"message": "Success",
+		"data":    data,
+	})
+}
+
+// GetDisputeUploadURLHttp handles GET /wallet/disputes/upload-url/:ticketId/:fileName
+func (wc *WalletController) GetDisputeUploadURLHttp(c *gin.Context) {
+	ticketId := c.Param("ticketId")
+	fileName := c.Param("fileName")
+
+	success, errMsg, data := squadService.GetDisputeUploadURL(c.Request.Context(), ticketId, fileName)
+
+	if !success {
+		msg := "Failed to retrieve upload url"
+		if errMsg != nil {
+			msg = *errMsg
+		}
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": msg,
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  200,
+		"success": true,
+		"message": "Success",
+		"data":    data,
+	})
+}
+
+// ResolveDisputeHttp handles POST /wallet/disputes/:ticketId/resolve
+func (wc *WalletController) ResolveDisputeHttp(c *gin.Context) {
+	ticketId := c.Param("ticketId")
+	var req payloads.ResolveDisputePayload
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": "Invalid request payload",
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	success, errMsg, data := squadService.ResolveDispute(c.Request.Context(), ticketId, req)
+
+	if !success {
+		msg := "Failed to resolve dispute"
+		if errMsg != nil {
+			msg = *errMsg
+		}
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": msg,
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  200,
+		"success": true,
+		"message": "Success",
+		"data":    data,
+	})
+}
+
+// CreateWalletHttp handles the POST /wallet/create HTTP request as a fallback/manual endpoint
+func (wc *WalletController) CreateWalletHttp(c *gin.Context) {
+	var req dto.CreateWalletDto
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": "Invalid request payload",
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	// Set UserID securely from the authenticated token
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status":  401,
+			"success": false,
+			"message": "Unauthorized",
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	// Safely convert userID from context to string
+	switch v := userID.(type) {
+	case string:
+		req.UserID = v
+	default:
+		req.UserID = fmt.Sprintf("%v", v)
+	}
+
+	// Call the internal CreateWallet method which handles Squad validation and database insertion
+	result := wc.CreateWallet(c.Request.Context(), req)
+
+	if !result.Success {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": result.Message, // e.g. BVN validation failed
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  200,
+		"success": true,
+		"message": result.Message,
+		"data":    result.Data,
+	})
+}
+
+// GetAllTransfersHttp handles GET /wallet/transfer/list
+func (wc *WalletController) GetAllTransfersHttp(c *gin.Context) {
+	success, errMsg, data := squadService.GetAllTransfers(c.Request.Context())
+
+	if !success {
+		msg := "Failed to retrieve transfers"
+		if errMsg != nil {
+			msg = *errMsg
+		}
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": msg,
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  200,
+		"success": true,
+		"message": "Success",
+		"data":    data,
+	})
+}
+
+// RequeryTransferHttp handles POST /wallet/transfer/requery
+func (wc *WalletController) RequeryTransferHttp(c *gin.Context) {
+	var req payloads.SquadRequeryTransferPayload
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": "Invalid request payload",
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	success, errMsg, data := squadService.RequeryTransfer(c.Request.Context(), req.TransactionReference)
+
+	if !success {
+		msg := "Failed to requery transfer"
+		if errMsg != nil {
+			msg = *errMsg
+		}
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": msg,
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  200,
+		"success": true,
+		"message": "Success",
+		"data":    data,
+	})
+}

@@ -93,3 +93,25 @@ type GetTransactionStatusResponseData struct {
 	BankTransactionId string `json:"bankTransactionId"`
 	TransactionType   string `json:"transactionType"`
 }
+
+type SquadResponse[T any] struct {
+	Status  int    `json:"status"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Data    T      `json:"data"`
+}
+
+type SquadCustomerTransaction struct {
+	TransactionReference string `json:"transaction_reference"`
+	VirtualAccountNumber string `json:"virtual_account_number"`
+	PrincipalAmount      string `json:"principal_amount"`
+	SettledAmount        string `json:"settled_amount"`
+	FeeCharged           string `json:"fee_charged"`
+	TransactionDate      string `json:"transaction_date"`
+	TransactionIndicator string `json:"transaction_indicator"`
+	Remarks              string `json:"remarks"`
+	Currency             string `json:"currency"`
+	Customer             struct {
+		CustomerIdentifier string `json:"customer_identifier"`
+	} `json:"customer"`
+}

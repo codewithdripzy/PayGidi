@@ -103,6 +103,11 @@ func (c *Client) WithTimeout(timeout time.Duration) *Client {
 	return c
 }
 
+func (c *Client) WithBaseURL(baseURL string) *Client {
+	c.baseURL = strings.TrimRight(baseURL, "/")
+	return c
+}
+
 func Get[T any](c *Client, ctx context.Context, path string, out *T) (*Response, error) {
 	return c.DoJSON(ctx, http.MethodGet, path, nil, out)
 }
