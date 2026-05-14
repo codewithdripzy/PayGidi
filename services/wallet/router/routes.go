@@ -12,6 +12,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	walletController := controllers.NewWalletController(db)
 
 	walletGroup := r.Group("/wallet")
+	// Public unauthenticated payment fetch
+	walletGroup.GET("/payments/:payment_id", walletController.GetPaymentHttp)
 	walletGroup.Use(middlewares.Authenticate())
 	{
 		walletGroup.GET("/banks", walletController.GetBanksHttp)
@@ -32,6 +34,9 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 
 		// Create Wallet
 		walletGroup.POST("/create", walletController.CreateWalletHttp)
+
+		// Payments (KYB Trust Layer integration)
+		walletGroup.POST("/payments/new", walletController.CreatePaymentHttp)
 
 		if constants.IsDevMode() {
 			walletGroup.POST("/deposit/simulate", walletController.SimulatePaymentHttp)

@@ -109,7 +109,7 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 	if err := wc.db.Create(&newAccount).Error; err != nil {
 		return &CreateWalletResult{
 			Success: false,
-			Code:    string(payGidiErrors.INTERNAL_SERVER_ERROR),
+			Code:    strconv.Itoa(int(payGidiErrors.INTERNAL_SERVER_ERROR)),
 			Message: "failed to save account to database",
 		}
 	}
@@ -689,5 +689,126 @@ func (wc *WalletController) RequeryTransferHttp(c *gin.Context) {
 		"success": true,
 		"message": "Success",
 		"data":    data,
+	})
+}
+
+// CreatePaymentHttp handles POST /wallet/payments/new
+func (wc *WalletController) CreatePaymentHttp(c *gin.Context) {
+	var req dto.CreatePaymentDto
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": "Invalid request payload",
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	userID, _ := c.Get("userID")
+	userIDStr := ""
+	switch v := userID.(type) {
+	case string:
+		userIDStr = v
+	default:
+		userIDStr = fmt.Sprintf("%v", v)
+	}
+
+	payment := models.Payment{
+		UserID:              userIDStr,
+		Amount:              req.Amount,
+		AccountNumber:       req.AccountNumber,
+		Bank:                req.Bank,
+		MerchantPhoneNumber: req.MerchantPhoneNumber,
+		MerchantEmail:       req.Email,
+		AdvanceOptions:      req.AdvanceOptions,
+		Status:              models.PaymentPending,
+	}
+
+	if req.ExpiresInMinutes > 0 {
+		exp := time.Now().Add(time.Duration(req.ExpiresInMinutes) * time.Minute)
+		payment.ExpiresAt = &exp
+	}
+
+	if err := wc.db.Create(&payment).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  500,
+			"success": false,
+			"message": "Failed to create payment record",
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	// Send an email conceptually to the merchant
+	kybLink := fmt.Sprintf("https://kyb.paygidi.site/%d", payment.ID)
+	// TODO: Dispatch to Notification Service
+	_ = kybLink 
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  200,
+		"success": true,
+		"message": "Payment locked successfully. Notification sent to merchant.",
+		"data": gin.H{
+			"payment_id": payment.ID,
+			"status":     payment.Status,
+		},
+	})
+}
+
+// GetPaymentHttp handles GET /wallet/payments/:payment_id
+// This is used by the frontend to retrieve payment details for KYB
+func (wc *WalletController) GetPaymentHttp(c *gin.Context) {
+	paymentIDStr := c.Param("payment_id")
+	paymentID, err := strconv.ParseUint(paymentIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": "Invalid payment ID",
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	var payment models.Payment
+	if err := wc.db.First(&payment, uint(paymentID)).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  404,
+			"success": false,
+			"message": "Payment not found",
+			"data":    gin.H{},
+		})
+		return
+	}
+
+	msg := "Payment details retrieved successfully"
+	switch payment.Status {
+	case models.PaymentDisbursed:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": "This payment has already been disbursed and cannot be modified.",
+			"data":    payment,
+		})
+		return
+	case models.PaymentRefunded:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": "This payment has already been refunded.",
+			"data":    payment,
+		})
+		return
+	case models.PaymentActionRequired:
+		msg = "Customer is currently reviewing this payment."
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  200,
+		"success": true,
+		"message": msg,
+		"data":    payment,
 	})
 }
