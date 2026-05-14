@@ -169,3 +169,44 @@ func GetCustomerTransactions(ctx context.Context, customerIdentifier string) (bo
 
 	return true, nil, response.Data
 }
+
+// GetVirtualAccount retrieves virtual account details from Squad API by virtual account number.
+func GetVirtualAccount(ctx context.Context, virtualAccountNumber string) (bool, *string, *responses.SquadVirtualAccountResponseData) {
+	refreshSquadClient()
+	var response responses.SquadResponse[responses.SquadVirtualAccountResponseData]
+
+	path := fmt.Sprintf("/virtual-account/customer/%s", virtualAccountNumber)
+	_, err := httpclient.Get(client, ctx, path, &response)
+	if err != nil {
+		log.Printf("[Squad][GetVirtualAccount] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		log.Printf("[Squad][GetVirtualAccount] provider error: %s", response.Message)
+		return false, &response.Message, nil
+	}
+
+	return true, nil, &response.Data
+}
+
+// SimulatePayment simulates a payment to a virtual account.
+func SimulatePayment(ctx context.Context, payload payloads.SimulateSquadPaymentPayload) (bool, *string, any) {
+	refreshSquadClient()
+	var response responses.SquadResponse[any]
+
+	_, err := httpclient.PostJSON(client, ctx, "/virtual-account/simulate/payment", payload, &response)
+	if err != nil {
+		log.Printf("[Squad][SimulatePayment] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		log.Printf("[Squad][SimulatePayment] provider error: %s", response.Message)
+		return false, &response.Message, nil
+	}
+
+	return true, nil, response.Data
+}

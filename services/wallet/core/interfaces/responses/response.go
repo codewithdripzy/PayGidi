@@ -177,13 +177,14 @@ type SquadResponse[T any] struct {
 }
 
 type SquadVirtualAccountResponseData struct {
-	FirstName         string `json:"first_name"`
-	LastName          string `json:"last_name"`
-	BankAccountNumber string `json:"bank_account_number"`
-	BankName          string `json:"bank_name"`
-	CustomerIdentifier string `json:"customer_identifier"`
-	MobileNum         string `json:"mobile_num"`
-	Email             string `json:"email"`
+	FirstName            string `json:"first_name"`
+	LastName             string `json:"last_name"`
+	BankAccountNumber    string `json:"bank_account_number"`
+	VirtualAccountNumber string `json:"virtual_account_number"`
+	BankName             string `json:"bank_name"`
+	CustomerIdentifier   string `json:"customer_identifier"`
+	MobileNum            string `json:"mobile_num"`
+	Email                string `json:"email"`
 }
 
 type SquadInitiatePaymentResponseData struct {
@@ -210,4 +211,9 @@ type SquadTransactionData struct {
 type SquadAccountLookupResponseData struct {
 	AccountNumber string `json:"account_number"`
 	AccountName   string `json:"account_name"`
+}
+
+type SquadBankData struct {
+	BankName string `json:"bank_name"`
+	BankCode string `json:"bank_code"`
 }

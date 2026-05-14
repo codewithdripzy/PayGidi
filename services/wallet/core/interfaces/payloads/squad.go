@@ -50,3 +50,8 @@ type SquadTransferPayload struct {
 	CurrencyID           string `json:"currency_id"` // "NGN"
 	Remark               string `json:"remark"`
 }
+
+type SimulateSquadPaymentPayload struct {
+	VirtualAccountNumber string `json:"virtual_account_number"`
+	Amount               string `json:"amount,omitempty"`
+}
