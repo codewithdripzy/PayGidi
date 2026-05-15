@@ -44,8 +44,61 @@ func (p *MockNINProvider) VerifyNIN(ctx context.Context, nin string) (string, er
 	return fmt.Sprintf("NIN %s verified: Valid Nigerian Citizen", nin), nil
 }
 
-type MockSentimentProvider struct{}
+type MockSocialMediaProvider struct{}
 
-func (p *MockSentimentProvider) AnalyzeSocialSentiment(ctx context.Context, handle string) (string, error) {
-	return fmt.Sprintf("Sentiment analysis for @%s: 85%% Positive, Active merchant history", handle), nil
+func (p *MockSocialMediaProvider) AnalyzeInstagram(ctx context.Context, handle string) (*SocialMediaResult, error) {
+	if handle == "" {
+		return nil, fmt.Errorf("no handle provided")
+	}
+	return &SocialMediaResult{
+		AccountAgeMonths: 36,
+		EngagementRate:   4.5,
+		FollowerCount:    12500,
+		IsAuthentic:      true,
+		PostFrequency:    "daily",
+		CustomerFeedback: "Excellent service, fast delivery mentioned in comments.",
+		SentimentScore:   0.88,
+	}, nil
+}
+
+func (p *MockSocialMediaProvider) AnalyzeFacebook(ctx context.Context, handle string) (*SocialMediaResult, error) {
+	return &SocialMediaResult{
+		AccountAgeMonths: 48,
+		EngagementRate:   2.1,
+		FollowerCount:    5000,
+		IsAuthentic:      true,
+		PostFrequency:    "weekly",
+		CustomerFeedback: "Active community group, many tagged buyers.",
+		SentimentScore:   0.75,
+	}, nil
+}
+
+func (p *MockSocialMediaProvider) AnalyzeTikTok(ctx context.Context, handle string) (*SocialMediaResult, error) {
+	return &SocialMediaResult{
+		AccountAgeMonths: 12,
+		EngagementRate:   8.2,
+		FollowerCount:    20000,
+		IsAuthentic:      true,
+		PostFrequency:    "daily",
+		CustomerFeedback: "Viral product demos, high engagement.",
+		SentimentScore:   0.92,
+	}, nil
+}
+
+func (p *MockSocialMediaProvider) AnalyzeLinkedIn(ctx context.Context, handle string) (*SocialMediaResult, error) {
+	return &SocialMediaResult{
+		AccountAgeMonths: 24,
+		EngagementRate:   1.5,
+		FollowerCount:    800,
+		IsAuthentic:      true,
+		PostFrequency:    "monthly",
+		CustomerFeedback: "Professional profile, business connections verified.",
+		SentimentScore:   0.65,
+	}, nil
+}
+
+type MockReputationProvider struct{}
+
+func (p *MockReputationProvider) GetCustomerReputation(ctx context.Context, businessName string) (float64, string, error) {
+	return 0.95, "Highly trusted merchant with 95% positive delivery feedback across 500+ orders.", nil
 }

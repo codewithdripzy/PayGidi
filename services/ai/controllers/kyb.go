@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"context"
+	"log"
 	"net/http"
 
 	"github.com/PayGidi/AIService/models"
@@ -27,7 +29,7 @@ type PaymentKYBRequest struct {
 	BusinessID   *string `json:"businessId"`
 	BusinessName string  `json:"businessName" binding:"required"`
 	NIN          string  `json:"nin" binding:"required"`
-	CACNumber    string  `json:"cacNumber" binding:"required"`
+	CACNumber    string  `json:"cacNumber"` // Optional for Informal
 	SocialHandle string  `json:"socialHandle" binding:"required"`
 }
 
@@ -38,25 +40,28 @@ func (c *KYBController) SubmitPaymentKYB(ctx *gin.Context) {
 		return
 	}
 
-	analysis, err := c.orchestrator.ProcessPaymentKYB(
-		ctx.Request.Context(),
-		req.PaymentID,
-		req.BusinessID,
-		req.BusinessName,
-		req.NIN,
-		req.CACNumber,
-		req.SocialHandle,
-	)
+	// For Payment KYB, we still run it synchronously or at least return immediately if needed.
+	// But usually, payment flow needs the result or a 'pending' state.
+	// The Orchestrator already updates the wallet service.
+	
+	go func() {
+		_, err := c.orchestrator.ProcessPaymentKYB(
+			context.Background(),
+			req.PaymentID,
+			req.BusinessID,
+			req.BusinessName,
+			req.NIN,
+			req.CACNumber,
+			req.SocialHandle,
+		)
+		if err != nil {
+			log.Printf("Background Payment KYB failed for Payment %d: %v", req.PaymentID, err)
+		}
+	}()
 
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error()})
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, gin.H{
+	ctx.JSON(http.StatusAccepted, gin.H{
 		"success": true,
-		"message": "Payment KYB analysis completed",
-		"data":    analysis,
+		"message": "Payment KYB analysis has started in the background",
 	})
 }
 
@@ -72,15 +77,24 @@ func (c *KYBController) SubmitKYB(ctx *gin.Context) {
 		return
 	}
 
-	err := c.orchestrator.ProcessKYB(ctx.Request.Context(), business.ID.String())
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Verification failed: " + err.Error()})
-		return
-	}
+	// Run PIPELINE in background
+	go func(bID string) {
+		log.Printf("Starting Multi-Tier Verification Pipeline for Business: %s", bID)
+		err := c.orchestrator.ProcessKYB(context.Background(), bID)
+		if err != nil {
+			log.Printf("Background KYB Pipeline failed for Business %s: %v", bID, err)
+		} else {
+			log.Printf("Background KYB Pipeline completed successfully for Business %s", bID)
+		}
+	}(business.ID.String())
 
-	c.db.Preload("Directors").Preload("Documents").First(&business, "id = ?", business.ID)
-	ctx.JSON(http.StatusCreated, gin.H{"success": true, "message": "KYB submitted and processed", "data": business})
+	ctx.JSON(http.StatusAccepted, gin.H{
+		"success": true, 
+		"message": "KYB submitted. Multi-tier verification pipeline is running in the background.", 
+		"data": gin.H{"id": business.ID},
+	})
 }
+
 
 func (c *KYBController) GetKYBStatus(ctx *gin.Context) {
 	idStr := ctx.Query("id")

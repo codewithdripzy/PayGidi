@@ -65,7 +65,8 @@ func main() {
 		&kyb.DefaultRiskEngine{},
 		nil, // LLM is optional
 		&kyb.MockNINProvider{},
-		&kyb.MockSentimentProvider{},
+		&kyb.MockSocialMediaProvider{},
+		&kyb.MockReputationProvider{},
 		walletClient,
 	)
 

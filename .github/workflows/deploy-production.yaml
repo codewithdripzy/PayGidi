@@ -87,11 +87,10 @@ jobs:
             sudo docker system prune -f || true
 
             echo "===== PULLING IMAGES ====="
-            export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
-            sudo -E docker compose -f docker-compose.production.yml pull
+            sudo DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}" docker compose -f docker-compose.production.yml pull
 
             echo "===== STARTING ====="
-            sudo -E docker compose -f docker-compose.production.yml up -d
+            sudo DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}" docker compose -f docker-compose.production.yml up -d
 
             echo "===== CONTAINERS ====="
             sudo docker ps
