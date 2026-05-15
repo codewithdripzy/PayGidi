@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api/v1
 definitions:
   dto.CreateActivityDTO:
     properties:
@@ -121,6 +121,7 @@ definitions:
       userId:
         type: string
     type: object
+host: api.paygidi.site
 info:
   contact: {}
   description: This is the notification service for PayGidi, handling emails, SMS,

@@ -192,7 +192,7 @@ definitions:
     - StatusReview
     - StatusApproved
     - StatusRejected
-host: localhost:8083
+host: api.paygidi.site
 info:
   contact:
     email: support@swagger.io

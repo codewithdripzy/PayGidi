@@ -6,7 +6,8 @@
         "contact": {},
         "version": "1.0"
     },
-    "basePath": "/",
+    "host": "api.paygidi.site",
+    "basePath": "/api/v1",
     "paths": {
         "/health": {
             "get": {

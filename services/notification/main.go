@@ -21,7 +21,8 @@ import (
 // @title PayGidi Notification Service API
 // @version 1.0
 // @description This is the notification service for PayGidi, handling emails, SMS, and activity logs.
-// @BasePath /
+// @host api.paygidi.site
+// @BasePath /api/v1
 func main() {
 	if err := constants.ConfigDotenv(); err != nil {
 		log.Fatalf("failed to load configuration: %v", err)

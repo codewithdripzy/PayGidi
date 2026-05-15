@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8083",
+    "host": "api.paygidi.site",
     "basePath": "/api/v1",
     "paths": {
         "/health": {

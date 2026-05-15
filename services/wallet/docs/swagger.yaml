@@ -86,7 +86,7 @@ definitions:
       transaction_reference:
         type: string
     type: object
-host: localhost:8082
+host: api.paygidi.site
 info:
   contact:
     email: support@swagger.io
