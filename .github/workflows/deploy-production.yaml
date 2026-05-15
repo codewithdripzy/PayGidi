@@ -8,14 +8,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Build Docker images
-        run: |
-          docker compose build
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -24,43 +21,85 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -A ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
-            set -e
-            # Install Docker & Buildx if missing
+          ssh \
+            -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=60 \
+            -o ServerAliveCountMax=10 \
+            ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+
+            set -euxo pipefail
+
+            echo "===== SYSTEM INFO ====="
+            free -h
+            df -h
+
+            # Install Docker if missing
             if ! command -v docker &> /dev/null; then
-              echo "Installing Docker and Buildx..."
+              echo "Installing Docker..."
+
               sudo apt-get update
-              sudo apt-get install -y docker.io docker-compose-v2 docker-buildx-plugin
+
+              sudo apt-get install -y \
+                docker.io \
+                docker-compose-v2 \
+                docker-buildx-plugin
+
+              sudo systemctl enable docker
+              sudo systemctl start docker
+
               sudo usermod -aG docker ubuntu
             fi
 
-            # Setup Swap (to prevent OOM/stuck builds on small instances)
-            # Reduced to 1GB because disk space is tight (only 2.3GB free)
+            # Create swap if missing
             if [ ! -f /swapfile ]; then
-              echo "Creating 1GB Swap file..."
-              sudo dd if=/dev/zero of=/swapfile bs=1M count=1024
+              echo "Creating swap..."
+
+              sudo fallocate -l 2G /swapfile || \
+              sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+
               sudo chmod 600 /swapfile
               sudo mkswap /swapfile
               sudo swapon /swapfile
+
               echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
             fi
 
-            # Setup directory and Git
+            # Ensure repo exists
             mkdir -p /home/ubuntu/paygidi
             cd /home/ubuntu/paygidi
-            
+
+            # Clone if first deploy
             if [ ! -d ".git" ]; then
-              echo "Initializing Git repository..."
-              git init
-              git remote add origin git@github.com:${{ github.repository }}.git
+              git clone git@github.com:${{ github.repository }}.git .
             fi
-            
-            # Pull latest changes
+
+            # Pull latest code
             git fetch origin
             git reset --hard origin/main
-            
-            # Build and Start
-            # We remove --parallel to build services one-by-one, saving RAM
-            sudo docker compose -f docker-compose.production.yml build
-            sudo docker compose -f docker-compose.production.yml up -d
+
+            echo "===== CLEANUP ====="
+
+            # Prevent disk exhaustion
+            sudo docker system prune -af || true
+
+            echo "===== BUILDING ====="
+
+            # Sequential builds only
+            sudo docker compose \
+              -f docker-compose.production.yml \
+              build \
+              --no-parallel
+
+            echo "===== STARTING ====="
+
+            sudo docker compose \
+              -f docker-compose.production.yml \
+              up -d
+
+            echo "===== CONTAINERS ====="
+
+            sudo docker ps
+
+            echo "===== DONE ====="
+
           EOF
