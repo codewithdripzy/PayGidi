@@ -1,3 +1,4 @@
+import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_forgot_password_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_login_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_otp_screen.dart';
@@ -74,6 +75,15 @@ class PayGidiRouter {
           child: const IndividualForgotPasswordScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               RouteTransitions.slideRight(animation, child),
+        ),
+      ),
+      GoRoute(
+        path: "/${PgRouteNames.individualHome}",
+        name: PgRouteNames.individualHome,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const IndividualHomeScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              RouteTransitions.fade(animation, child),
         ),
       ),
     ],

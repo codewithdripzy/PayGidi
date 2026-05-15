@@ -4,6 +4,7 @@ import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -77,7 +78,7 @@ class IndividualOtpScreen extends StatelessWidget {
               const Spacer(),
               PgScaleButton(
                 onTap: () {
-                  // Navigate to success or dashboard
+                  context.pushNamed(PgRouteNames.individualHome);
                 },
                 child: Container(
                   height: objectHeight(size: 56, context: context),

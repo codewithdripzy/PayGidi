@@ -7,4 +7,5 @@ class PgRouteNames {
   static const String individualLogin = 'individualLogin';
   static const String individualOtp = 'individualOtp';
   static const String individualForgotPassword = 'individualForgotPassword';
+  static const String individualHome = 'individualHome';
 }

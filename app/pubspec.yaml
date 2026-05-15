@@ -37,6 +37,7 @@ dependencies:
   go_router: ^17.2.3
   flutter_svg: ^2.3.0
   iconsax_flutter: ^1.0.1
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +68,8 @@ flutter:
     - assets/
     - assets/logo/
     - assets/onboarding_images/
+    - assets/icons/
+    - assets/images/
     
 
   # An image asset can refer to one or more resolution-specific "variants", see
