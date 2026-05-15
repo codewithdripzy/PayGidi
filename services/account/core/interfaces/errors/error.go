@@ -1,7 +1,7 @@
 package payGidiErrors
 
 type payGidiErrors string
-type SpiritHTTPStatus int
+type PayGidiHTTPStatus int
 
 const (
 	// General Errors
@@ -13,11 +13,11 @@ const (
 
 	// Authentication Errors
 	PHONE_NUMBER_MISSING      payGidiErrors = "PHONE_NUMBER_MISSING"
-	PHONE_OR_PASSWORD_MISSING payGidiErrors = "NO_PHONE_OR_PASSWORD_MISSING"
+	PHONE_OR_PIN_MISSING payGidiErrors = "NO_PHONE_OR_PIN_MISSING"
 
 	// Authentication and User Management Errors
-	INCORRECT_PHONE_OR_PASSWORD payGidiErrors = "INCORRECT_PHONE_OR_PASSWORD"
-	INCORRECT_EMAIL_OR_PASSWORD payGidiErrors = "INCORRECT_EMAIL_OR_PASSWORD"
+	INCORRECT_PHONE_OR_PIN payGidiErrors = "INCORRECT_PHONE_OR_PIN"
+	INCORRECT_EMAIL_OR_PIN payGidiErrors = "INCORRECT_EMAIL_OR_PIN"
 	EMAIL_NOT_FOUND             payGidiErrors = "EMAIL_NOT_FOUND"
 	PHONE_NOT_FOUND             payGidiErrors = "PHONE_NOT_FOUND"
 	INVALID_TOKEN               payGidiErrors = "INVALID_TOKEN"
@@ -26,7 +26,7 @@ const (
 	EMAIL_ALREADY_EXISTS        payGidiErrors = "EMAIL_ALREADY_EXISTS"
 	PHONE_ALREADY_EXISTS        payGidiErrors = "PHONE_ALREADY_EXISTS"
 	USER_CREATION_FAILED        payGidiErrors = "USER_CREATION_FAILED"
-	PASSWORD_MISMATCH           payGidiErrors = "PASSWORD_MISMATCH"
+	PIN_MISMATCH           payGidiErrors = "PIN_MISMATCH"
 	EMAIL_NOT_VERIFIED          payGidiErrors = "EMAIL_NOT_VERIFIED"
 	PHONE_NOT_VERIFIED          payGidiErrors = "PHONE_NOT_VERIFIED"
 	SESSION_EXPIRED             payGidiErrors = "SESSION_EXPIRED"
@@ -44,13 +44,13 @@ const (
 	ACCOUNT_ALREADY_EXISTS  payGidiErrors = "ACCOUNT_ALREADY_EXISTS"
 
 	// HTTP Status Codes
-	SUCCESS               SpiritHTTPStatus = 200
-	CREATED               SpiritHTTPStatus = 201
-	BAD_REQUEST           SpiritHTTPStatus = 400
-	UNAUTHORIZED          SpiritHTTPStatus = 401
-	FORBIDDEN             SpiritHTTPStatus = 403
-	NOT_FOUND             SpiritHTTPStatus = 404
-	INTERNAL_SERVER_ERROR SpiritHTTPStatus = 500
+	SUCCESS               PayGidiHTTPStatus = 200
+	CREATED               PayGidiHTTPStatus = 201
+	BAD_REQUEST           PayGidiHTTPStatus = 400
+	UNAUTHORIZED          PayGidiHTTPStatus = 401
+	FORBIDDEN             PayGidiHTTPStatus = 403
+	NOT_FOUND             PayGidiHTTPStatus = 404
+	INTERNAL_SERVER_ERROR PayGidiHTTPStatus = 500
 
 	// Other specific errors can be added here as needed
 	VFD_SERVICE_ERROR payGidiErrors = "VFD_SERVICE_ERROR"

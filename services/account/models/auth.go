@@ -15,7 +15,6 @@ type AuthInfo struct {
 	LockedUntil      *time.Time `json:"lockedUntil,omitempty"`      // Timestamp until which the user is locked out
 	OTPRequestCount  int        `json:"otpRequestCount"`            // Number of OTP requests
 	OTPCooldownUntil *time.Time `json:"otpCooldownUntil,omitempty"` // Timestamp until which the user is cooled down from requesting OTP
-	PasswordResetAt  *time.Time `json:"passwordResetAt,omitempty"`  // Timestamp of the last password reset
 	CreatedAt        time.Time  `json:"createdAt"`
 	UpdatedAt        time.Time  `json:"updatedAt"`
 	DeletedAt        *time.Time `json:"deletedAt,omitempty"`

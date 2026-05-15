@@ -159,7 +159,7 @@ func Auth(c *gin.Context) {
 		return
 	}
 
-	// Generate an OTP for passwordless login
+	// Generate an OTP for verification
 	otp := utils.GenerateOTPCode(5)
 
 	// add a new OTP to the user's auth info

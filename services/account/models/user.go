@@ -33,6 +33,7 @@ type User struct {
 	BiometricID      string        `json:"biometricID"` // Unique identifier for biometrics (e.g., Device ID + Biometric Hash)
 	Status           string        `json:"status"`      // e.g., "active", "inactive", etc.
 	OTPs             []OTP         `json:"otps" gorm:"foreignKey:UserID"` // List of OTPs associated with the user
+	Pin              string        `json:"pin"`                          // Hashed version of the user's PIN for security
 	CreatedAt        time.Time     `json:"createdAt"`
 	UpdatedAt        time.Time     `json:"updatedAt"`
 	DeletedAt        *time.Time    `json:"deletedAt,omitempty"`

@@ -19,10 +19,10 @@ var (
 	// JWT constants
 	JWT_SECRET             string
 	JWT_EXPIRATION         string = "24h" // Default JWT expiration time
-	JWT_ISSUER             string = "spiritpay"
+	JWT_ISSUER             string = "paygidi"
 	JWT_REFRESH_SECRET     string
 	JWT_REFRESH_EXPIRATION string = "7d" // Default JWT refresh token expiration time
-	JWT_REFRESH_ISSUER     string = "spiritpay_refresh"
+	JWT_REFRESH_ISSUER     string = "paygidi_refresh"
 
 	// Application mode
 	APP_ENV   string = "development" // Default to development mode

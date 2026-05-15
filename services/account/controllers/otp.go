@@ -39,8 +39,8 @@ func RequestOTP(c *gin.Context) {
 	validatedBody, exists := c.Get("validatedBody")
 	if !exists {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":  payGidiErrors.PHONE_OR_PASSWORD_MISSING,
-			"error": "Please provide phone and password",
+			"code":  payGidiErrors.PHONE_OR_PIN_MISSING,
+			"error": "Please provide phone and PIN",
 		})
 		return
 	}
@@ -66,7 +66,7 @@ func RequestOTP(c *gin.Context) {
 
 	if otpType == "phone" && verifyData.Phone == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":  payGidiErrors.PHONE_OR_PASSWORD_MISSING,
+			"code":  payGidiErrors.PHONE_OR_PIN_MISSING,
 			"error": "Phone number is required for phone OTP requests",
 		})
 		return

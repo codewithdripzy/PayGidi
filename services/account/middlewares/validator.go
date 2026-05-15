@@ -122,9 +122,11 @@ func sanitizePayloadForLog(raw []byte) string {
 	}
 
 	sensitiveKeys := map[string]struct{}{
-		"password":        {},
-		"confirmPassword": {},
-		"token":           {},
+		"pin":          {},
+		"oldPin":       {},
+		"newPin":       {},
+		"confirmPin":   {},
+		"token":        {},
 		"accessToken":     {},
 		"refreshToken":    {},
 		"base64Image":     {},

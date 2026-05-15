@@ -47,10 +47,13 @@ func SetupRoutes(app *gin.Engine) {
 	}
 
 	// account routes
-	// api.GET("/account", middlewares.Authenticate(), controllers.GetAccountDetails)
-	// api.POST("/account/setup", middlewares.Authenticate(), middlewares.ValidateDTO(&validators.CreateAccountDto{}), controllers.CreateAccount)
-	// api.PUT("/account/pin", middlewares.Authenticate(), middlewares.ValidateDTO(&validators.SetAccountPin{}), controllers.SetAccountPin)
-	// api.PUT("/account/update", middlewares.Authenticate(), middlewares.ValidateDTO(&validators.UpdateAccountDto{}), controllers.UpdateAccount)
+	account := api.Group("/account")
+	account.Use(middlewares.Authenticate())
+	{
+		account.GET("", controllers.GetAccountDetails)
+		account.POST("/pin", middlewares.ValidateDTO(&validators.SetPinDto{}), controllers.SetPin)
+		account.PUT("/pin", middlewares.ValidateDTO(&validators.UpdatePinDto{}), controllers.UpdatePin)
+	}
 
 	api.GET("/health", controllers.HealthCheck)
 }
