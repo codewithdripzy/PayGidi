@@ -11,3 +11,5 @@ Squad_API_Summary_v2.pptx
 
 .env
 .env.production
+
+deploy-env.sh
