@@ -7,7 +7,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetCustomerTransactions fetches the transactions for a customer identifier.
+// GetCustomerTransactions godoc
+// @Summary Get customer transactions
+// @Description Fetch transaction history for a specific customer identifier using the Squad API.
+// @Tags Transactions
+// @Accept json
+// @Produce json
+// @Param customerIdentifier path string true "Customer Identifier (e.g. email or UID)"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Failure 400 {object} map[string]interface{} "Bad Request"
+// @Router /transactions/{customerIdentifier} [get]
 func GetCustomerTransactions(c *gin.Context) {
 	customerIdentifier := c.Param("customerIdentifier")
 	if customerIdentifier == "" {
