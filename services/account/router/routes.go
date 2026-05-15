@@ -33,6 +33,8 @@ func SetupRoutes(app *gin.Engine) {
 	api.POST("/auth/verify/email", middlewares.ValidateDTO(&validators.VerifyEmailDto{}), controllers.VerifyEmail)
 
 	api.POST("/auth/otp/request/:otpType", middlewares.ValidateDTO(&validators.RequestOTPDto{}), controllers.RequestOTP)
+	api.POST("/auth/biometric", middlewares.ValidateDTO(&validators.BiometricAuthDto{}), controllers.BiometricAuth)
+	api.POST("/auth/biometric/register", middlewares.Authenticate(), middlewares.ValidateDTO(&validators.RegisterBiometricDto{}), controllers.RegisterBiometric)
 	api.POST("/auth/logout", middlewares.Authenticate(), controllers.Logout)
 
 	// business routes

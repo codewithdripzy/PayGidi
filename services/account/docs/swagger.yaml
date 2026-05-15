@@ -14,6 +14,25 @@ definitions:
     required:
     - phone
     type: object
+  validators.BiometricAuthDto:
+    properties:
+      biometricID:
+        type: string
+      phone:
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - biometricID
+    - phone
+    type: object
+  validators.RegisterBiometricDto:
+    properties:
+      biometricID:
+        type: string
+    required:
+    - biometricID
+    type: object
   validators.RequestOTPDto:
     properties:
       email:
@@ -171,6 +190,54 @@ paths:
             additionalProperties: true
             type: object
       summary: Initiate authentication
+      tags:
+      - Auth
+  /auth/biometric:
+    post:
+      consumes:
+      - application/json
+      description: Exchange a biometric ID for a new JWT token.
+      parameters:
+      - description: Biometric authentication data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.BiometricAuthDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Authenticate via biometrics
+      tags:
+      - Auth
+  /auth/biometric/register:
+    post:
+      consumes:
+      - application/json
+      description: Link a biometric ID to the authenticated user's account.
+      parameters:
+      - description: Biometric registration data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.RegisterBiometricDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Biometrics enabled successfully
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Enable biometric authentication
       tags:
       - Auth
   /auth/complete:

@@ -81,6 +81,81 @@
                 }
             }
         },
+        "/auth/biometric": {
+            "post": {
+                "description": "Exchange a biometric ID for a new JWT token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Authenticate via biometrics",
+                "parameters": [
+                    {
+                        "description": "Biometric authentication data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.BiometricAuthDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/biometric/register": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Link a biometric ID to the authenticated user's account.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Enable biometric authentication",
+                "parameters": [
+                    {
+                        "description": "Biometric registration data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.RegisterBiometricDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Biometrics enabled successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/auth/complete": {
             "post": {
                 "security": [
@@ -599,6 +674,34 @@
                     "type": "string",
                     "maxLength": 15,
                     "minLength": 10
+                }
+            }
+        },
+        "validators.BiometricAuthDto": {
+            "type": "object",
+            "required": [
+                "biometricID",
+                "phone"
+            ],
+            "properties": {
+                "biometricID": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "minLength": 10
+                }
+            }
+        },
+        "validators.RegisterBiometricDto": {
+            "type": "object",
+            "required": [
+                "biometricID"
+            ],
+            "properties": {
+                "biometricID": {
+                    "type": "string"
                 }
             }
         },
