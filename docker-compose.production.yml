@@ -6,6 +6,12 @@ services:
       dockerfile: ./services/gateway/Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - ACCOUNT_SERVICE_URL=http://account-service:8080
+      - WALLET_SERVICE_URL=http://wallet-service:8082
+      - TRANSACTION_SERVICE_URL=http://transaction-service:8081
+      - AI_SERVICE_URL=http://ai-service:8083
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8080
     depends_on:
       - account-service
       - wallet-service
@@ -19,6 +25,7 @@ services:
       context: .
       dockerfile: ./services/account/Dockerfile
     expose:
+      - "8080"
       - "50051"
     env_file:
       - ./services/account/.env
@@ -31,6 +38,7 @@ services:
       context: .
       dockerfile: ./services/wallet/Dockerfile
     expose:
+      - "8082"
       - "50053"
     env_file:
       - ./services/wallet/.env
@@ -43,6 +51,7 @@ services:
       context: .
       dockerfile: ./services/transaction/Dockerfile
     expose:
+      - "8081"
       - "50055"
     env_file:
       - ./services/transaction/.env
@@ -55,6 +64,7 @@ services:
       context: .
       dockerfile: ./services/ai/Dockerfile
     expose:
+      - "8083"
       - "50054"
     env_file:
       - ./services/ai/.env
@@ -67,6 +77,7 @@ services:
       context: .
       dockerfile: ./services/notification/Dockerfile
     expose:
+      - "8080"
       - "50052"
     env_file:
       - ./services/notification/.env
