@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package connection;
 
-option go_package = "connection/pb;pb";
+option go_package = "github.com/PayGidi/AIService/proto/connection/walletpb";
 
 service WalletService {
   rpc CreateWallet (CreateWalletRequest) returns (CreateWalletResponse);

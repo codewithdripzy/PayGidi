@@ -7,15 +7,13 @@ import (
 	"github.com/PayGidi/AIService/config"
 	grpcserver "github.com/PayGidi/AIService/connection/grpc"
 	"github.com/PayGidi/AIService/core/constants"
-	"github.com/PayGidi/AIService/proto/connection/pb"
+	"github.com/PayGidi/AIService/proto/connection/aipb"
 	"github.com/PayGidi/AIService/router"
 	"github.com/PayGidi/AIService/services/kyb"
 	"github.com/PayGidi/AIService/services/wallet"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
-
-
 
 func main() {
 	if err := constants.ConfigDotenv(); err != nil {
@@ -71,11 +69,10 @@ func main() {
 	}
 
 	grpcSrv := grpc.NewServer()
-	pb.RegisterAIServiceServer(grpcSrv, grpcserver.NewAIServer(orch))
+	aipb.RegisterAIServiceServer(grpcSrv, grpcserver.NewAIServer(orch))
 
 	log.Printf("AI gRPC service listening on :%s", constants.GRPC_PORT)
 	if err := grpcSrv.Serve(lis); err != nil {
 		log.Fatalf("failed to start gRPC server: %v", err)
 	}
 }
-

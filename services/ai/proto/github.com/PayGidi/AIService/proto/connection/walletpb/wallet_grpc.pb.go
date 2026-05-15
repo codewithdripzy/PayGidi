@@ -4,7 +4,7 @@
 // - protoc             v6.33.3
 // source: connection/wallet.proto
 
-package pb
+package walletpb
 
 import (
 	context "context"
@@ -19,12 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WalletService_CreateWallet_FullMethodName     = "/connection.WalletService/CreateWallet"
-	WalletService_InitiatePayment_FullMethodName  = "/connection.WalletService/InitiatePayment"
-	WalletService_InitiateTransfer_FullMethodName = "/connection.WalletService/InitiateTransfer"
-	WalletService_VerifyNIN_FullMethodName        = "/connection.WalletService/VerifyNIN"
-	WalletService_VerifyBVNImage_FullMethodName   = "/connection.WalletService/VerifyBVNImage"
-	WalletService_HealthCheck_FullMethodName      = "/connection.WalletService/HealthCheck"
+	WalletService_CreateWallet_FullMethodName        = "/connection.WalletService/CreateWallet"
+	WalletService_InitiatePayment_FullMethodName     = "/connection.WalletService/InitiatePayment"
+	WalletService_InitiateTransfer_FullMethodName    = "/connection.WalletService/InitiateTransfer"
+	WalletService_GetTransactions_FullMethodName     = "/connection.WalletService/GetTransactions"
+	WalletService_ResolveAccount_FullMethodName      = "/connection.WalletService/ResolveAccount"
+	WalletService_VerifyNIN_FullMethodName           = "/connection.WalletService/VerifyNIN"
+	WalletService_VerifyBVNImage_FullMethodName      = "/connection.WalletService/VerifyBVNImage"
+	WalletService_GetPayment_FullMethodName          = "/connection.WalletService/GetPayment"
+	WalletService_UpdatePaymentStatus_FullMethodName = "/connection.WalletService/UpdatePaymentStatus"
+	WalletService_HealthCheck_FullMethodName         = "/connection.WalletService/HealthCheck"
 )
 
 // WalletServiceClient is the client API for WalletService service.
@@ -34,8 +38,12 @@ type WalletServiceClient interface {
 	CreateWallet(ctx context.Context, in *CreateWalletRequest, opts ...grpc.CallOption) (*CreateWalletResponse, error)
 	InitiatePayment(ctx context.Context, in *InitiatePaymentRequest, opts ...grpc.CallOption) (*InitiatePaymentResponse, error)
 	InitiateTransfer(ctx context.Context, in *InitiateTransferRequest, opts ...grpc.CallOption) (*InitiateTransferResponse, error)
+	GetTransactions(ctx context.Context, in *GetTransactionsRequest, opts ...grpc.CallOption) (*GetTransactionsResponse, error)
+	ResolveAccount(ctx context.Context, in *ResolveAccountRequest, opts ...grpc.CallOption) (*ResolveAccountResponse, error)
 	VerifyNIN(ctx context.Context, in *VerifyNINRequest, opts ...grpc.CallOption) (*VerifyNINResponse, error)
 	VerifyBVNImage(ctx context.Context, in *VerifyBVNImageRequest, opts ...grpc.CallOption) (*VerifyBVNImageResponse, error)
+	GetPayment(ctx context.Context, in *GetPaymentRequest, opts ...grpc.CallOption) (*GetPaymentResponse, error)
+	UpdatePaymentStatus(ctx context.Context, in *UpdatePaymentStatusRequest, opts ...grpc.CallOption) (*UpdatePaymentStatusResponse, error)
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
@@ -77,6 +85,26 @@ func (c *walletServiceClient) InitiateTransfer(ctx context.Context, in *Initiate
 	return out, nil
 }
 
+func (c *walletServiceClient) GetTransactions(ctx context.Context, in *GetTransactionsRequest, opts ...grpc.CallOption) (*GetTransactionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTransactionsResponse)
+	err := c.cc.Invoke(ctx, WalletService_GetTransactions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletServiceClient) ResolveAccount(ctx context.Context, in *ResolveAccountRequest, opts ...grpc.CallOption) (*ResolveAccountResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResolveAccountResponse)
+	err := c.cc.Invoke(ctx, WalletService_ResolveAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *walletServiceClient) VerifyNIN(ctx context.Context, in *VerifyNINRequest, opts ...grpc.CallOption) (*VerifyNINResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(VerifyNINResponse)
@@ -91,6 +119,26 @@ func (c *walletServiceClient) VerifyBVNImage(ctx context.Context, in *VerifyBVNI
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(VerifyBVNImageResponse)
 	err := c.cc.Invoke(ctx, WalletService_VerifyBVNImage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletServiceClient) GetPayment(ctx context.Context, in *GetPaymentRequest, opts ...grpc.CallOption) (*GetPaymentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPaymentResponse)
+	err := c.cc.Invoke(ctx, WalletService_GetPayment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletServiceClient) UpdatePaymentStatus(ctx context.Context, in *UpdatePaymentStatusRequest, opts ...grpc.CallOption) (*UpdatePaymentStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdatePaymentStatusResponse)
+	err := c.cc.Invoke(ctx, WalletService_UpdatePaymentStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,8 +162,12 @@ type WalletServiceServer interface {
 	CreateWallet(context.Context, *CreateWalletRequest) (*CreateWalletResponse, error)
 	InitiatePayment(context.Context, *InitiatePaymentRequest) (*InitiatePaymentResponse, error)
 	InitiateTransfer(context.Context, *InitiateTransferRequest) (*InitiateTransferResponse, error)
+	GetTransactions(context.Context, *GetTransactionsRequest) (*GetTransactionsResponse, error)
+	ResolveAccount(context.Context, *ResolveAccountRequest) (*ResolveAccountResponse, error)
 	VerifyNIN(context.Context, *VerifyNINRequest) (*VerifyNINResponse, error)
 	VerifyBVNImage(context.Context, *VerifyBVNImageRequest) (*VerifyBVNImageResponse, error)
+	GetPayment(context.Context, *GetPaymentRequest) (*GetPaymentResponse, error)
+	UpdatePaymentStatus(context.Context, *UpdatePaymentStatusRequest) (*UpdatePaymentStatusResponse, error)
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedWalletServiceServer()
 }
@@ -136,11 +188,23 @@ func (UnimplementedWalletServiceServer) InitiatePayment(context.Context, *Initia
 func (UnimplementedWalletServiceServer) InitiateTransfer(context.Context, *InitiateTransferRequest) (*InitiateTransferResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitiateTransfer not implemented")
 }
+func (UnimplementedWalletServiceServer) GetTransactions(context.Context, *GetTransactionsRequest) (*GetTransactionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTransactions not implemented")
+}
+func (UnimplementedWalletServiceServer) ResolveAccount(context.Context, *ResolveAccountRequest) (*ResolveAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResolveAccount not implemented")
+}
 func (UnimplementedWalletServiceServer) VerifyNIN(context.Context, *VerifyNINRequest) (*VerifyNINResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyNIN not implemented")
 }
 func (UnimplementedWalletServiceServer) VerifyBVNImage(context.Context, *VerifyBVNImageRequest) (*VerifyBVNImageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyBVNImage not implemented")
+}
+func (UnimplementedWalletServiceServer) GetPayment(context.Context, *GetPaymentRequest) (*GetPaymentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPayment not implemented")
+}
+func (UnimplementedWalletServiceServer) UpdatePaymentStatus(context.Context, *UpdatePaymentStatusRequest) (*UpdatePaymentStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePaymentStatus not implemented")
 }
 func (UnimplementedWalletServiceServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
@@ -220,6 +284,42 @@ func _WalletService_InitiateTransfer_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WalletService_GetTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTransactionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).GetTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_GetTransactions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).GetTransactions(ctx, req.(*GetTransactionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WalletService_ResolveAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResolveAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).ResolveAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_ResolveAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).ResolveAccount(ctx, req.(*ResolveAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _WalletService_VerifyNIN_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VerifyNINRequest)
 	if err := dec(in); err != nil {
@@ -252,6 +352,42 @@ func _WalletService_VerifyBVNImage_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WalletServiceServer).VerifyBVNImage(ctx, req.(*VerifyBVNImageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WalletService_GetPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPaymentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).GetPayment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_GetPayment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).GetPayment(ctx, req.(*GetPaymentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WalletService_UpdatePaymentStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePaymentStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).UpdatePaymentStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_UpdatePaymentStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).UpdatePaymentStatus(ctx, req.(*UpdatePaymentStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -294,12 +430,28 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _WalletService_InitiateTransfer_Handler,
 		},
 		{
+			MethodName: "GetTransactions",
+			Handler:    _WalletService_GetTransactions_Handler,
+		},
+		{
+			MethodName: "ResolveAccount",
+			Handler:    _WalletService_ResolveAccount_Handler,
+		},
+		{
 			MethodName: "VerifyNIN",
 			Handler:    _WalletService_VerifyNIN_Handler,
 		},
 		{
 			MethodName: "VerifyBVNImage",
 			Handler:    _WalletService_VerifyBVNImage_Handler,
+		},
+		{
+			MethodName: "GetPayment",
+			Handler:    _WalletService_GetPayment_Handler,
+		},
+		{
+			MethodName: "UpdatePaymentStatus",
+			Handler:    _WalletService_UpdatePaymentStatus_Handler,
 		},
 		{
 			MethodName: "HealthCheck",

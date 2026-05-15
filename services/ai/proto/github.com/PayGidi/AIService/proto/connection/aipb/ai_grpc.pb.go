@@ -4,7 +4,7 @@
 // - protoc             v6.33.3
 // source: connection/ai.proto
 
-package pb
+package aipb
 
 import (
 	context "context"
