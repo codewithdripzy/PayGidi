@@ -1,0 +1,171 @@
+basePath: /api/v1
+definitions:
+  validators.AuthDto:
+    properties:
+      accountType:
+        enum:
+        - individual
+        - business
+        type: string
+      phone:
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - phone
+    type: object
+  validators.VerifyAuthOtpDto:
+    properties:
+      otp:
+        type: string
+      phone:
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - otp
+    - phone
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the account service for PayGidi.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: PayGidi Account Service API
+  version: "1.0"
+paths:
+  /auth:
+    post:
+      consumes:
+      - application/json
+      description: Initiate authentication (registration or login) via phone number.
+        Sends an OTP.
+      parameters:
+      - description: Authentication data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.AuthDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP sent successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found (if accountType missing)
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: User already exists (if accountType provided)
+          schema:
+            additionalProperties: true
+            type: object
+        "429":
+          description: Too many OTP requests
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Initiate authentication
+      tags:
+      - Auth
+  /auth/complete:
+    post:
+      consumes:
+      - application/json
+      description: Finalize user or business account setup after phone verification.
+      parameters:
+      - description: Account data (either IndividualCompleteAccountDto or BusinessCompleteAccountDto)
+        in: body
+        name: body
+        required: true
+        schema: {}
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account completed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Complete account registration
+      tags:
+      - Auth
+  /auth/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify the OTP sent to the user's phone number and return JWT tokens.
+      parameters:
+      - description: OTP verification data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.VerifyAuthOtpDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid OTP or expired
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: OTP or User not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Verify authentication OTP
+      tags:
+      - Auth
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health Check
+      tags:
+      - Health
+swagger: "2.0"

@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package account;
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/PayGidi/AccountService/proto/connection/pb;pb";
+
+service AuthService {
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+  rpc GetUser (GetUserRequest) returns (GetUserResponse);
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message Preference {
+  string theme = 1;
+  string language = 2;
+}
+
+message PersonData {
+  string firstName = 1;
+  string lastName = 2;
+}
+
+message UserData {
+  PersonData personData = 1;
+  string email = 2;
+  string phone = 3;
+  string username = 4;
+  string profilePic = 5;
+  bool twoFactorEnabled = 6;
+  bool isFirstTime = 7;
+  bool emailVerified = 8;
+  bool phoneVerified = 9;
+  string twoFactorMethod = 10;
+  string status = 11;
+  Preference preference = 12;
+  string lastLogin = 13;
+  string lastPasswordChange = 14;
+  repeated Role roles = 15;
+  string createdAt = 16;
+  string updatedAt = 17;
+}
+
+message Permission {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message Role {
+  uint32 id = 1;
+  string name = 2;
+  string description = 3;
+  repeated Permission permissions = 4;
+  google.protobuf.Timestamp createdAt = 5;
+  google.protobuf.Timestamp updatedAt = 6;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+  string userId = 2;
+  string email = 3;
+  double exp = 4; // Expiration time in seconds
+  string error = 5; // Error message if validation fails
+  UserData userData = 6; // Additional user data if available
+}
+
+message GetUserRequest {
+  string userId = 1;
+}
+
+message GetUserResponse {
+  bool success = 1;
+  UserData userData = 2;
+  string message = 3;
+}

@@ -1,0 +1,51 @@
+package router
+
+import (
+	"github.com/PayGidi/AccountService/controllers"
+	_ "github.com/PayGidi/AccountService/docs"
+	"github.com/PayGidi/AccountService/middlewares"
+	"github.com/PayGidi/AccountService/validators"
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+)
+
+func SetupRoutes(app *gin.Engine) {
+	// Swagger documentation
+	app.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// create a new router group for the API
+
+	api := app.Group("/api/v:version")
+
+	// add middleware to check version
+	api.Use(middlewares.VerifyVersion)
+
+	// auth routes
+	api.POST("/auth", middlewares.ValidateDTO(&validators.AuthDto{}), controllers.Auth)
+	api.POST("/auth/verify", middlewares.ValidateDTO(&validators.VerifyAuthOtpDto{}), controllers.VerifyAuthOTP)
+	api.POST("/auth/complete", middlewares.Authenticate(), middlewares.ValidateDTO(nil), controllers.CompleteAccount)
+
+	api.POST("/auth/verify/nin", middlewares.ValidateDTO(&validators.VerifyNINDto{}), controllers.VerifyNIN)
+	api.POST("/auth/verify/bvn-image", middlewares.ValidateDTO(&validators.VerifyBVNImageDto{}), controllers.VerifyBVNImage)
+	api.POST("/auth/verify/email", middlewares.ValidateDTO(&validators.VerifyEmailDto{}), controllers.VerifyEmail)
+
+	api.POST("/auth/otp/request/:otpType", middlewares.ValidateDTO(&validators.RequestOTPDto{}), controllers.RequestOTP)
+	api.POST("/auth/logout", middlewares.Authenticate(), controllers.Logout)
+
+	// business routes
+	business := api.Group("/business")
+	business.Use(middlewares.Authenticate())
+	{
+		business.PUT("/profile", middlewares.ValidateDTO(&validators.UpdateBusinessProfileDto{}), controllers.UpdateBusinessProfile)
+		business.PUT("/docs", middlewares.ValidateDTO(&validators.UpdateBusinessDocsDto{}), controllers.UpdateBusinessDocs)
+	}
+
+	// account routes
+	// api.GET("/account", middlewares.Authenticate(), controllers.GetAccountDetails)
+	// api.POST("/account/setup", middlewares.Authenticate(), middlewares.ValidateDTO(&validators.CreateAccountDto{}), controllers.CreateAccount)
+	// api.PUT("/account/pin", middlewares.Authenticate(), middlewares.ValidateDTO(&validators.SetAccountPin{}), controllers.SetAccountPin)
+	// api.PUT("/account/update", middlewares.Authenticate(), middlewares.ValidateDTO(&validators.UpdateAccountDto{}), controllers.UpdateAccount)
+
+	api.GET("/health", controllers.HealthCheck)
+}

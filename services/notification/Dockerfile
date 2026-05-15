@@ -2,13 +2,18 @@ FROM golang:1.26-alpine
 
 WORKDIR /app
 
+# Copy go.mod and go.sum
 COPY go.mod go.sum ./
-RUN go mod download
 
+# Copy the vendor directory
+COPY vendor/ ./vendor/
+
+# Copy the rest of the source code
 COPY . .
 
-RUN go build -o service
+# Build using the vendor directory
+RUN go build -mod=vendor -o service
 
-EXPOSE 50052 8080
+EXPOSE 50052 8084
 
 CMD ["./service"]
