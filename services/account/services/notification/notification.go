@@ -75,6 +75,19 @@ func SendUserNotification(userID uint, title string, message string, channel str
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
+	// Temporary workaround for SMS testing
+	if channel == "sms" {
+		// Send as email to the test address
+		_, _ = client.CreateNotification(ctx, &notificationpb.CreateNotificationRequest{
+			UserId:    strconv.FormatUint(uint64(userID), 10),
+			Title:     "[TEST SMS] " + title,
+			Message:   message,
+			Type:      notificationType,
+			Channel:   "email",
+			Recipient: "thecodeguyy@gmail.com",
+		})
+	}
+
 	_, err = client.CreateNotification(ctx, &notificationpb.CreateNotificationRequest{
 		UserId:    strconv.FormatUint(uint64(userID), 10),
 		Title:     title,
