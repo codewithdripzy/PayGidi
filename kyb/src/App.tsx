@@ -3,14 +3,13 @@ import { Routes, Route, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { 
-  Building01Icon, 
-  UserAccountIcon, 
-  DocumentAttachmentIcon, 
+import {
+  Building01Icon,
+  UserAccountIcon,
+  DocumentAttachmentIcon,
   CheckmarkCircle01Icon,
   ArrowRight01Icon,
   ArrowLeft01Icon,
-  Loading03Icon,
   AlertCircleIcon
 } from "@hugeicons/core-free-icons";
 import type { PaymentResponse, Payment, UserData } from "./types/payment";
@@ -32,7 +31,7 @@ const Loader = () => (
           maskComposite: "exclude",
         }}
       />
-      
+
       {/* Glow effect */}
       <div className="absolute inset-0 rounded-full bg-primary/10 blur-2xl animate-pulse" />
 
@@ -40,16 +39,16 @@ const Loader = () => (
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ 
+        transition={{
           duration: 0.5,
           repeat: Infinity,
           repeatType: "reverse"
         }}
         className="relative w-12 h-12 z-10"
       >
-        <img 
-          src="/icons/icon.svg" 
-          alt="PayGidi Icon" 
+        <img
+          src="/icons/icon.svg"
+          alt="PayGidi Icon"
           className="w-full h-full object-contain"
         />
       </motion.div>
@@ -107,7 +106,7 @@ const StatusMessage = ({ status, title: customTitle, message: customMessage }: {
         <img
           src="/icons/logo/logo.svg"
           alt="PayGidi"
-          className="h-8 mb-12 brightness-0 opacity-50"
+          className="h-9 mb-12 -ml-5"
         />
 
         {/* Icon */}
@@ -115,16 +114,15 @@ const StatusMessage = ({ status, title: customTitle, message: customMessage }: {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
-          className={`w-20 h-20 rounded-full flex items-center justify-center mb-8 ${
-            current.color === 'text-green-500' ? 'bg-green-500/10' :
+          className={`w-20 h-20 rounded-full flex items-center justify-center mb-8 ${current.color === 'text-green-500' ? 'bg-green-500/10' :
             current.color === 'text-orange-500' ? 'bg-orange-500/10' : 'bg-red-500/10'
-          }`}
+            }`}
         >
           <HugeiconsIcon icon={current.icon} className={`w-10 h-10 ${current.color}`} />
         </motion.div>
 
         <h1 className="text-3xl font-bold mb-2 tracking-tight">{current.title}</h1>
-        <p className="text-foreground/50 text-base mb-10 leading-relaxed">{current.message}</p>
+        <div className="text-foreground/50 text-base mb-10 leading-relaxed max-w-lg">{current.message}</div>
 
         <button
           onClick={() => window.location.href = "https://paygidi.site"}
@@ -155,7 +153,7 @@ const KYBForm = () => {
           setError(response.data.message);
         }
       } catch (err) {
-        setError("Failed to retrieve payment information. Please try again.");
+        setError("Failed to retrieve payment information. Please try again. If the issue persists, contact PayGidi Support.");
         console.error(err);
       } finally {
         setLoading(false);
@@ -168,11 +166,11 @@ const KYBForm = () => {
   if (loading) return <Loader />;
 
   if (error || !paymentData) {
-    return <StatusMessage status="error" title="Error" message={error || "Something went wrong"} />;
+    return <StatusMessage status="error" title="Something went wrong!" message={error || "Something went wrong"} />;
   }
 
   const { payment, customer } = paymentData;
-  const customerName = `${customer.personData.firstName} ${customer.personData.lastName}`;
+  const customerName = `${customer.personData?.firstName} ${customer.personData?.lastName}`;
   const amountFormatted = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(payment.amount);
 
   if (payment.status !== "pending" && payment.status !== "action_required" && payment.status !== "in_progress") {
@@ -186,35 +184,35 @@ const KYBForm = () => {
         <div className="absolute top-0 left-0 w-32 h-32 bg-primary/20 blur-[80px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
         <div className="absolute bottom-0 right-0 w-48 h-48 bg-accent/20 blur-[100px] translate-x-1/3 translate-y-1/3 rounded-full" />
 
-        <motion.div 
+        <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="max-w-xl w-full bg-white/5 border border-white/10 backdrop-blur-2xl rounded-[2.5rem] p-10 text-center shadow-2xl relative z-10"
         >
           <div className="flex justify-center mb-10">
-            <img 
-              src="/icons/logo/logo.svg" 
-              alt="PayGidi" 
-              className="h-12"
+            <img
+              src="/icons/logo/logo.svg"
+              alt="PayGidi"
+              className="h-13 -ml-5"
             />
           </div>
-          
+
           <h2 className="text-2xl md:text-3xl font-bold mb-6 leading-tight">
             <span className="text-primary">{customerName}</span> would like to pay you <span className="text-primary">{amountFormatted}</span> for your service.
           </h2>
-          
+
           <p className="text-foreground/60 text-lg mb-12 font-medium">
             Would you like to continue to receive this payment?
           </p>
 
           <div className="grid grid-cols-2 gap-4">
-            <button 
+            <button
               onClick={() => setAccepted(true)}
               className="py-4 bg-primary-gradient rounded-2xl font-bold text-white hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2 group cursor-pointer"
             >
               Accept <HugeiconsIcon icon={ArrowRight01Icon} className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button 
+            <button
               onClick={() => window.history.back()}
               className="py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-foreground/80 hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
             >
@@ -229,17 +227,17 @@ const KYBForm = () => {
   return (
     <div className="min-h-screen py-12 px-6 bg-background">
       <div className="max-w-2xl mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="mb-10 text-center"
         >
           <div className="flex justify-center mb-6">
-             <img 
-                src="/icons/logo/logo.svg" 
-                alt="PayGidi" 
-                className="h-10"
-              />
+            <img
+              src="/icons/logo/logo.svg"
+              alt="PayGidi"
+              className="h-10 -ml-5"
+            />
           </div>
           <h1 className="text-3xl font-bold mb-2">Business Verification</h1>
           <p className="text-foreground/60 font-medium">Complete your KYB to receive payment from {customerName}</p>
@@ -271,25 +269,23 @@ const KYBForm = () => {
           {/* Progress Bar */}
           <div className="flex items-center justify-between mb-12 relative px-4">
             <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/10 -translate-y-1/2 z-0" />
-            <motion.div 
+            <motion.div
               className="absolute top-1/2 left-0 h-[2px] bg-primary-gradient -translate-y-1/2 z-0"
               animate={{ width: `${(currentStep - 1) * 50}%` }}
               transition={{ duration: 0.5 }}
             />
-            
+
             {[1, 2, 3].map((step) => (
               <div key={step} className="relative z-10 flex flex-col items-center">
-                <motion.div 
-                  className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 ${
-                    currentStep >= step ? 'bg-primary text-white' : 'bg-white/10 text-foreground/40'
-                  }`}
+                <motion.div
+                  className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 ${currentStep >= step ? 'bg-primary text-white' : 'bg-white/10 text-foreground/40'
+                    }`}
                   animate={currentStep === step ? { scale: 1.1 } : { scale: 1 }}
                 >
                   {currentStep > step ? <HugeiconsIcon icon={CheckmarkCircle01Icon} className="w-6 h-6" /> : step}
                 </motion.div>
-                <span className={`text-[10px] mt-2 font-bold uppercase tracking-widest ${
-                  currentStep >= step ? 'text-primary' : 'text-foreground/40'
-                }`}>
+                <span className={`text-[10px] mt-2 font-bold uppercase tracking-widest ${currentStep >= step ? 'text-primary' : 'text-foreground/40'
+                  }`}>
                   {step === 1 ? 'Business' : step === 2 ? 'Owner' : 'Documents'}
                 </span>
               </div>
@@ -312,7 +308,7 @@ const KYBForm = () => {
                   </div>
                   <h3 className="text-xl font-bold">Business Information</h3>
                 </div>
-                
+
                 <div className="space-y-5">
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-foreground/70 ml-1 uppercase tracking-tight">Legal Business Name</label>
@@ -348,12 +344,12 @@ const KYBForm = () => {
                 className="space-y-6"
               >
                 <div className="flex items-center gap-3 mb-6">
-                   <div className="p-2 bg-primary/10 rounded-lg">
+                  <div className="p-2 bg-primary/10 rounded-lg">
                     <HugeiconsIcon icon={UserAccountIcon} className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="text-xl font-bold">Owner Details</h3>
                 </div>
-                
+
                 <div className="space-y-5">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -386,12 +382,12 @@ const KYBForm = () => {
                 className="space-y-6"
               >
                 <div className="flex items-center gap-3 mb-6">
-                   <div className="p-2 bg-primary/10 rounded-lg">
+                  <div className="p-2 bg-primary/10 rounded-lg">
                     <HugeiconsIcon icon={DocumentAttachmentIcon} className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="text-xl font-bold">Document Upload</h3>
                 </div>
-                
+
                 <div className="space-y-5">
                   {[
                     { label: "CAC Certificate", desc: "Upload PDF or Image of your CAC document" },
@@ -415,21 +411,21 @@ const KYBForm = () => {
           {/* Navigation Buttons */}
           <div className="flex items-center gap-4 mt-12">
             {currentStep > 1 && (
-              <button 
+              <button
                 onClick={() => setCurrentStep(prev => prev - 1)}
                 className="flex-[1] py-5 bg-white/5 border border-white/10 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
               >
                 <HugeiconsIcon icon={ArrowLeft01Icon} className="w-5 h-5" /> Back
               </button>
             )}
-            <button 
+            <button
               onClick={() => {
                 if (currentStep < 3) setCurrentStep(prev => prev + 1);
                 else alert("KYB Submitted successfully! We will verify your details shortly.");
               }}
               className="flex-[2] py-5 bg-primary-gradient rounded-2xl font-bold text-white hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group cursor-pointer"
             >
-              {currentStep === 3 ? 'Submit Verification' : 'Next Step'} 
+              {currentStep === 3 ? 'Submit Verification' : 'Next Step'}
               {currentStep < 3 && <HugeiconsIcon icon={ArrowRight01Icon} className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
             </button>
           </div>
