@@ -3,15 +3,84 @@ import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
+import 'package:app/core/widgets/pg_snackbar.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-class IndividualOtpScreen extends StatelessWidget {
+/// [IndividualOtpScreen] verifies the 5-digit code sent to the user's phone.
+/// It directs the user either to the dashboard (if returning) or to complete account setup (if new).
+class IndividualOtpScreen extends StatefulWidget {
   final bool isLogin;
-  const IndividualOtpScreen({super.key, this.isLogin = false});
+  final String phone;
+
+  const IndividualOtpScreen({
+    super.key,
+    this.isLogin = false,
+    required this.phone,
+  });
+
+  @override
+  State<IndividualOtpScreen> createState() => _IndividualOtpScreenState();
+}
+
+class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
+  final List<TextEditingController> _controllers = List.generate(
+    5,
+    (_) => TextEditingController(),
+  );
+  final List<FocusNode> _focusNodes = List.generate(5, (_) => FocusNode());
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
+  String get _otp => _controllers.map((c) => c.text).join();
+
+  Future<void> _verify() async {
+    if (_otp.length < 5) {
+      PgSnackBar.show(
+        context,
+        message: "Please enter the full 5-digit code",
+        isError: true,
+      );
+      return;
+    }
+
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.verifyOtp(
+      phone: widget.phone,
+      code: _otp,
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      final needsOnboarding = authProvider.userData?.needsOnboarding ?? false;
+      if (widget.isLogin && !needsOnboarding) {
+        context.goNamed(PgRouteNames.individualHome);
+      } else {
+        context.pushNamed(PgRouteNames.individualCompleteAccount1);
+      }
+    } else {
+      PgSnackBar.show(
+        context,
+        message: authProvider.errorMessage ?? "Verification failed",
+        isError: true,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,20 +110,18 @@ class IndividualOtpScreen extends StatelessWidget {
               heightSpacing(12),
               PgTexts.text400(
                 context,
-                text: "We've sent a 5-digit code to your phone number.",
+                text: "We've sent a 5-digit code to ${widget.phone}.",
                 fontSize: 14,
                 color: Colors.black54,
               ),
               heightSpacing(48),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(
                   5,
-                  (index) => _buildOtpBox(context, index == 0),
+                  (index) => _buildOtpBox(context, index),
                 ),
               ),
-
               heightSpacing(32),
               Center(
                 child: Column(
@@ -63,7 +130,7 @@ class IndividualOtpScreen extends StatelessWidget {
                     heightSpacing(8),
                     PgScaleButton(
                       onTap: () {
-                        // Resend OTP
+                        // Resend OTP logic could be added here
                       },
                       child: PgTexts.text600(
                         context,
@@ -75,33 +142,44 @@ class IndividualOtpScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
               const Spacer(),
-              PgScaleButton(
-                onTap: () {
-                  if (isLogin) {
-                    context.goNamed(PgRouteNames.individualHome);
-                  } else {
-                    context.pushNamed(PgRouteNames.individualCompleteAccount1);
-                  }
-                },
-                child: Container(
-                  height: objectHeight(size: 56, context: context),
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: const LinearGradient(
-                      colors: [PgColors.primary, PgColors.secondary],
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return PgScaleButton(
+                    onTap: auth.isLoading ? () {} : _verify,
+                    child: Container(
+                      height: objectHeight(size: 56, context: context),
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          colors: auth.isLoading
+                              ? [
+                                  PgColors.primary.withValues(alpha: 0.5),
+                                  PgColors.secondary.withValues(alpha: 0.5),
+                                ]
+                              : [PgColors.primary, PgColors.secondary],
+                        ),
+                      ),
+                      child: auth.isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : PgTexts.text600(
+                              context,
+                              text: "Verify Now",
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
                     ),
-                  ),
-                  child: PgTexts.text600(
-                    context,
-                    text: "Verify Now",
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
-                ),
+                  );
+                },
               ),
               heightSpacing(40),
             ],
@@ -111,15 +189,22 @@ class IndividualOtpScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOtpBox(BuildContext context, bool autoFocus) {
+  Widget _buildOtpBox(BuildContext context, int index) {
     return SizedBox(
       height: 60,
       width: 60,
       child: TextFormField(
-        autofocus: autoFocus,
+        controller: _controllers[index],
+        focusNode: _focusNodes[index],
+        autofocus: index == 0,
         onChanged: (value) {
-          if (value.length == 1) {
-            FocusScope.of(context).nextFocus();
+          if (value.length == 1 && index < 4) {
+            _focusNodes[index + 1].requestFocus();
+          } else if (value.isEmpty && index > 0) {
+            _focusNodes[index - 1].requestFocus();
+          }
+          if (_otp.length == 5) {
+            _verify();
           }
         },
         keyboardType: TextInputType.number,

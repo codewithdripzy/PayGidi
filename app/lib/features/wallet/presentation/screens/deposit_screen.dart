@@ -1,0 +1,179 @@
+import 'package:app/core/theme/pg_colors.dart';
+import 'package:app/core/theme/pg_fonts.dart';
+import 'package:app/core/theme/pg_styles.dart';
+import 'package:app/core/widgets/pg_annotated_region.dart';
+import 'package:app/core/widgets/pg_scale_button.dart';
+import 'package:app/core/widgets/pg_snackbar.dart';
+import 'package:app/core/widgets/pg_texts.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:go_router/go_router.dart';
+
+class DepositScreen extends StatelessWidget {
+  const DepositScreen({super.key});
+
+  void _copyToClipboard(BuildContext context, String text, String label) {
+    Clipboard.setData(ClipboardData(text: text));
+    PgSnackBar.showSuccess(context, "$label copied to clipboard");
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // These should ideally come from a provider or passed as arguments
+    const accountNumber = "8123456789";
+    const bankName = "Wema Bank (PayGidi)";
+    const accountName = "Joel Onuoha / PayGidi";
+
+    return buildPGAnnotatedRegion(
+      brightness: Brightness.dark,
+      color: PgColors.scaffoldBackground,
+      child: Scaffold(
+        backgroundColor: PgColors.scaffoldBackground,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              heightSpacing(24),
+              PgScaleButton(
+                child: const Icon(Icons.arrow_back_outlined),
+                onTap: () => context.pop(),
+              ),
+              heightSpacing(18),
+              PgTexts.text700(
+                context,
+                text: "Deposit",
+                fontSize: 28,
+                color: PgColors.black,
+                fontFamily: PgFonts.stackSans,
+              ),
+              heightSpacing(12),
+              PgTexts.text400(
+                context,
+                text: "Transfer money to your PayGidi account using the details below.",
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+              heightSpacing(40),
+              _buildAccountDetailCard(
+                context,
+                label: "Account Number",
+                value: accountNumber,
+                onCopy: () => _copyToClipboard(context, accountNumber, "Account number"),
+              ),
+              heightSpacing(24),
+              _buildAccountDetailCard(
+                context,
+                label: "Bank Name",
+                value: bankName,
+                onCopy: () => _copyToClipboard(context, bankName, "Bank name"),
+              ),
+              heightSpacing(24),
+              _buildAccountDetailCard(
+                context,
+                label: "Account Name",
+                value: accountName,
+                onCopy: () => _copyToClipboard(context, accountName, "Account name"),
+              ),
+              heightSpacing(40),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: PgColors.primary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: PgColors.primary.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Iconsax.info_circle_copy,
+                      color: PgColors.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: PgTexts.text400(
+                        context,
+                        text: "Please send money to the account details above. Once completed, check your wallet dashboard to verify your top-up.",
+                        fontSize: 12,
+                        color: PgColors.primary,
+                        textOverflow: TextOverflow.visible,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAccountDetailCard(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required VoidCallback onCopy,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PgTexts.text400(
+            context,
+            text: label,
+            fontSize: 12,
+            color: Colors.black54,
+          ),
+          heightSpacing(8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: PgTexts.text600(
+                  context,
+                  text: value,
+                  fontSize: 18,
+                  color: PgColors.black,
+                  textOverflow: TextOverflow.visible,
+                ),
+              ),
+              PgScaleButton(
+                onTap: onCopy,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: PgColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Iconsax.copy_copy,
+                    color: PgColors.primary,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -1,4 +1,5 @@
 import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
+import 'package:app/features/wallet/presentation/screens/deposit_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_forgot_password_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_login_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_otp_screen.dart';
@@ -67,8 +68,9 @@ class PayGidiRouter {
         pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           final isLogin = extra?['isLogin'] ?? false;
+          final phone = extra?['phone'] ?? "";
           return CustomTransitionPage(
-            child: IndividualOtpScreen(isLogin: isLogin),
+            child: IndividualOtpScreen(isLogin: isLogin, phone: phone),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 RouteTransitions.slideRight(animation, child),
           );
@@ -86,11 +88,18 @@ class PayGidiRouter {
       GoRoute(
         path: "/${PgRouteNames.individualCompleteAccount2}",
         name: PgRouteNames.individualCompleteAccount2,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          child: const IndividualCompleteAccount2Screen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-              RouteTransitions.slideRight(animation, child),
-        ),
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return CustomTransitionPage(
+            child: IndividualCompleteAccount2Screen(
+              firstName: extra?['firstName'] ?? "",
+              lastName: extra?['lastName'] ?? "",
+              email: extra?['email'] ?? "",
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                RouteTransitions.slideRight(animation, child),
+          );
+        },
       ),
       GoRoute(
         path: "/${PgRouteNames.individualForgotPassword}",
@@ -108,6 +117,15 @@ class PayGidiRouter {
           child: const IndividualHomeScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               RouteTransitions.fade(animation, child),
+        ),
+      ),
+      GoRoute(
+        path: "/${PgRouteNames.deposit}",
+        name: PgRouteNames.deposit,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const DepositScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              RouteTransitions.slideRight(animation, child),
         ),
       ),
     ],

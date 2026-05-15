@@ -53,7 +53,7 @@ class PgSuccessDialog extends StatelessWidget {
               height: 150,
               width: 150,
               decoration: BoxDecoration(
-                color: PgColors.primary.withOpacity(0.05),
+                color: PgColors.primary.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
             ),
@@ -65,12 +65,12 @@ class PgSuccessDialog extends StatelessWidget {
               height: 100,
               width: 100,
               decoration: BoxDecoration(
-                color: PgColors.secondary.withOpacity(0.05),
+                color: PgColors.secondary.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
             child: Column(
@@ -80,7 +80,7 @@ class PgSuccessDialog extends StatelessWidget {
                   height: 90,
                   width: 90,
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -113,7 +113,7 @@ class PgSuccessDialog extends StatelessWidget {
                   text: message,
                   textAlign: TextAlign.center,
                   fontSize: 15,
-                  color: Colors.black.withOpacity(0.6),
+                  color: Colors.black.withValues(alpha: 0.6),
                   textOverflow: TextOverflow.visible,
                 ),
                 heightSpacing(40),
@@ -132,7 +132,7 @@ class PgSuccessDialog extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: PgColors.primary.withOpacity(0.3),
+                          color: PgColors.primary.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -153,5 +153,4 @@ class PgSuccessDialog extends StatelessWidget {
       ),
     );
   }
-
 }

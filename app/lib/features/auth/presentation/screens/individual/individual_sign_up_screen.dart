@@ -3,14 +3,19 @@ import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
+import 'package:app/core/widgets/pg_snackbar.dart';
 import 'package:app/core/widgets/pg_text_field.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart';
 
+/// [IndividualSignUpScreen] is the starting point for the registration flow.
+/// It captures the user's phone number and initiates the OTP verification process.
 class IndividualSignUpScreen extends StatefulWidget {
   const IndividualSignUpScreen({super.key});
 
@@ -28,9 +33,28 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      context.pushNamed(PgRouteNames.individualOtp);
+      final authProvider = context.read<AuthProvider>();
+      final success = await authProvider.initiateIndividualAuth(
+        phone: "234${_phoneController.text}",
+        isLogin: false,
+      );
+
+      if (!mounted) return;
+
+      if (success) {
+        context.pushNamed(
+          PgRouteNames.individualOtp,
+          extra: {'isLogin': false, 'phone': "234${_phoneController.text}"},
+        );
+      } else {
+        PgSnackBar.show(
+          context,
+          message: authProvider.errorMessage ?? "An error occurred",
+          isError: true,
+        );
+      }
     }
   }
 
@@ -64,7 +88,8 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                 heightSpacing(12),
                 PgTexts.text400(
                   context,
-                  text: "Enter your phone number to receive a verification code.",
+                  text:
+                      "Enter your phone number to receive a verification code.",
                   fontSize: 14,
                   color: Colors.black54,
                 ),
@@ -100,25 +125,43 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                   },
                 ),
                 heightSpacing(40),
-                PgScaleButton(
-                  onTap: _submit,
-                  child: Container(
-                    height: objectHeight(size: 56, context: context),
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: const LinearGradient(
-                        colors: [PgColors.primary, PgColors.secondary],
+                Consumer<AuthProvider>(
+                  builder: (context, auth, child) {
+                    return PgScaleButton(
+                      onTap: auth.isLoading ? () {} : _submit,
+                      child: Container(
+                        height: objectHeight(size: 56, context: context),
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            colors: auth.isLoading
+                                ? [
+                                    PgColors.primary.withValues(alpha: 0.5),
+                                    PgColors.secondary.withValues(alpha: 0.5),
+                                  ]
+                                : [PgColors.primary, PgColors.secondary],
+                          ),
+                        ),
+                        child: auth.isLoading
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : PgTexts.text600(
+                                context,
+                                text: "Send Code",
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
                       ),
-                    ),
-                    child: PgTexts.text600(
-                      context,
-                      text: "Send Code",
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
+                    );
+                  },
                 ),
                 heightSpacing(24),
                 Row(
@@ -126,7 +169,8 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                   children: [
                     PgTexts.text400(context, text: "Already have an account? "),
                     GestureDetector(
-                      onTap: () => context.pushNamed(PgRouteNames.individualLogin),
+                      onTap: () =>
+                          context.pushNamed(PgRouteNames.individualLogin),
                       child: PgTexts.text600(
                         context,
                         text: "Login",
@@ -144,5 +188,3 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
     );
   }
 }
-
-

@@ -5,21 +5,33 @@
             "name": "PayGidi (Debug)",
             "request": "launch",
             "type": "dart",
-            "program": "lib/main/main.dart"
+            "program": "lib/main/main.dart",
+            "args": [
+                "--dart-define",
+                "BASE_URL=https://api.paygidi.site/api/v1"
+            ]
         },
         {
             "name": "PayGidi (Profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main/main.dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define",
+                "BASE_URL=https://api.paygidi.site/api/v1"
+            ]
         },
         {
             "name": "PayGidi (Release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main/main.dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "args": [
+                "--dart-define",
+                "BASE_URL=https://api.paygidi.site/api/v1"
+            ]
         }
     ]
 }

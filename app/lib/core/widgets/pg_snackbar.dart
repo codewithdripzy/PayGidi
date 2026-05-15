@@ -22,7 +22,7 @@ class PgSnackBar {
             boxShadow: [
               BoxShadow(
                 color: (isError ? const Color(0xFFE53935) : PgColors.primary)
-                    .withOpacity(0.3),
+                    .withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -39,6 +39,7 @@ class PgSnackBar {
                 child: PgTexts.text500(
                   context,
                   text: message,
+                  textOverflow: TextOverflow.clip,
                   color: Colors.white,
                   fontSize: 14,
                 ),

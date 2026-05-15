@@ -2,8 +2,10 @@ import 'package:app/core/theme/assets.dart';
 import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 
 /// A horizontal list of quick actions (Pay, Deposit, Statement, Withdraw)
 /// for easy access to core financial features.
@@ -31,6 +33,7 @@ class HomeQuickActions extends StatelessWidget {
           "Deposit",
           PgAssets.customIcon(iconName: 'deposit'),
           Colors.grey.shade200,
+          onTap: () => context.pushNamed(PgRouteNames.deposit),
         ),
         _buildAction(
           context,
@@ -55,13 +58,14 @@ class HomeQuickActions extends StatelessWidget {
     String iconPath,
     Color bgColor, {
     Gradient? gradient,
+    VoidCallback? onTap,
   }) {
     final bool isHighlighted = label == "Pay";
 
     return Column(
       children: [
         PgScaleButton(
-          onTap: () {},
+          onTap: onTap ?? () {},
           child: Container(
             height: 64,
             width: 64,
