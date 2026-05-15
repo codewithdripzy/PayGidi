@@ -82,6 +82,7 @@ func Auth(c *gin.Context) {
 		data = &models.User{
 			UID:         uid,
 			Phone:       authData.Phone,
+			Username:    "user_" + uid, // Temporary unique username
 			AccountType: authData.AccountType,
 			IsFirstTime: true,
 			Status:      "pending",
