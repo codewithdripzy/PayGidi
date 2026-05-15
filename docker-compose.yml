@@ -1,0 +1,68 @@
+services:
+  gateway:
+    build: ./services/gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - account-service
+      - wallet-service
+      - transaction-service
+      - ai-service
+      - notification-service
+
+  account-service:
+    build: ./services/account
+    expose:
+      - "50051"
+    env_file:
+      - ./services/account/.env
+    depends_on:
+      - postgres
+
+  wallet-service:
+    build: ./services/wallet
+    expose:
+      - "50053"
+    env_file:
+      - ./services/wallet/.env
+    depends_on:
+      - postgres
+
+  transaction-service:
+    build: ./services/transaction
+    expose:
+      - "50055"
+    env_file:
+      - ./services/transaction/.env
+    depends_on:
+      - postgres
+
+  ai-service:
+    build: ./services/ai
+    expose:
+      - "50054"
+    env_file:
+      - ./services/ai/.env
+    depends_on:
+      - postgres
+
+  notification-service:
+    build: ./services/notification
+    expose:
+      - "50052"
+    env_file:
+      - ./services/notification/.env
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    env_file:
+      - ./services/postgres/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

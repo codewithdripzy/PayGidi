@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package ai;
+
+option go_package = "github.com/PayGidi/AIService/proto/connection/aipb";
+
+service AIService {
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+    rpc ProcessKYB(ProcessKYBRequest) returns (ProcessKYBResponse);
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+    string status = 1;
+}
+
+message ProcessKYBRequest {
+    string business_id = 1;
+}
+
+message ProcessKYBResponse {
+    bool success = 1;
+    string message = 2;
+    string status = 3;
+    int32 trust_score = 4;
+}

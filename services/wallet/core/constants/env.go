@@ -30,6 +30,7 @@ var (
 	HTTP_PORT string = "8082"
 
 	NOTIFICATION_SERVICE_ADDR string = "localhost:50052"
+	ACCOUNT_SERVICE_ADDR      string = "localhost:50051"
 )
 
 func ConfigDotenv() error {
@@ -106,6 +107,10 @@ func ConfigDotenv() error {
 
 	if notificationAddress := os.Getenv("NOTIFICATION_SERVICE_ADDR"); notificationAddress != "" {
 		NOTIFICATION_SERVICE_ADDR = notificationAddress
+	}
+
+	if accountAddress := os.Getenv("ACCOUNT_SERVICE_ADDR"); accountAddress != "" {
+		ACCOUNT_SERVICE_ADDR = accountAddress
 	}
 
 	return nil

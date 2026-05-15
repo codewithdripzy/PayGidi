@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package connection;
+package wallet;
 
-option go_package = "connection/pb;pb";
+option go_package = "github.com/PayGidi/WalletService/proto/connection/pb;pb";
 
 service WalletService {
   rpc CreateWallet (CreateWalletRequest) returns (CreateWalletResponse);
@@ -12,6 +12,8 @@ service WalletService {
   rpc ResolveAccount (ResolveAccountRequest) returns (ResolveAccountResponse);
   rpc VerifyNIN (VerifyNINRequest) returns (VerifyNINResponse);
   rpc VerifyBVNImage (VerifyBVNImageRequest) returns (VerifyBVNImageResponse);
+  rpc GetPayment (GetPaymentRequest) returns (GetPaymentResponse);
+  rpc UpdatePaymentStatus (UpdatePaymentStatusRequest) returns (UpdatePaymentStatusResponse);
   rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
 }
 
@@ -129,4 +131,41 @@ message HealthCheckRequest {}
 
 message HealthCheckResponse {
   string status = 1;
+}
+
+message GetPaymentRequest {
+  uint64 paymentId = 1;
+}
+
+message GetPaymentResponse {
+  bool success = 1;
+  string message = 2;
+  PaymentData data = 3;
+}
+
+message PaymentData {
+  uint64 id = 1;
+  string userId = 2;
+  double amount = 3;
+  string accountNumber = 4;
+  string bank = 5;
+  string merchantPhoneNumber = 6;
+  string merchantEmail = 7;
+  string advanceOptions = 8;
+  string status = 9;
+  double trustScore = 10;
+  string expiresAt = 11;
+  string createdAt = 12;
+}
+
+message UpdatePaymentStatusRequest {
+  uint64 paymentId = 1;
+  string status = 2;
+  double trustScore = 3;
+  string summary = 4;
+}
+
+message UpdatePaymentStatusResponse {
+  bool success = 1;
+  string message = 2;
 }

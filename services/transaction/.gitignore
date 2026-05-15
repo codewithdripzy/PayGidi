@@ -1,4 +1,3 @@
-.env*
 data.txt
 tmp/
 *.log
@@ -20,3 +19,7 @@ build
 
 # Go vendor directory
 vendor/
+
+.env
+.env.production
+.env.local

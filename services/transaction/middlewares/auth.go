@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	payGidiErrors "github.com/PayGidi/AccountService/core/interfaces/errors"
-	"github.com/PayGidi/AccountService/models"
-	"github.com/PayGidi/AccountService/utils"
+	payGidiErrors "github.com/PayGidi/TransactionService/core/interfaces/errors"
+	"github.com/PayGidi/TransactionService/models"
+	"github.com/PayGidi/TransactionService/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

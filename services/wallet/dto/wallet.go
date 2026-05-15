@@ -19,3 +19,13 @@ type SendMoneyDto struct {
 	RecipientPhone string  `json:"recipientPhone" validate:"required,min=10,max=15"`
 	Amount         float64 `json:"amount" validate:"required,gt=0"`
 }
+
+type CreatePaymentDto struct {
+	Amount              float64 `json:"amount" validate:"required,gt=0"`
+	AccountNumber       string  `json:"accountNumber" validate:"required"`
+	Bank                string  `json:"bank" validate:"required"`
+	MerchantPhoneNumber string  `json:"merchantPhoneNumber" validate:"required"`
+	Email               string  `json:"email" validate:"required,email"`
+	AdvanceOptions      string  `json:"advanceOptions" validate:"omitempty"` // optional JSON or text describing purchase
+	ExpiresInMinutes    int     `json:"expiresInMinutes" validate:"omitempty,gt=0"`
+}

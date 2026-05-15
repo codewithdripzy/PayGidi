@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package connection;
+package transaction_auth_client;
 import "google/protobuf/timestamp.proto";
 
 option go_package = "connection/pb;pb";

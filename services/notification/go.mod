@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/joho/godotenv v1.5.1
+	github.com/resend/resend-go/v3 v3.6.0
 	github.com/twilio/twilio-go v1.26.2
 	google.golang.org/grpc v1.69.4
 	google.golang.org/protobuf v1.35.1

@@ -1,20 +1,31 @@
 package main
 
 import (
-	// "os"
-
 	"log"
 	"net"
 
-	"github.com/PayGidi/AccountService/config"
-	"github.com/PayGidi/AccountService/core/constants"
-	"github.com/PayGidi/AccountService/proto/connection/pb"
-	"github.com/PayGidi/AccountService/router"
-	"github.com/PayGidi/AccountService/services/auth"
+	"github.com/PayGidi/TransactionService/config"
+	"github.com/PayGidi/TransactionService/core/constants"
+	"github.com/PayGidi/TransactionService/router"
+	_ "github.com/PayGidi/TransactionService/docs"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
-	// "google.golang.org/grpc/grpclog"
 )
+
+// @title PayGidi Transaction Service API
+// @version 1.0
+// @description This is the transaction service for PayGidi.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api/v1
 
 func main() {
 	app := gin.Default()
@@ -41,10 +52,10 @@ func main() {
 		if err := config.RunAutoMigrations(db); err != nil {
 			panic("Error running auto migrations: " + err.Error())
 		}
-		log.Println("Running WalletService in development mode")
+		log.Println("Running TransactionService in development mode")
 		gin.SetMode(gin.DebugMode)
 	} else {
-		log.Println("Running WalletService in production mode")
+		log.Println("Running TransactionService in production mode")
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -53,26 +64,22 @@ func main() {
 
 	// Start gRPC server in a separate goroutine
 	go func() {
-		lis, err := net.Listen("tcp", ":50051")
+		lis, err := net.Listen("tcp", ":"+constants.GRPC_PORT)
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
 
 		grpcServer := grpc.NewServer()
-		authServer := &auth.AuthServer{
-			App: app,
-		}
-		pb.RegisterAuthServiceServer(grpcServer, authServer)
 
-		log.Println("gRPC server listening on :50051")
+		log.Println("gRPC server listening on :" + constants.GRPC_PORT)
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
 
 	// Start HTTP server
-	log.Println("HTTP server listening on :8080")
-	if err := app.Run(":8080"); err != nil {
+	log.Println("HTTP server listening on :" + constants.HTTP_PORT)
+	if err := app.Run(":" + constants.HTTP_PORT); err != nil {
 		log.Fatalf("failed to run HTTP server: %v", err)
 	}
 }

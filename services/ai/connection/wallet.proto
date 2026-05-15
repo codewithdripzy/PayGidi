@@ -1,0 +1,171 @@
+syntax = "proto3";
+
+package ai_wallet_client;
+
+option go_package = "github.com/PayGidi/AIService/proto/connection/walletpb";
+
+service WalletService {
+  rpc CreateWallet (CreateWalletRequest) returns (CreateWalletResponse);
+  rpc InitiatePayment (InitiatePaymentRequest) returns (InitiatePaymentResponse);
+  rpc InitiateTransfer (InitiateTransferRequest) returns (InitiateTransferResponse);
+  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc ResolveAccount (ResolveAccountRequest) returns (ResolveAccountResponse);
+  rpc VerifyNIN (VerifyNINRequest) returns (VerifyNINResponse);
+  rpc VerifyBVNImage (VerifyBVNImageRequest) returns (VerifyBVNImageResponse);
+  rpc GetPayment (GetPaymentRequest) returns (GetPaymentResponse);
+  rpc UpdatePaymentStatus (UpdatePaymentStatusRequest) returns (UpdatePaymentStatusResponse);
+  rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message CreateWalletRequest {
+  string firstname = 1;
+  string middlename = 2;
+  string lastname = 3;
+  string nin = 4;
+  string dateOfBirth = 5;
+  string bvn = 6;
+  string phone = 7;
+  string email = 8;
+  string gender = 9;
+  string userId = 10;
+  string accountType = 11;
+  string businessName = 12;
+}
+
+message CreateWalletResponse {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  string firstname = 4;
+  string middlename = 5;
+  string lastname = 6;
+  string accountNo = 7;
+  string currentTier = 8;
+}
+
+message InitiatePaymentRequest {
+  int64 amount = 1; // in kobo
+  string email = 2;
+  string currency = 3;
+}
+
+message InitiatePaymentResponse {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  string checkoutUrl = 4;
+}
+
+message InitiateTransferRequest {
+  string transactionReference = 1;
+  int64 amount = 2; // in kobo
+  string bankCode = 3;
+  string accountNumber = 4;
+  string accountName = 5;
+  string remark = 6;
+}
+
+message InitiateTransferResponse {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  string transactionReference = 4;
+}
+
+message GetTransactionsRequest {
+  string customerIdentifier = 1;
+}
+
+message GetTransactionsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated TransactionData transactions = 3;
+}
+
+message ResolveAccountRequest {
+  string bankCode = 1;
+  string accountNumber = 2;
+}
+
+message ResolveAccountResponse {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  string accountName = 4;
+  string accountNumber = 5;
+}
+
+message TransactionData {
+  int64 amount = 1;
+  string transactionRef = 2;
+  string gatewayRef = 3;
+  string transactionType = 4;
+  string createdAt = 5;
+  string status = 6;
+}
+
+message VerifyNINRequest {
+  string nin = 1;
+}
+
+message VerifyNINResponse {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  bool isValid = 4;
+}
+
+message VerifyBVNImageRequest {
+  string base64Image = 1;
+  string bvn = 2;
+}
+
+message VerifyBVNImageResponse {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  bool imageMatched = 4;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+}
+
+message GetPaymentRequest {
+  uint64 paymentId = 1;
+}
+
+message GetPaymentResponse {
+  bool success = 1;
+  string message = 2;
+  PaymentData data = 3;
+}
+
+message PaymentData {
+  uint64 id = 1;
+  string userId = 2;
+  double amount = 3;
+  string accountNumber = 4;
+  string bank = 5;
+  string merchantPhoneNumber = 6;
+  string merchantEmail = 7;
+  string advanceOptions = 8;
+  string status = 9;
+  double trustScore = 10;
+  string expiresAt = 11;
+  string createdAt = 12;
+}
+
+message UpdatePaymentStatusRequest {
+  uint64 paymentId = 1;
+  string status = 2;
+  double trustScore = 3;
+  string summary = 4;
+}
+
+message UpdatePaymentStatusResponse {
+  bool success = 1;
+  string message = 2;
+}

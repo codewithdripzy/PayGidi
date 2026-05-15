@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/PayGidi/AccountService/core/constants"
+	"github.com/PayGidi/TransactionService/core/constants"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

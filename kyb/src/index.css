@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,100..1000&family=Stack+Sans+Notch&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #FA4821;
+  --primary-gradient: linear-gradient(135deg, #FA4821 0%, #9E0261 100%);
+  --primary-accent: #9E0261;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-accent: var(--primary-accent);
+  --font-display: 'Stack Sans Notch', sans-serif;
+  --font-sans: 'Google Sans Flex', sans-serif;
+}
+
+
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display) !important;
+}
+
+.bg-primary-gradient {
+  background: var(--primary-gradient);
+}

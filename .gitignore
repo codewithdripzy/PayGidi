@@ -7,3 +7,9 @@ yarn.lock
 pnpm-lock.yaml
 
 Squad_API_Summary_v2.pptx
+*.pem
+
+.env
+.env.production
+
+deploy-env.sh

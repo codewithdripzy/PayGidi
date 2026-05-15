@@ -1,0 +1,47 @@
+basePath: /api/v1
+host: localhost:8082
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the wallet service for PayGidi.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: PayGidi Wallet Service API
+  version: "1.0"
+paths:
+  /wallet/payments/{payment_id}:
+    get:
+      description: Retrieve details of a specific payment by its ID, including customer
+        information
+      parameters:
+      - description: Payment ID
+        in: path
+        name: payment_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get payment details
+      tags:
+      - payments
+swagger: "2.0"

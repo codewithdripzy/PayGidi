@@ -169,3 +169,165 @@ func GetCustomerTransactions(ctx context.Context, customerIdentifier string) (bo
 
 	return true, nil, response.Data
 }
+
+// GetVirtualAccount retrieves virtual account details from Squad API by virtual account number.
+func GetVirtualAccount(ctx context.Context, virtualAccountNumber string) (bool, *string, *responses.SquadVirtualAccountResponseData) {
+	refreshSquadClient()
+	var response responses.SquadResponse[responses.SquadVirtualAccountResponseData]
+
+	path := fmt.Sprintf("/virtual-account/customer/%s", virtualAccountNumber)
+	_, err := httpclient.Get(client, ctx, path, &response)
+	if err != nil {
+		log.Printf("[Squad][GetVirtualAccount] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		log.Printf("[Squad][GetVirtualAccount] provider error: %s", response.Message)
+		return false, &response.Message, nil
+	}
+
+	return true, nil, &response.Data
+}
+
+// SimulatePayment simulates a payment to a virtual account.
+func SimulatePayment(ctx context.Context, payload payloads.SimulateSquadPaymentPayload) (bool, *string, any) {
+	refreshSquadClient()
+	var response responses.SquadResponse[any]
+
+	_, err := httpclient.PostJSON(client, ctx, "/virtual-account/simulate/payment", payload, &response)
+	if err != nil {
+		log.Printf("[Squad][SimulatePayment] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		log.Printf("[Squad][SimulatePayment] provider error: %s", response.Message)
+		return false, &response.Message, nil
+	}
+
+	return true, nil, response.Data
+}
+
+// GetBanks retrieves the list of supported banks for transfer.
+func GetBanks(ctx context.Context) (bool, *string, []responses.SquadBankData) {
+	refreshSquadClient()
+	var response responses.SquadResponse[[]responses.SquadBankData]
+
+	// The endpoint for fetching bank list in Squad is typically /payout/banks
+	_, err := httpclient.Get(client, ctx, "/payout/banks", &response)
+	if err != nil {
+		log.Printf("[Squad][GetBanks] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		return false, &response.Message, nil
+	}
+
+	return true, nil, response.Data
+}
+
+// GetAllDisputes retrieves all disputes raised on your transactions.
+func GetAllDisputes(ctx context.Context) (bool, *string, any) {
+	refreshSquadClient()
+	var response responses.SquadResponse[any]
+
+	_, err := httpclient.Get(client, ctx, "/dispute", &response)
+	if err != nil {
+		log.Printf("[Squad][GetAllDisputes] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		return false, &response.Message, nil
+	}
+
+	return true, nil, response.Data
+}
+
+// GetDisputeUploadURL retrieves a unique URL to upload evidence for a dispute.
+func GetDisputeUploadURL(ctx context.Context, ticketId, fileName string) (bool, *string, any) {
+	refreshSquadClient()
+	var response responses.SquadResponse[any]
+
+	path := fmt.Sprintf("/dispute/upload-url/%s/%s", ticketId, fileName)
+	_, err := httpclient.Get(client, ctx, path, &response)
+	if err != nil {
+		log.Printf("[Squad][GetDisputeUploadURL] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		return false, &response.Message, nil
+	}
+
+	return true, nil, response.Data
+}
+
+// ResolveDispute resolves a dispute by accepting or rejecting it.
+func ResolveDispute(ctx context.Context, ticketId string, payload payloads.ResolveDisputePayload) (bool, *string, any) {
+	refreshSquadClient()
+	var response responses.SquadResponse[any]
+
+	path := fmt.Sprintf("/dispute/%s/resolve", ticketId)
+	_, err := httpclient.PostJSON(client, ctx, path, payload, &response)
+	if err != nil {
+		log.Printf("[Squad][ResolveDispute] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		return false, &response.Message, nil
+	}
+
+	return true, nil, response.Data
+}
+
+// GetAllTransfers retrieves the details of all transfers done from your Squad Wallet.
+func GetAllTransfers(ctx context.Context) (bool, *string, []responses.SquadTransferRecord) {
+	refreshSquadClient()
+	var response responses.SquadResponse[[]responses.SquadTransferRecord]
+
+	_, err := httpclient.Get(client, ctx, "/payout/list", &response)
+	if err != nil {
+		log.Printf("[Squad][GetAllTransfers] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		return false, &response.Message, nil
+	}
+
+	return true, nil, response.Data
+}
+
+// RequeryTransfer allows you to re-query the status of a transfer.
+func RequeryTransfer(ctx context.Context, transactionReference string) (bool, *string, any) {
+	refreshSquadClient()
+	var response responses.SquadResponse[any]
+
+	payload := payloads.SquadRequeryTransferPayload{
+		TransactionReference: transactionReference,
+	}
+
+	_, err := httpclient.PostJSON(client, ctx, "/payout/requery", payload, &response)
+	if err != nil {
+		log.Printf("[Squad][RequeryTransfer] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		return false, &response.Message, nil
+	}
+
+	return true, nil, response.Data
+}
