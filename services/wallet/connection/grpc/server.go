@@ -54,6 +54,7 @@ func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 		UserID:       req.UserId,
 		AccountType:  req.AccountType,
 		BusinessName: req.BusinessName,
+		Address:      req.Address,
 	})
 
 	if result == nil {

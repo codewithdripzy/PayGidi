@@ -52,23 +52,34 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 	var squadErr *string
 	var response *responses.SquadVirtualAccountResponseData
 
+	// Ensure phone number is max 11 digits for Squad (e.g. 080...)
+	mobileNum := request.Phone
+	if strings.HasPrefix(mobileNum, "+234") {
+		mobileNum = "0" + strings.TrimPrefix(mobileNum, "+234")
+	}
+	if len(mobileNum) > 11 {
+		mobileNum = mobileNum[len(mobileNum)-11:]
+	}
+
 	if request.AccountType == "business" {
 		success, squadErr, response = squadService.CreateBusinessVirtualAccount(ctx, payloads.CreateSquadBusinessVirtualAccountPayload{
 			BusinessName:       request.BusinessName,
 			CustomerIdentifier: request.UserID,
-			MobileNum:          request.Phone,
+			MobileNum:          mobileNum,
 			Bvn:                bvn,
 		})
 	} else {
 		success, squadErr, response = squadService.CreateVirtualAccount(ctx, payloads.CreateSquadVirtualAccountPayload{
 			FirstName:          request.Firstname,
+			MiddleName:         request.Middlename,
 			LastName:           request.Lastname,
-			MobileNum:          request.Phone,
+			MobileNum:          mobileNum,
 			Dob:                dob,
 			Bvn:                bvn,
 			CustomerIdentifier: request.UserID,
 			Gender:             request.Gender,
 			Email:              request.Email,
+			Address:            request.Address,
 		})
 	}
 

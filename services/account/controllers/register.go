@@ -71,6 +71,8 @@ func CompleteAccount(c *gin.Context) {
 	var email string
 	var firstName string
 	var lastName string
+	var middleName string
+	var address string
 	var dob string
 	var nin string
 	var bvn string
@@ -81,6 +83,8 @@ func CompleteAccount(c *gin.Context) {
 		email = data.OwnerInfo.Email
 		firstName = data.OwnerInfo.FirstName
 		lastName = data.OwnerInfo.LastName
+		middleName = data.OwnerInfo.MiddleName
+		address = data.OwnerInfo.Address
 		dob = data.OwnerInfo.DateOfBirth
 		nin = data.OwnerInfo.NIN
 		bvn = data.OwnerInfo.BVN
@@ -104,6 +108,8 @@ func CompleteAccount(c *gin.Context) {
 		email = data.Email
 		firstName = data.FirstName
 		lastName = data.LastName
+		middleName = data.MiddleName
+		address = data.Address
 		dob = data.DateOfBirth
 		nin = data.NIN
 		bvn = data.BVN
@@ -115,6 +121,8 @@ func CompleteAccount(c *gin.Context) {
 		UserID:      u.ID,
 		FirstName:   firstName,
 		LastName:    lastName,
+		MiddleName:  middleName,
+		Address:     address,
 		DateOfBirth: dob,
 		Gender:      gender,
 	}
@@ -139,15 +147,53 @@ func CompleteAccount(c *gin.Context) {
 		return
 	}
 
+	var businessName string
+	if u.AccountType == "business" {
+		businessName = validatedBody.(*validators.BusinessCompleteAccountDto).Name
+	}
+
+	// Create wallet for all accounts (Synchronously as requested)
+	walletClient, err := walletService.NewWalletService(constants.WALLET_SERVICE_ADDR)
+	if err != nil {
+		tx.Rollback()
+		log.Printf("[CompleteAccount] failed to connect to wallet service: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to wallet service. Account not created."})
+		return
+	}
+	defer walletClient.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second) // Squad can be slow
+	defer cancel()
+
+	resp, err := walletClient.CreateWalletForUser(ctx, &walletpb.CreateWalletRequest{
+		Firstname:    firstName,
+		Middlename:   middleName,
+		Lastname:     lastName,
+		Nin:          nin,
+		DateOfBirth:  dob,
+		Bvn:          bvn,
+		Phone:        u.Phone,
+		Email:        email,
+		Gender:       gender,
+		UserId:       u.UID,
+		AccountType:  u.AccountType,
+		BusinessName: businessName,
+		Address:      address,
+	}, u.ID, u.Phone)
+
+	if err != nil {
+		tx.Rollback()
+		log.Printf("[CompleteAccount] wallet creation failed: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Wallet creation failed: " + err.Error() + ". Account registration rolled back."})
+		return
+	}
+
 	if err := tx.Commit().Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to finalize account: " + err.Error()})
 		return
 	}
 
-	var businessName string
-	if u.AccountType == "business" {
-		businessName = validatedBody.(*validators.BusinessCompleteAccountDto).Name
-	}
+	log.Printf("[CompleteAccount] wallet created successfully: %s", resp.AccountNo)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Account completed successfully",
@@ -156,41 +202,9 @@ func CompleteAccount(c *gin.Context) {
 			"firstName": firstName,
 			"lastName":  lastName,
 			"email":     email,
+			"accountNo": resp.AccountNo,
 		},
 	})
-
-	// Create wallet for all accounts
-	go func() {
-		walletClient, err := walletService.NewWalletService(constants.WALLET_SERVICE_ADDR)
-		if err != nil {
-			log.Printf("[CompleteAccount] failed to connect to wallet service: %v", err)
-			return
-		}
-		defer walletClient.Close()
-
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		resp, err := walletClient.CreateWalletForUser(ctx, &walletpb.CreateWalletRequest{
-			Firstname:    firstName,
-			Lastname:     lastName,
-			Nin:          nin,
-			DateOfBirth:  dob,
-			Bvn:          bvn,
-			Phone:        u.Phone,
-			Email:        email,
-			Gender:       gender,
-			UserId:       u.UID,
-			AccountType:  u.AccountType,
-			BusinessName: businessName,
-		}, u.ID, u.Phone)
-
-		if err != nil {
-			log.Printf("[CompleteAccount] wallet creation failed: %v", err)
-		} else {
-			log.Printf("[CompleteAccount] wallet created successfully: %s", resp.AccountNo)
-		}
-	}()
 
 	log.Printf("[CompleteAccount] completed successfully userID=%d durationMs=%d", u.ID, time.Since(start).Milliseconds())
 }

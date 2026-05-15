@@ -6,6 +6,8 @@ type Person struct {
 	ID          uint           `json:"id" gorm:"primaryKey;autoIncrement"`
 	FirstName   string         `json:"firstName"`
 	LastName    string         `json:"lastName"`
+	MiddleName  string         `json:"middleName"`
+	Address     string         `json:"address"`
 	OtherNames  pq.StringArray `gorm:"type:text[]" json:"otherNames"`
 	Gender      string         `json:"gender"`
 	DateOfBirth string         `json:"dateOfBirth"`
