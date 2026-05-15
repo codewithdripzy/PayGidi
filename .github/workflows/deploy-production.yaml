@@ -6,48 +6,130 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-gateway:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     permissions:
       contents: read
       packages: write
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Login to GitHub Container Registry
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Push Images
+      - name: Build and Push
         run: |
-          # GHCR requires lowercase registry paths
           REGISTRY="ghcr.io/${{ github.repository_owner }}"
           REGISTRY=$(echo "$REGISTRY" | tr '[:upper:]' '[:lower:]')
-          
-          echo "Building images for ${REGISTRY}..."
-
-          # Build each service
           docker build -t ${REGISTRY}/paygidi-gateway:latest -f ./services/gateway/Dockerfile .
-          docker build -t ${REGISTRY}/paygidi-account:latest -f ./services/account/Dockerfile .
-          docker build -t ${REGISTRY}/paygidi-wallet:latest -f ./services/wallet/Dockerfile .
-          docker build -t ${REGISTRY}/paygidi-transaction:latest -f ./services/transaction/Dockerfile .
-          docker build -t ${REGISTRY}/paygidi-ai:latest -f ./services/ai/Dockerfile .
-          docker build -t ${REGISTRY}/paygidi-notification:latest -f ./services/notification/Dockerfile .
-
-          # Push images
           docker push ${REGISTRY}/paygidi-gateway:latest
+
+  build-account:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        run: |
+          REGISTRY="ghcr.io/${{ github.repository_owner }}"
+          REGISTRY=$(echo "$REGISTRY" | tr '[:upper:]' '[:lower:]')
+          docker build -t ${REGISTRY}/paygidi-account:latest -f ./services/account/Dockerfile .
           docker push ${REGISTRY}/paygidi-account:latest
+
+  build-wallet:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        run: |
+          REGISTRY="ghcr.io/${{ github.repository_owner }}"
+          REGISTRY=$(echo "$REGISTRY" | tr '[:upper:]' '[:lower:]')
+          docker build -t ${REGISTRY}/paygidi-wallet:latest -f ./services/wallet/Dockerfile .
           docker push ${REGISTRY}/paygidi-wallet:latest
+
+  build-transaction:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        run: |
+          REGISTRY="ghcr.io/${{ github.repository_owner }}"
+          REGISTRY=$(echo "$REGISTRY" | tr '[:upper:]' '[:lower:]')
+          docker build -t ${REGISTRY}/paygidi-transaction:latest -f ./services/transaction/Dockerfile .
           docker push ${REGISTRY}/paygidi-transaction:latest
+
+  build-ai:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        run: |
+          REGISTRY="ghcr.io/${{ github.repository_owner }}"
+          REGISTRY=$(echo "$REGISTRY" | tr '[:upper:]' '[:lower:]')
+          docker build -t ${REGISTRY}/paygidi-ai:latest -f ./services/ai/Dockerfile .
           docker push ${REGISTRY}/paygidi-ai:latest
+
+  build-notification:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        run: |
+          REGISTRY="ghcr.io/${{ github.repository_owner }}"
+          REGISTRY=$(echo "$REGISTRY" | tr '[:upper:]' '[:lower:]')
+          docker build -t ${REGISTRY}/paygidi-notification:latest -f ./services/notification/Dockerfile .
           docker push ${REGISTRY}/paygidi-notification:latest
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-gateway, build-account, build-wallet, build-transaction, build-ai, build-notification]
+    steps:
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -55,55 +137,24 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          # Prepare registry path for EC2 env
           REGISTRY="ghcr.io/${{ github.repository_owner }}"
           REGISTRY=$(echo "$REGISTRY" | tr '[:upper:]' '[:lower:]')
 
-          ssh \
-            -o StrictHostKeyChecking=no \
-            -o ServerAliveInterval=60 \
-            -o ServerAliveCountMax=10 \
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=10 \
             ubuntu@${{ secrets.EC2_HOST }} "REGISTRY=${REGISTRY} GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} GITHUB_ACTOR=${{ github.actor }} bash -s" << 'EOF'
-
+            
             set -euxo pipefail
-
-            # Install Docker if missing
-            if ! command -v docker &> /dev/null; then
-              echo "Installing Docker..."
-              sudo apt-get update
-              sudo apt-get install -y docker.io docker-compose-v2
-              sudo systemctl enable docker
-              sudo systemctl start docker
-              sudo usermod -aG docker ubuntu
-            fi
-
-            # Ensure repo exists
-            mkdir -p /home/ubuntu/paygidi
-            cd /home/ubuntu/paygidi
-
-            # Clone if first deploy
+            mkdir -p /home/ubuntu/paygidi && cd /home/ubuntu/paygidi
+            
             if [ ! -d ".git" ]; then
               git clone git@github.com:${{ github.repository }}.git .
             fi
-
-            # Pull latest code (just for the docker-compose file)
-            git fetch origin
-            git reset --hard origin/main
-
-            echo "===== DOCKER LOGIN (GHCR) ====="
+            
+            git fetch origin && git reset --hard origin/main
+            
             echo "${GITHUB_TOKEN}" | sudo docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
-
-            echo "===== CLEANUP ====="
             sudo docker system prune -f || true
-
-            echo "===== PULLING IMAGES ====="
             sudo REGISTRY="${REGISTRY}" docker compose -f docker-compose.production.yml pull
-
-            echo "===== STARTING ====="
             sudo REGISTRY="${REGISTRY}" docker compose -f docker-compose.production.yml up -d
-
-            echo "===== CONTAINERS ====="
             sudo docker ps
-
-            echo "===== DONE ====="
           EOF
