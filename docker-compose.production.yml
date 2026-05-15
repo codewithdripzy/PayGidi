@@ -1,5 +1,6 @@
 services:
   gateway:
+    container_name: paygidi-gateway
     image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-gateway:latest
     build:
       context: .
@@ -7,19 +8,22 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - ACCOUNT_SERVICE_URL=http://account-service:8080
-      - WALLET_SERVICE_URL=http://wallet-service:8082
-      - TRANSACTION_SERVICE_URL=http://transaction-service:8081
-      - AI_SERVICE_URL=http://ai-service:8083
-      - NOTIFICATION_SERVICE_URL=http://notification-service:8080
+      - ACCOUNT_SERVICE_URL=http://paygidi-account:8080
+      - WALLET_SERVICE_URL=http://paygidi-wallet:8082
+      - TRANSACTION_SERVICE_URL=http://paygidi-transaction:8081
+      - AI_SERVICE_URL=http://paygidi-ai:8083
+      - NOTIFICATION_SERVICE_URL=http://paygidi-notification:8080
     depends_on:
       - account-service
       - wallet-service
       - transaction-service
       - ai-service
       - notification-service
+    networks:
+      - paygidi-network
 
   account-service:
+    container_name: paygidi-account
     image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-account:latest
     build:
       context: .
@@ -31,8 +35,11 @@ services:
       - ./services/account/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   wallet-service:
+    container_name: paygidi-wallet
     image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-wallet:latest
     build:
       context: .
@@ -44,8 +51,11 @@ services:
       - ./services/wallet/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   transaction-service:
+    container_name: paygidi-transaction
     image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-transaction:latest
     build:
       context: .
@@ -57,8 +67,11 @@ services:
       - ./services/transaction/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   ai-service:
+    container_name: paygidi-ai
     image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-ai:latest
     build:
       context: .
@@ -70,8 +83,11 @@ services:
       - ./services/ai/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   notification-service:
+    container_name: paygidi-notification
     image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-notification:latest
     build:
       context: .
@@ -83,8 +99,11 @@ services:
       - ./services/notification/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   postgres:
+    container_name: paygidi-postgres
     image: postgres:16
     env_file:
       - ./services/postgres/.env.production
@@ -92,6 +111,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - paygidi-network
+
+networks:
+  paygidi-network:
+    driver: bridge
 
 volumes:
   postgres_data:
