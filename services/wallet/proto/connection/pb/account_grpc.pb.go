@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.33.3
-// source: connection/account.proto
+// source: account.proto
 
 package pb
 
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_ValidateToken_FullMethodName = "/connection.AuthService/ValidateToken"
-	AuthService_GetUser_FullMethodName       = "/connection.AuthService/GetUser"
+	AuthService_ValidateToken_FullMethodName = "/account_client.AuthService/ValidateToken"
+	AuthService_GetUser_FullMethodName       = "/account_client.AuthService/GetUser"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -142,7 +142,7 @@ func _AuthService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AuthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "connection.AuthService",
+	ServiceName: "account_client.AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -155,5 +155,5 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "connection/account.proto",
+	Metadata: "account.proto",
 }

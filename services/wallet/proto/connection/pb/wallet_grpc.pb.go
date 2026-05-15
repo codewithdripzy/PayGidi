@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.33.3
-// source: connection/wallet.proto
+// source: wallet.proto
 
 package pb
 
@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WalletService_CreateWallet_FullMethodName        = "/connection.WalletService/CreateWallet"
-	WalletService_InitiatePayment_FullMethodName     = "/connection.WalletService/InitiatePayment"
-	WalletService_InitiateTransfer_FullMethodName    = "/connection.WalletService/InitiateTransfer"
-	WalletService_GetTransactions_FullMethodName     = "/connection.WalletService/GetTransactions"
-	WalletService_ResolveAccount_FullMethodName      = "/connection.WalletService/ResolveAccount"
-	WalletService_VerifyNIN_FullMethodName           = "/connection.WalletService/VerifyNIN"
-	WalletService_VerifyBVNImage_FullMethodName      = "/connection.WalletService/VerifyBVNImage"
-	WalletService_GetPayment_FullMethodName          = "/connection.WalletService/GetPayment"
-	WalletService_UpdatePaymentStatus_FullMethodName = "/connection.WalletService/UpdatePaymentStatus"
-	WalletService_HealthCheck_FullMethodName         = "/connection.WalletService/HealthCheck"
+	WalletService_CreateWallet_FullMethodName        = "/wallet.WalletService/CreateWallet"
+	WalletService_InitiatePayment_FullMethodName     = "/wallet.WalletService/InitiatePayment"
+	WalletService_InitiateTransfer_FullMethodName    = "/wallet.WalletService/InitiateTransfer"
+	WalletService_GetTransactions_FullMethodName     = "/wallet.WalletService/GetTransactions"
+	WalletService_ResolveAccount_FullMethodName      = "/wallet.WalletService/ResolveAccount"
+	WalletService_VerifyNIN_FullMethodName           = "/wallet.WalletService/VerifyNIN"
+	WalletService_VerifyBVNImage_FullMethodName      = "/wallet.WalletService/VerifyBVNImage"
+	WalletService_GetPayment_FullMethodName          = "/wallet.WalletService/GetPayment"
+	WalletService_UpdatePaymentStatus_FullMethodName = "/wallet.WalletService/UpdatePaymentStatus"
+	WalletService_HealthCheck_FullMethodName         = "/wallet.WalletService/HealthCheck"
 )
 
 // WalletServiceClient is the client API for WalletService service.
@@ -414,7 +414,7 @@ func _WalletService_HealthCheck_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var WalletService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "connection.WalletService",
+	ServiceName: "wallet.WalletService",
 	HandlerType: (*WalletServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -459,5 +459,5 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "connection/wallet.proto",
+	Metadata: "wallet.proto",
 }

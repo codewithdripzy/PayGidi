@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.33.3
-// source: connection/ai.proto
+// source: ai.proto
 
 package aipb
 
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AIService_HealthCheck_FullMethodName = "/pb.AIService/HealthCheck"
-	AIService_ProcessKYB_FullMethodName  = "/pb.AIService/ProcessKYB"
+	AIService_HealthCheck_FullMethodName = "/ai.AIService/HealthCheck"
+	AIService_ProcessKYB_FullMethodName  = "/ai.AIService/ProcessKYB"
 )
 
 // AIServiceClient is the client API for AIService service.
@@ -142,7 +142,7 @@ func _AIService_ProcessKYB_Handler(srv interface{}, ctx context.Context, dec fun
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AIService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.AIService",
+	ServiceName: "ai.AIService",
 	HandlerType: (*AIServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -155,5 +155,5 @@ var AIService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "connection/ai.proto",
+	Metadata: "ai.proto",
 }
