@@ -71,6 +71,19 @@ func main() {
 
 	// Start Gin HTTP server
 	r := gin.Default()
+
+	// Middleware to inject db into context
+	r.Use(func(c *gin.Context) {
+		c.Set("db", db)
+		c.Next()
+	})
+
+	if constants.IsDevMode() {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router.SetupRoutes(r, db, orch)
 	go func() {
 		log.Printf("AI HTTP service listening on :%s", constants.HTTP_PORT)

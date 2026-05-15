@@ -105,3 +105,19 @@ func UpdateBusinessDocs(c *gin.Context) {
 		"data":    business,
 	})
 }
+func GetBusinessProfile(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB)
+	user, _ := c.Get("user")
+	u := user.(models.User)
+
+	var business models.Business
+	if err := db.Where("user_id = ?", u.ID).First(&business).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Business profile not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Business profile retrieved successfully",
+		"data":    business,
+	})
+}

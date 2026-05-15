@@ -25,6 +25,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -A ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
             # Install Docker & Buildx if missing
             if ! command -v docker &> /dev/null; then
               echo "Installing Docker and Buildx..."
@@ -34,9 +35,10 @@ jobs:
             fi
 
             # Setup Swap (to prevent OOM/stuck builds on small instances)
+            # Reduced to 1GB because disk space is tight (only 2.3GB free)
             if [ ! -f /swapfile ]; then
-              echo "Creating 2GB Swap file..."
-              sudo fallocate -l 2G /swapfile
+              echo "Creating 1GB Swap file..."
+              sudo dd if=/dev/zero of=/swapfile bs=1M count=1024
               sudo chmod 600 /swapfile
               sudo mkswap /swapfile
               sudo swapon /swapfile

@@ -37,6 +37,7 @@ func SetupRoutes(app *gin.Engine) {
 	business := api.Group("/business")
 	business.Use(middlewares.Authenticate())
 	{
+		business.GET("/profile", controllers.GetBusinessProfile)
 		business.PUT("/profile", middlewares.ValidateDTO(&validators.UpdateBusinessProfileDto{}), controllers.UpdateBusinessProfile)
 		business.PUT("/docs", middlewares.ValidateDTO(&validators.UpdateBusinessDocsDto{}), controllers.UpdateBusinessDocs)
 	}

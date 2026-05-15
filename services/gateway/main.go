@@ -59,6 +59,9 @@ func main() {
 	// Notification Service routes
 	api.Any("/notification/*path", gin.WrapH(notificationProxy))
 
+	// Webhook routes (routed to wallet service)
+	api.POST("/webhook/squad", gin.WrapH(walletProxy))
+
 	port := getEnv("PORT", "8080")
 	log.Printf("Gateway starting on port %s", port)
 	r.Run(":" + port)

@@ -17,9 +17,12 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 
 	walletController := controllers.NewWalletController(db, accClient)
 
-	walletGroup := r.Group("/wallet")
-	// Public unauthenticated payment fetch
+	api := r.Group("/api/v1")
+	walletGroup := api.Group("/wallet")
+	// Public endpoints
 	walletGroup.GET("/payments/:payment_id", walletController.GetPaymentHttp)
+	walletGroup.POST("/webhook/squad", walletController.HandleSquadWebhook)
+	
 	walletGroup.Use(middlewares.Authenticate())
 	{
 		walletGroup.GET("/banks", walletController.GetBanksHttp)
