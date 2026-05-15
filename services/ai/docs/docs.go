@@ -23,13 +23,447 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/health": {
+            "get": {
+                "description": "Check the health of the service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "Service is healthy",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/kyb/payment/submit": {
+            "post": {
+                "description": "Submit business details for verification tied to a specific payment.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "KYB"
+                ],
+                "summary": "Submit Payment KYB",
+                "parameters": [
+                    {
+                        "description": "Payment KYB data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.PaymentKYBRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Analysis started",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/kyb/status": {
+            "get": {
+                "description": "Retrieve the current status and results of a KYB verification.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "KYB"
+                ],
+                "summary": "Get KYB status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/kyb/submit": {
+            "post": {
+                "description": "Submit business details for general verification.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "KYB"
+                ],
+                "summary": "Submit General KYB",
+                "parameters": [
+                    {
+                        "description": "Business data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Business"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "KYB submitted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controllers.PaymentKYBRequest": {
+            "type": "object",
+            "required": [
+                "businessName",
+                "nin",
+                "paymentId",
+                "socialHandle"
+            ],
+            "properties": {
+                "businessId": {
+                    "type": "string"
+                },
+                "businessName": {
+                    "type": "string"
+                },
+                "cacNumber": {
+                    "description": "Optional for Informal",
+                    "type": "string"
+                },
+                "nin": {
+                    "type": "string"
+                },
+                "paymentId": {
+                    "type": "integer"
+                },
+                "socialHandle": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Business": {
+            "type": "object",
+            "properties": {
+                "account_age_score": {
+                    "type": "integer"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "date_founded": {
+                    "type": "string"
+                },
+                "delivery_success_rate": {
+                    "type": "number"
+                },
+                "directors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Director"
+                    }
+                },
+                "dispute_rate": {
+                    "type": "number"
+                },
+                "documents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Document"
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "engagement_score": {
+                    "type": "integer"
+                },
+                "facebook_handle": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "instagram_handle": {
+                    "description": "Social Proof \u0026 Activity Signals",
+                    "type": "string"
+                },
+                "linkedin_handle": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "registration_number": {
+                    "description": "Optional for Informal",
+                    "type": "string"
+                },
+                "risk_analysis": {
+                    "type": "string"
+                },
+                "social_links": {
+                    "description": "JSON: {\"instagram\": \"@handle\", \"facebook\": \"page\", ...}",
+                    "type": "string"
+                },
+                "tiktok_handle": {
+                    "type": "string"
+                },
+                "tin": {
+                    "type": "string"
+                },
+                "trust_score": {
+                    "type": "integer"
+                },
+                "trust_tier": {
+                    "$ref": "#/definitions/models.TrustTier"
+                },
+                "type": {
+                    "$ref": "#/definitions/models.BusinessType"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "verification_status": {
+                    "description": "Verification Data",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.VerificationStatus"
+                        }
+                    ]
+                },
+                "website": {
+                    "type": "string"
+                },
+                "whatsapp_business": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.BusinessType": {
+            "type": "string",
+            "enum": [
+                "sole_proprietorship",
+                "llc",
+                "partnership",
+                "informal"
+            ],
+            "x-enum-comments": {
+                "Informal": "Added for non-CAC businesses"
+            },
+            "x-enum-descriptions": [
+                "",
+                "",
+                "",
+                "Added for non-CAC businesses"
+            ],
+            "x-enum-varnames": [
+                "SoleProprietorship",
+                "LLC",
+                "Partnership",
+                "Informal"
+            ]
+        },
+        "models.Director": {
+            "type": "object",
+            "properties": {
+                "business_id": {
+                    "type": "string"
+                },
+                "bvn": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "face_match_score": {
+                    "type": "number"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "id_number": {
+                    "type": "string"
+                },
+                "id_type": {
+                    "type": "string"
+                },
+                "is_verified": {
+                    "description": "Liveness \u0026 Identity",
+                    "type": "boolean"
+                },
+                "liveness_score": {
+                    "type": "number"
+                },
+                "nin": {
+                    "type": "string"
+                },
+                "ownership_percentage": {
+                    "type": "number"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "residential_address": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Document": {
+            "type": "object",
+            "properties": {
+                "business_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "extracted_data": {
+                    "type": "string"
+                },
+                "file_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_verified": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "description": "CAC_CERT, TIN_CERT, UTILITY_BILL, NIN_SLIP, etc.",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TrustTier": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "Tier0Unverified",
+                "Tier1Identity",
+                "Tier2Social",
+                "Tier3Registered"
+            ]
+        },
+        "models.VerificationStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "review",
+                "approved",
+                "rejected"
+            ],
+            "x-enum-varnames": [
+                "StatusPending",
+                "StatusReview",
+                "StatusApproved",
+                "StatusRejected"
+            ]
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8083",
+	Host:             "api.paygidi.site",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "PayGidi AI Service API",

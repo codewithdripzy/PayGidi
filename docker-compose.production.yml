@@ -1,70 +1,122 @@
-# version: "3.9"
-
 services:
   gateway:
-    build: ./services/gateway
+    container_name: paygidi-gateway
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-gateway:latest
+    build:
+      context: .
+      dockerfile: ./services/gateway/Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - GODEBUG=netdns=go
+      - ACCOUNT_SERVICE_URL=http://account-service:8080
+      - WALLET_SERVICE_URL=http://wallet-service:8082
+      - TRANSACTION_SERVICE_URL=http://transaction-service:8081
+      - AI_SERVICE_URL=http://ai-service:8083
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8084
     depends_on:
       - account-service
       - wallet-service
       - transaction-service
       - ai-service
       - notification-service
+    networks:
+      - paygidi-network
 
   account-service:
-    build: ./services/account
+    container_name: paygidi-account
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-account:latest
+    build:
+      context: .
+      dockerfile: ./services/account/Dockerfile
     expose:
+      - "8080"
       - "50051"
     env_file:
-      - ./services/account/.env
+      - ./services/account/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   wallet-service:
-    build: ./services/wallet
+    container_name: paygidi-wallet
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-wallet:latest
+    build:
+      context: .
+      dockerfile: ./services/wallet/Dockerfile
     expose:
+      - "8082"
       - "50053"
     env_file:
-      - ./services/wallet/.env
+      - ./services/wallet/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   transaction-service:
-    build: ./services/transaction
+    container_name: paygidi-transaction
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-transaction:latest
+    build:
+      context: .
+      dockerfile: ./services/transaction/Dockerfile
     expose:
+      - "8081"
       - "50055"
     env_file:
-      - ./services/transaction/.env
+      - ./services/transaction/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   ai-service:
-    build: ./services/ai
+    container_name: paygidi-ai
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-ai:latest
+    build:
+      context: .
+      dockerfile: ./services/ai/Dockerfile
     expose:
+      - "8083"
       - "50054"
     env_file:
-      - ./services/ai/.env
+      - ./services/ai/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   notification-service:
-    build: ./services/notification
+    container_name: paygidi-notification
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-notification:latest
+    build:
+      context: .
+      dockerfile: ./services/notification/Dockerfile
     expose:
       - "50052"
     env_file:
-      - ./services/notification/.env
+      - ./services/notification/.env.production
     depends_on:
       - postgres
+    networks:
+      - paygidi-network
 
   postgres:
+    container_name: paygidi-postgres
     image: postgres:16
     env_file:
-      - ./services/postgres/.env
+      - ./services/postgres/.env.production
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - paygidi-network
+
+networks:
+  paygidi-network:
+    driver: bridge
 
 volumes:
   postgres_data:

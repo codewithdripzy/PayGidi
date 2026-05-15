@@ -29,10 +29,9 @@ var (
 )
 
 func ConfigDotenv() error {
-	// Load environment variables from .env file
-	if err := godotenv.Load(); err != nil {
-		return fmt.Errorf("error loading .env file: %w", err)
-	}
+	// Attempt to load .env.production, then .env
+	_ = godotenv.Load(".env.production")
+	_ = godotenv.Load()
 
 	// Override constants with environment variables if they exist
 	if host := os.Getenv("DB_HOST"); host != "" {

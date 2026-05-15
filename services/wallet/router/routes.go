@@ -1,6 +1,7 @@
 package router
 
 import (
+	_ "github.com/PayGidi/WalletService/docs"
 	"github.com/PayGidi/WalletService/controllers"
 	"github.com/PayGidi/WalletService/core/constants"
 	"github.com/PayGidi/WalletService/middlewares"
@@ -15,11 +16,17 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 	// Swagger documentation
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// health check
+	r.GET("/health", controllers.HealthCheck)
+
 	walletController := controllers.NewWalletController(db, accClient)
 
-	walletGroup := r.Group("/wallet")
-	// Public unauthenticated payment fetch
+	api := r.Group("/api/v1")
+	walletGroup := api.Group("/wallet")
+	// Public endpoints
 	walletGroup.GET("/payments/:payment_id", walletController.GetPaymentHttp)
+	walletGroup.POST("/webhook/squad", walletController.HandleSquadWebhook)
+	
 	walletGroup.Use(middlewares.Authenticate())
 	{
 		walletGroup.GET("/banks", walletController.GetBanksHttp)

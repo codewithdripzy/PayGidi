@@ -29,7 +29,9 @@ type User struct {
 	Activities       []Activity    `json:"activities" gorm:"foreignKey:UserID"`  // List of activities performed by the user
 	Preferences      Preference    `json:"preferences" gorm:"foreignKey:UserID"` // User preferences
 	Roles            []Role        `json:"roles" gorm:"many2many:user_roles;"`
-	Status           string        `json:"status"`                        // e.g., "active", "inactive", etc.
+	BiometricEnabled bool          `json:"biometricEnabled" gorm:"default:false"`
+	BiometricID      string        `json:"biometricID"` // Unique identifier for biometrics (e.g., Device ID + Biometric Hash)
+	Status           string        `json:"status"`      // e.g., "active", "inactive", etc.
 	OTPs             []OTP         `json:"otps" gorm:"foreignKey:UserID"` // List of OTPs associated with the user
 	CreatedAt        time.Time     `json:"createdAt"`
 	UpdatedAt        time.Time     `json:"updatedAt"`

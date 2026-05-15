@@ -1,5 +1,198 @@
 basePath: /api/v1
-host: localhost:8083
+definitions:
+  controllers.PaymentKYBRequest:
+    properties:
+      businessId:
+        type: string
+      businessName:
+        type: string
+      cacNumber:
+        description: Optional for Informal
+        type: string
+      nin:
+        type: string
+      paymentId:
+        type: integer
+      socialHandle:
+        type: string
+    required:
+    - businessName
+    - nin
+    - paymentId
+    - socialHandle
+    type: object
+  models.Business:
+    properties:
+      account_age_score:
+        type: integer
+      address:
+        type: string
+      category:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      date_founded:
+        type: string
+      delivery_success_rate:
+        type: number
+      directors:
+        items:
+          $ref: '#/definitions/models.Director'
+        type: array
+      dispute_rate:
+        type: number
+      documents:
+        items:
+          $ref: '#/definitions/models.Document'
+        type: array
+      email:
+        type: string
+      engagement_score:
+        type: integer
+      facebook_handle:
+        type: string
+      id:
+        type: string
+      instagram_handle:
+        description: Social Proof & Activity Signals
+        type: string
+      linkedin_handle:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      registration_number:
+        description: Optional for Informal
+        type: string
+      risk_analysis:
+        type: string
+      social_links:
+        description: 'JSON: {"instagram": "@handle", "facebook": "page", ...}'
+        type: string
+      tiktok_handle:
+        type: string
+      tin:
+        type: string
+      trust_score:
+        type: integer
+      trust_tier:
+        $ref: '#/definitions/models.TrustTier'
+      type:
+        $ref: '#/definitions/models.BusinessType'
+      updated_at:
+        type: string
+      verification_status:
+        allOf:
+        - $ref: '#/definitions/models.VerificationStatus'
+        description: Verification Data
+      website:
+        type: string
+      whatsapp_business:
+        type: boolean
+    type: object
+  models.BusinessType:
+    enum:
+    - sole_proprietorship
+    - llc
+    - partnership
+    - informal
+    type: string
+    x-enum-comments:
+      Informal: Added for non-CAC businesses
+    x-enum-descriptions:
+    - ""
+    - ""
+    - ""
+    - Added for non-CAC businesses
+    x-enum-varnames:
+    - SoleProprietorship
+    - LLC
+    - Partnership
+    - Informal
+  models.Director:
+    properties:
+      business_id:
+        type: string
+      bvn:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      face_match_score:
+        type: number
+      full_name:
+        type: string
+      id:
+        type: string
+      id_number:
+        type: string
+      id_type:
+        type: string
+      is_verified:
+        description: Liveness & Identity
+        type: boolean
+      liveness_score:
+        type: number
+      nin:
+        type: string
+      ownership_percentage:
+        type: number
+      phone:
+        type: string
+      residential_address:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Document:
+    properties:
+      business_id:
+        type: string
+      created_at:
+        type: string
+      extracted_data:
+        type: string
+      file_url:
+        type: string
+      id:
+        type: string
+      is_verified:
+        type: boolean
+      type:
+        description: CAC_CERT, TIN_CERT, UTILITY_BILL, NIN_SLIP, etc.
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.TrustTier:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - Tier0Unverified
+    - Tier1Identity
+    - Tier2Social
+    - Tier3Registered
+  models.VerificationStatus:
+    enum:
+    - pending
+    - review
+    - approved
+    - rejected
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusReview
+    - StatusApproved
+    - StatusRejected
+host: api.paygidi.site
 info:
   contact:
     email: support@swagger.io
@@ -12,5 +205,108 @@ info:
   termsOfService: http://swagger.io/terms/
   title: PayGidi AI Service API
   version: "1.0"
-paths: {}
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health Check
+      tags:
+      - Health
+  /kyb/payment/submit:
+    post:
+      consumes:
+      - application/json
+      description: Submit business details for verification tied to a specific payment.
+      parameters:
+      - description: Payment KYB data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.PaymentKYBRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Analysis started
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Submit Payment KYB
+      tags:
+      - KYB
+  /kyb/status:
+    get:
+      description: Retrieve the current status and results of a KYB verification.
+      parameters:
+      - description: Business ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get KYB status
+      tags:
+      - KYB
+  /kyb/submit:
+    post:
+      consumes:
+      - application/json
+      description: Submit business details for general verification.
+      parameters:
+      - description: Business data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Business'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: KYB submitted
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Submit General KYB
+      tags:
+      - KYB
 swagger: "2.0"

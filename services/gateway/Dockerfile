@@ -2,18 +2,17 @@ FROM golang:1.26-alpine
 
 WORKDIR /app
 
-# Copy go.mod and go.sum
-COPY go.mod go.sum ./
+# Copy gateway service source
+COPY services/gateway /app/services/gateway
 
-# Copy the vendor directory
-COPY vendor/ ./vendor/
+WORKDIR /app/services/gateway
 
-# Copy the rest of the source code
-COPY . .
+# Download dependencies
+RUN go mod download
 
-# Build using the vendor directory
-RUN go build -mod=vendor -o gateway
+# Build the application
+RUN go build -o service
 
 EXPOSE 8080
 
-CMD ["./gateway"]
+CMD ["./service"]

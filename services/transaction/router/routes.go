@@ -1,6 +1,7 @@
 package router
 
 import (
+	_ "github.com/PayGidi/TransactionService/docs"
 	"github.com/PayGidi/TransactionService/controllers"
 	"github.com/PayGidi/TransactionService/middlewares"
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,11 @@ import (
 
 func SetupRoutes(app *gin.Engine) {
 	// Swagger documentation
-	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	app.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// health check
+	app.GET("/health", controllers.HealthCheck)
+
 	// create a new router group for the API
 	api := app.Group("/api/v:version")
 

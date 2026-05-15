@@ -1,8 +1,8 @@
 package kyb
 
 import (
-	"fmt"
 	"strings"
+
 	"github.com/PayGidi/AIService/models"
 )
 
@@ -12,53 +12,78 @@ func NewRiskEngine() RiskEngine {
 	return &DefaultRiskEngine{}
 }
 
-func (e *DefaultRiskEngine) ComputeScore(business *models.Business) (int, string) {
-	score := 50 // Start with a neutral score
+func (e *DefaultRiskEngine) ComputeScore(business *models.Business) (int, models.TrustTier, string) {
+	score := 0
 	var observations []string
+	tier := models.Tier0Unverified
 
-	// CAC Verification (+30)
-	if business.VerificationStatus == models.StatusApproved {
-		score += 30
-		observations = append(observations, "CAC registration verified.")
-	} else if business.VerificationStatus == models.StatusRejected {
-		score -= 50
-		observations = append(observations, "CAC registration verification failed.")
+	// 1. Identity Trust (Weight: 30)
+	identityScore := 0
+	allDirectorsVerified := true
+	hasDirectors := len(business.Directors) > 0
+	if hasDirectors {
+		for _, d := range business.Directors {
+			if d.IsVerified {
+				identityScore += 15 // Up to 30 for multiple directors
+			} else {
+				allDirectorsVerified = false
+			}
+		}
+	} else {
+		allDirectorsVerified = false
 	}
 
-	// Director Verification
-	allDirectorsVerified := true
-	for _, d := range business.Directors {
-		if !d.IsVerified {
-			allDirectorsVerified = false
-			break
+	if identityScore > 30 {
+		identityScore = 30
+	}
+	score += identityScore
+	if identityScore >= 15 {
+		tier = models.Tier1Identity
+		if allDirectorsVerified {
+			observations = append(observations, "All directors' identities verified via NIN/BVN.")
+		} else {
+			observations = append(observations, "Partial director identity verification completed.")
 		}
 	}
-	if allDirectorsVerified && len(business.Directors) > 0 {
-		score += 20
-		observations = append(observations, "All directors' identities verified.")
-	} else if len(business.Directors) > 0 {
-		score += 5
-		observations = append(observations, "Some directors verified.")
-	} else {
-		score -= 10
-		observations = append(observations, "No directors provided or verified.")
+
+	// 2. Social Trust (Weight: 20)
+	socialScore := 0
+	if business.InstagramHandle != "" || business.FacebookHandle != "" || business.TikTokHandle != "" {
+		socialScore += 10
+		if business.EngagementScore > 0 {
+			socialScore += 10
+		}
+		observations = append(observations, "Active social media presence detected.")
+	}
+	score += socialScore
+	if socialScore >= 15 && tier < models.Tier2Social {
+		tier = models.Tier2Social
 	}
 
-	// Document Checks
-	if len(business.Documents) > 0 {
-		score += 10
-		observations = append(observations, fmt.Sprintf("%d documents submitted.", len(business.Documents)))
+	// 3. Commerce & Behavioral Trust (Weight: 30)
+	commerceScore := 0
+	if business.DeliverySuccessRate > 0.8 {
+		commerceScore += 20
+		observations = append(observations, "High delivery success rate.")
+	} else if business.DeliverySuccessRate > 0.5 {
+		commerceScore += 10
+		observations = append(observations, "Moderate delivery history.")
 	}
 
-	// Website/Social Presence
-	if business.Website != "" {
-		score += 5
-		observations = append(observations, "Business has a website.")
+	if business.DisputeRate < 0.05 {
+		commerceScore += 10
+		observations = append(observations, "Low dispute rate.")
 	}
-	if business.SocialLinks != "" {
-		score += 5
-		observations = append(observations, "Social presence detected.")
+	score += commerceScore
+
+	// 4. Business Trust (Weight: 20)
+	businessScore := 0
+	if business.RegistrationNumber != "" && business.VerificationStatus == models.StatusApproved {
+		businessScore += 20
+		tier = models.Tier3Registered
+		observations = append(observations, "Official CAC registration verified.")
 	}
+	score += businessScore
 
 	// CAP at 100 and Floor at 0
 	if score > 100 {
@@ -69,5 +94,9 @@ func (e *DefaultRiskEngine) ComputeScore(business *models.Business) (int, string
 	}
 
 	summary := strings.Join(observations, " ")
-	return score, summary
+	if summary == "" {
+		summary = "No significant trust signals found."
+	}
+
+	return score, tier, summary
 }

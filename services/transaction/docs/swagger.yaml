@@ -1,5 +1,5 @@
 basePath: /api/v1
-host: localhost:8080
+host: api.paygidi.site
 info:
   contact:
     email: support@swagger.io

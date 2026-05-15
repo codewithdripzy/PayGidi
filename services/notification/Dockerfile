@@ -2,17 +2,16 @@ FROM golang:1.26-alpine
 
 WORKDIR /app
 
-# Copy go.mod and go.sum
-COPY go.mod go.sum ./
+# Copy notification service source
+COPY services/notification /app/services/notification
 
-# Copy the vendor directory
-COPY vendor/ ./vendor/
+WORKDIR /app/services/notification
 
-# Copy the rest of the source code
-COPY . .
+# Download dependencies
+RUN go mod download
 
-# Build using the vendor directory
-RUN go build -mod=vendor -o service
+# Build the application
+RUN go build -o service
 
 EXPOSE 50052 8084
 

@@ -14,8 +14,10 @@ func SetupRoutes(app *gin.Engine) {
 	// Swagger documentation
 	app.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// create a new router group for the API
+	// health check
+	app.GET("/health", controllers.HealthCheck)
 
+	// create a new router group for the API
 	api := app.Group("/api/v:version")
 
 	// add middleware to check version
@@ -31,12 +33,15 @@ func SetupRoutes(app *gin.Engine) {
 	api.POST("/auth/verify/email", middlewares.ValidateDTO(&validators.VerifyEmailDto{}), controllers.VerifyEmail)
 
 	api.POST("/auth/otp/request/:otpType", middlewares.ValidateDTO(&validators.RequestOTPDto{}), controllers.RequestOTP)
+	api.POST("/auth/biometric", middlewares.ValidateDTO(&validators.BiometricAuthDto{}), controllers.BiometricAuth)
+	api.POST("/auth/biometric/register", middlewares.Authenticate(), middlewares.ValidateDTO(&validators.RegisterBiometricDto{}), controllers.RegisterBiometric)
 	api.POST("/auth/logout", middlewares.Authenticate(), controllers.Logout)
 
 	// business routes
 	business := api.Group("/business")
 	business.Use(middlewares.Authenticate())
 	{
+		business.GET("/profile", controllers.GetBusinessProfile)
 		business.PUT("/profile", middlewares.ValidateDTO(&validators.UpdateBusinessProfileDto{}), controllers.UpdateBusinessProfile)
 		business.PUT("/docs", middlewares.ValidateDTO(&validators.UpdateBusinessDocsDto{}), controllers.UpdateBusinessDocs)
 	}

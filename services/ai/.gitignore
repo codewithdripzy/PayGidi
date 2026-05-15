@@ -18,7 +18,8 @@ spirit
 build
 
 # Go vendor directory
-vendor/
+/vendor
+
 PROMPTS.txt
 
 .env

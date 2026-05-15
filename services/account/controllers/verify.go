@@ -15,6 +15,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// VerifyEmail godoc
+// @Summary Verify email OTP
+// @Description Verify the OTP sent to the user's email address.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body validators.VerifyEmailDto true "Email verification data"
+// @Success 200 {object} map[string]interface{} "Email verified successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid OTP or expired"
+// @Failure 404 {object} map[string]interface{} "User or OTP not found"
+// @Router /auth/verify/email [post]
 func VerifyEmail(c *gin.Context) {
 	db, exists := c.Get("db")
 	if !exists {
@@ -272,6 +283,17 @@ func VerifyEmail(c *gin.Context) {
 	})
 }
 
+// VerifyNIN godoc
+// @Summary Verify NIN
+// @Description Verify a user's National Identification Number (NIN).
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body validators.VerifyNINDto true "NIN data"
+// @Success 200 {object} map[string]interface{} "NIN verified successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid NIN"
+// @Failure 502 {object} map[string]interface{} "Service error"
+// @Router /auth/verify/nin [post]
 func VerifyNIN(c *gin.Context) {
 	fmt.Println("[VerifyNIN][account] request received")
 
@@ -341,6 +363,17 @@ func VerifyNIN(c *gin.Context) {
 	})
 }
 
+// VerifyBVNImage godoc
+// @Summary Verify BVN Image
+// @Description Verify a user's face image against their BVN record.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body validators.VerifyBVNImageDto true "BVN and Image data"
+// @Success 200 {object} map[string]interface{} "BVN image verified successfully"
+// @Failure 400 {object} map[string]interface{} "Image mismatch"
+// @Failure 502 {object} map[string]interface{} "Service error"
+// @Router /auth/verify/bvn-image [post]
 func VerifyBVNImage(c *gin.Context) {
 	validatedBody, exists := c.Get("validatedBody")
 	if !exists {

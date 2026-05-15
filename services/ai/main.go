@@ -28,7 +28,7 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8083
+// @host api.paygidi.site
 // @BasePath /api/v1
 
 func main() {
@@ -65,12 +65,26 @@ func main() {
 		&kyb.DefaultRiskEngine{},
 		nil, // LLM is optional
 		&kyb.MockNINProvider{},
-		&kyb.MockSentimentProvider{},
+		&kyb.MockSocialMediaProvider{},
+		&kyb.MockReputationProvider{},
 		walletClient,
 	)
 
 	// Start Gin HTTP server
 	r := gin.Default()
+
+	// Middleware to inject db into context
+	r.Use(func(c *gin.Context) {
+		c.Set("db", db)
+		c.Next()
+	})
+
+	if constants.IsDevMode() {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router.SetupRoutes(r, db, orch)
 	go func() {
 		log.Printf("AI HTTP service listening on :%s", constants.HTTP_PORT)

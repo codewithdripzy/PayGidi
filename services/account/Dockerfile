@@ -2,17 +2,20 @@ FROM golang:1.26-alpine
 
 WORKDIR /app
 
-# Copy go.mod and go.sum
-COPY go.mod go.sum ./
+# Copy local dependencies first
+COPY services/notification /app/services/notification
+COPY services/wallet /app/services/wallet
 
-# Copy the vendor directory (which contains all dependencies including local ones)
-COPY vendor/ ./vendor/
+# Copy account service source
+COPY services/account /app/services/account
 
-# Copy the rest of the source code
-COPY . .
+WORKDIR /app/services/account
 
-# Build using the vendor directory
-RUN go build -mod=vendor -o service
+# Download dependencies
+RUN go mod download
+
+# Build the application
+RUN go build -o service
 
 EXPOSE 50051 8080
 

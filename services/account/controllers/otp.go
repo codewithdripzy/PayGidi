@@ -14,6 +14,18 @@ import (
 	"gorm.io/gorm"
 )
 
+// RequestOTP godoc
+// @Summary Request OTP
+// @Description Request an OTP to be sent via email or SMS.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param otpType path string true "OTP type (email or phone)"
+// @Param body body validators.RequestOTPDto true "OTP request data"
+// @Success 200 {object} map[string]interface{} "OTP sent successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 404 {object} map[string]interface{} "User not found"
+// @Router /auth/otp/request/{otpType} [post]
 func RequestOTP(c *gin.Context) {
 	db, exists := c.Get("db")
 	if !exists {

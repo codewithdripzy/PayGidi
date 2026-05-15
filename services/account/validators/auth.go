@@ -50,3 +50,12 @@ type VerifyBVNImageDto struct {
 	BVN         string `json:"bvn" validate:"required,len=11"`
 	Base64Image string `json:"base64Image" validate:"required"`
 }
+
+type BiometricAuthDto struct {
+	Phone       string `json:"phone" validate:"required,min=10,max=15"`
+	BiometricID string `json:"biometricID" validate:"required"`
+}
+
+type RegisterBiometricDto struct {
+	BiometricID string `json:"biometricID" validate:"required"`
+}

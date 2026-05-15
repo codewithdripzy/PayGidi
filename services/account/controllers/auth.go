@@ -377,3 +377,94 @@ func VerifyAuthOTP(c *gin.Context) {
 		},
 	})
 }
+
+// RegisterBiometric godoc
+// @Summary Enable biometric authentication
+// @Description Link a biometric ID to the authenticated user's account.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param body body validators.RegisterBiometricDto true "Biometric registration data"
+// @Success 200 {object} map[string]interface{} "Biometrics enabled successfully"
+// @Router /auth/biometric/register [post]
+func RegisterBiometric(c *gin.Context) {
+	db, _ := c.Get("db")
+	user, _ := c.Get("user")
+	currentUser := user.(*models.User)
+
+	validatedBody, _ := c.Get("validatedBody")
+	data := validatedBody.(*validators.RegisterBiometricDto)
+
+	if err := db.(*gorm.DB).Model(currentUser).Updates(map[string]interface{}{
+		"biometric_enabled": true,
+		"biometric_id":      data.BiometricID,
+	}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
+			"error": "Failed to enable biometrics: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Biometric authentication enabled successfully",
+	})
+}
+
+// BiometricAuth godoc
+// @Summary Authenticate via biometrics
+// @Description Exchange a biometric ID for a new JWT token.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body validators.BiometricAuthDto true "Biometric authentication data"
+// @Success 200 {object} map[string]interface{} "Login successful"
+// @Router /auth/biometric [post]
+func BiometricAuth(c *gin.Context) {
+	db, _ := c.Get("db")
+	validatedBody, _ := c.Get("validatedBody")
+	authData := validatedBody.(*validators.BiometricAuthDto)
+
+	var user models.User
+	if err := db.(*gorm.DB).Preload("Person").Preload("AuthInfo").Where("phone = ? AND biometric_id = ? AND biometric_enabled = ?", authData.Phone, authData.BiometricID, true).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":  payGidiErrors.UNAUTHORIZED_ACCESS,
+				"error": "Biometric authentication failed or not enabled for this device",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
+				"error": "An error occurred: " + err.Error(),
+			})
+		}
+		return
+	}
+
+	// Generate JWT tokens
+	token, refreshToken, err := utils.GenerateJWTtokens(user.ID, user.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
+			"error": "Failed to generate tokens: " + err.Error(),
+		})
+		return
+	}
+
+	// Update last login time
+	userService.UpdateUserLastLogin(db.(*gorm.DB), user.ID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Biometric login successful 👋🏽",
+		"data": gin.H{
+			"userId":       user.UID,
+			"firstName":    user.Person.FirstName,
+			"lastName":     user.Person.LastName,
+			"phone":        user.Phone,
+			"email":        user.Email,
+			"token":        token,
+			"refreshToken": refreshToken,
+		},
+	})
+}
