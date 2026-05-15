@@ -23,7 +23,9 @@ var (
 	JWT_REFRESH_ISSUER     string = "spiritpay_refresh"
 
 	// Application mode
-	APP_ENV string = "development" // Default to development mode
+	APP_ENV   string = "development" // Default to development mode
+	GRPC_PORT string = "50055"
+	HTTP_PORT string = "8081"
 )
 
 func ConfigDotenv() error {
@@ -81,6 +83,14 @@ func ConfigDotenv() error {
 
 	if refreshIssuer := os.Getenv("JWT_REFRESH_ISSUER"); refreshIssuer != "" {
 		JWT_REFRESH_ISSUER = refreshIssuer
+	}
+
+	if grpcPort := os.Getenv("GRPC_PORT"); grpcPort != "" {
+		GRPC_PORT = grpcPort
+	}
+
+	if httpPort := os.Getenv("HTTP_PORT"); httpPort != "" {
+		HTTP_PORT = httpPort
 	}
 
 	return nil

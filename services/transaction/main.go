@@ -64,22 +64,22 @@ func main() {
 
 	// Start gRPC server in a separate goroutine
 	go func() {
-		lis, err := net.Listen("tcp", ":50053")
+		lis, err := net.Listen("tcp", ":"+constants.GRPC_PORT)
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
 
 		grpcServer := grpc.NewServer()
 
-		log.Println("gRPC server listening on :50053")
+		log.Println("gRPC server listening on :" + constants.GRPC_PORT)
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
 
 	// Start HTTP server
-	log.Println("HTTP server listening on :8080")
-	if err := app.Run(":8080"); err != nil {
+	log.Println("HTTP server listening on :" + constants.HTTP_PORT)
+	if err := app.Run(":" + constants.HTTP_PORT); err != nil {
 		log.Fatalf("failed to run HTTP server: %v", err)
 	}
 }
