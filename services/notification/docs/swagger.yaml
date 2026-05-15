@@ -1,0 +1,214 @@
+basePath: /
+definitions:
+  dto.CreateActivityDTO:
+    properties:
+      action:
+        maxLength: 100
+        minLength: 2
+        type: string
+      details:
+        maxLength: 5000
+        type: string
+      entityId:
+        maxLength: 100
+        type: string
+      entityType:
+        maxLength: 100
+        type: string
+      ipAddress:
+        maxLength: 64
+        type: string
+      userAgent:
+        maxLength: 512
+        type: string
+      userId:
+        type: string
+    required:
+    - action
+    - userId
+    type: object
+  dto.SendEmailDTO:
+    properties:
+      body:
+        maxLength: 5000
+        minLength: 3
+        type: string
+      subject:
+        maxLength: 150
+        minLength: 3
+        type: string
+      to:
+        type: string
+      type:
+        maxLength: 50
+        type: string
+      userId:
+        type: string
+    required:
+    - body
+    - subject
+    - to
+    type: object
+  dto.SendSMSDTO:
+    properties:
+      message:
+        maxLength: 1000
+        minLength: 3
+        type: string
+      to:
+        maxLength: 25
+        minLength: 7
+        type: string
+      userId:
+        type: string
+    required:
+    - message
+    - to
+    type: object
+  models.Activity:
+    properties:
+      action:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      details:
+        type: string
+      entityId:
+        type: string
+      entityType:
+        type: string
+      id:
+        type: integer
+      ipAddress:
+        type: string
+      updatedAt:
+        type: string
+      userAgent:
+        type: string
+      userId:
+        type: string
+    type: object
+  models.Notification:
+    properties:
+      archived:
+        type: boolean
+      channel:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      metadata:
+        type: string
+      read:
+        type: boolean
+      recipient:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is the notification service for PayGidi, handling emails, SMS,
+    and activity logs.
+  title: PayGidi Notification Service API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health Check
+      tags:
+      - Health
+  /notification/activity:
+    post:
+      consumes:
+      - application/json
+      description: Log a user activity for audit trails.
+      parameters:
+      - description: Activity data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateActivityDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Activity'
+      summary: Record user activity
+      tags:
+      - Activities
+  /notification/email:
+    post:
+      consumes:
+      - application/json
+      description: Send an email via Resend.
+      parameters:
+      - description: Email data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SendEmailDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Notification'
+      summary: Send email notification
+      tags:
+      - Notifications
+  /notification/sms:
+    post:
+      consumes:
+      - application/json
+      description: Send an SMS via Twilio.
+      parameters:
+      - description: SMS data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SendSMSDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Notification'
+      summary: Send SMS notification
+      tags:
+      - Notifications
+swagger: "2.0"

@@ -33,6 +33,16 @@ type PaymentKYBRequest struct {
 	SocialHandle string  `json:"socialHandle" binding:"required"`
 }
 
+// SubmitPaymentKYB godoc
+// @Summary Submit Payment KYB
+// @Description Submit business details for verification tied to a specific payment.
+// @Tags KYB
+// @Accept json
+// @Produce json
+// @Param body body PaymentKYBRequest true "Payment KYB data"
+// @Success 202 {object} map[string]interface{} "Analysis started"
+// @Failure 400 {object} map[string]interface{} "Bad Request"
+// @Router /kyb/payment/submit [post]
 func (c *KYBController) SubmitPaymentKYB(ctx *gin.Context) {
 	var req PaymentKYBRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -65,6 +75,16 @@ func (c *KYBController) SubmitPaymentKYB(ctx *gin.Context) {
 	})
 }
 
+// SubmitKYB godoc
+// @Summary Submit General KYB
+// @Description Submit business details for general verification.
+// @Tags KYB
+// @Accept json
+// @Produce json
+// @Param body body models.Business true "Business data"
+// @Success 202 {object} map[string]interface{} "KYB submitted"
+// @Failure 400 {object} map[string]interface{} "Bad Request"
+// @Router /kyb/submit [post]
 func (c *KYBController) SubmitKYB(ctx *gin.Context) {
 	var business models.Business
 	if err := ctx.ShouldBindJSON(&business); err != nil {
@@ -96,6 +116,16 @@ func (c *KYBController) SubmitKYB(ctx *gin.Context) {
 }
 
 
+// GetKYBStatus godoc
+// @Summary Get KYB status
+// @Description Retrieve the current status and results of a KYB verification.
+// @Tags KYB
+// @Produce json
+// @Param id query string true "Business ID"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Failure 400 {object} map[string]interface{} "Bad Request"
+// @Failure 404 {object} map[string]interface{} "Not Found"
+// @Router /kyb/status [get]
 func (c *KYBController) GetKYBStatus(ctx *gin.Context) {
 	idStr := ctx.Query("id")
 	id, err := uuid.Parse(idStr)

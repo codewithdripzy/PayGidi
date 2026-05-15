@@ -1,4 +1,91 @@
 basePath: /api/v1
+definitions:
+  dto.CreatePaymentDto:
+    properties:
+      accountNumber:
+        type: string
+      advanceOptions:
+        description: optional JSON or text describing purchase
+        type: string
+      amount:
+        type: number
+      bank:
+        type: string
+      email:
+        type: string
+      expiresInMinutes:
+        type: integer
+      merchantPhoneNumber:
+        type: string
+    required:
+    - accountNumber
+    - amount
+    - bank
+    - email
+    - merchantPhoneNumber
+    type: object
+  dto.CreateWalletDto:
+    properties:
+      accountType:
+        enum:
+        - individual
+        - business
+        type: string
+      businessName:
+        type: string
+      bvn:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
+      firstname:
+        type: string
+      gender:
+        description: 1 for male, 2 for female (Squad often uses 1/2 or M/F)
+        enum:
+        - "1"
+        - "2"
+        type: string
+      lastname:
+        type: string
+      middlename:
+        type: string
+      nin:
+        type: string
+      phone:
+        type: string
+      userId:
+        type: string
+    required:
+    - dateOfBirth
+    - email
+    - firstname
+    - gender
+    - lastname
+    - nin
+    - phone
+    - userId
+    type: object
+  payloads.ResolveDisputePayload:
+    properties:
+      action:
+        type: string
+      file_name:
+        type: string
+    type: object
+  payloads.SquadAccountLookupPayload:
+    properties:
+      account_number:
+        type: string
+      bank_code:
+        type: string
+    type: object
+  payloads.SquadRequeryTransferPayload:
+    properties:
+      transaction_reference:
+        type: string
+    type: object
 host: localhost:8082
 info:
   contact:
@@ -13,6 +100,224 @@ info:
   title: PayGidi Wallet Service API
   version: "1.0"
 paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health Check
+      tags:
+      - Health
+  /wallet/{accountNumber}:
+    get:
+      description: Retrieve virtual account details for the authenticated user or
+        a specific account number.
+      parameters:
+      - description: Account Number
+        in: path
+        name: accountNumber
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get wallet details
+      tags:
+      - Wallet
+  /wallet/{accountNumber}/transactions:
+    get:
+      description: Fetch transaction history for a specific wallet account number.
+      parameters:
+      - description: Account Number
+        in: path
+        name: accountNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get wallet transactions
+      tags:
+      - Wallet
+  /wallet/banks:
+    get:
+      description: Retrieve a list of supported banks and their codes.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get bank list
+      tags:
+      - Wallet
+  /wallet/create:
+    post:
+      consumes:
+      - application/json
+      description: Manually trigger virtual account creation for the authenticated
+        user.
+      parameters:
+      - description: Wallet creation data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateWalletDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create wallet account (Manual)
+      tags:
+      - Wallet
+  /wallet/deposit/simulate:
+    post:
+      consumes:
+      - application/json
+      description: Simulate a virtual account credit for testing purposes.
+      parameters:
+      - description: Simulation data
+        in: body
+        name: body
+        required: true
+        schema: {}
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Simulate payment (Dev only)
+      tags:
+      - Wallet
+  /wallet/disputes:
+    get:
+      description: List all transaction disputes.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all disputes
+      tags:
+      - Wallet
+  /wallet/disputes/{ticketId}/resolve:
+    post:
+      consumes:
+      - application/json
+      description: Update the status or resolution of a dispute.
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: ticketId
+        required: true
+        type: string
+      - description: Resolution data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/payloads.ResolveDisputePayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Resolve dispute
+      tags:
+      - Wallet
+  /wallet/disputes/upload-url/{ticketId}/{fileName}:
+    get:
+      description: Get a signed URL for uploading dispute evidence.
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: ticketId
+        required: true
+        type: string
+      - description: File Name
+        in: path
+        name: fileName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get dispute upload URL
+      tags:
+      - Wallet
   /wallet/payments/{payment_id}:
     get:
       description: Retrieve details of a specific payment by its ID, including customer
@@ -44,4 +349,119 @@ paths:
       summary: Get payment details
       tags:
       - payments
+  /wallet/payments/new:
+    post:
+      consumes:
+      - application/json
+      description: Create a locked payment for KYB verification.
+      parameters:
+      - description: Payment data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePaymentDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create new payment
+      tags:
+      - Wallet
+  /wallet/transfer:
+    post:
+      consumes:
+      - application/json
+      description: Transfer funds from wallet to a bank account.
+      parameters:
+      - description: Transfer data
+        in: body
+        name: body
+        required: true
+        schema: {}
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Initiate transfer
+      tags:
+      - Wallet
+  /wallet/transfer/list:
+    get:
+      description: List all initiated bank transfers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get transfer history
+      tags:
+      - Wallet
+  /wallet/transfer/lookup:
+    post:
+      consumes:
+      - application/json
+      description: Lookup account name from account number and bank code.
+      parameters:
+      - description: Lookup data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/payloads.SquadAccountLookupPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Resolve bank account
+      tags:
+      - Wallet
+  /wallet/transfer/requery:
+    post:
+      consumes:
+      - application/json
+      description: Check the current status of a bank transfer.
+      parameters:
+      - description: Requery data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/payloads.SquadRequeryTransferPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Requery transfer status
+      tags:
+      - Wallet
 swagger: "2.0"

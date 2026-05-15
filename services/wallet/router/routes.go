@@ -1,6 +1,7 @@
 package router
 
 import (
+	_ "github.com/PayGidi/WalletService/docs"
 	"github.com/PayGidi/WalletService/controllers"
 	"github.com/PayGidi/WalletService/core/constants"
 	"github.com/PayGidi/WalletService/middlewares"
@@ -14,6 +15,9 @@ import (
 func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 	// Swagger documentation
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// health check
+	r.GET("/health", controllers.HealthCheck)
 
 	walletController := controllers.NewWalletController(db, accClient)
 

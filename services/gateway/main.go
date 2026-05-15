@@ -72,6 +72,11 @@ func main() {
 	// Webhook routes (routed to wallet service)
 	api.POST("/webhook/squad", gin.WrapH(walletProxy))
 
+	// Health check
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "Gateway is healthy"})
+	})
+
 	port := getEnv("PORT", "8080")
 	log.Printf("Gateway starting on port %s", port)
 	r.Run(":" + port)

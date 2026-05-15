@@ -10,6 +10,18 @@ import (
 	"gorm.io/gorm"
 )
 
+// UpdateBusinessProfile godoc
+// @Summary Update business profile
+// @Description Update the profile information for a business account.
+// @Tags Business
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param body body validators.UpdateBusinessProfileDto true "Business profile data"
+// @Success 200 {object} map[string]interface{} "Business profile updated successfully"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 404 {object} map[string]interface{} "Not found"
+// @Router /business/profile [put]
 func UpdateBusinessProfile(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	user, _ := c.Get("user")
@@ -69,6 +81,17 @@ func UpdateBusinessProfile(c *gin.Context) {
 	})
 }
 
+// UpdateBusinessDocs godoc
+// @Summary Update business documents
+// @Description Update the verification documents for a business account.
+// @Tags Business
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param body body validators.UpdateBusinessDocsDto true "Business documents data"
+// @Success 200 {object} map[string]interface{} "Business documents updated successfully"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Router /business/docs [put]
 func UpdateBusinessDocs(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	user, _ := c.Get("user")
@@ -105,6 +128,15 @@ func UpdateBusinessDocs(c *gin.Context) {
 		"data":    business,
 	})
 }
+// GetBusinessProfile godoc
+// @Summary Get business profile
+// @Description Retrieve the profile information for the authenticated business account.
+// @Tags Business
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Business profile retrieved successfully"
+// @Failure 404 {object} map[string]interface{} "Not found"
+// @Router /business/profile [get]
 func GetBusinessProfile(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	user, _ := c.Get("user")

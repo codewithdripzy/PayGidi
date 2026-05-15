@@ -14,8 +14,10 @@ func SetupRoutes(app *gin.Engine) {
 	// Swagger documentation
 	app.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// create a new router group for the API
+	// health check
+	app.GET("/health", controllers.HealthCheck)
 
+	// create a new router group for the API
 	api := app.Group("/api/v:version")
 
 	// add middleware to check version

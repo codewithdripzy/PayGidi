@@ -148,6 +148,17 @@ func (wc *WalletController) ResolveAccount(ctx context.Context, request payloads
 }
 
 // GetWalletHttp handles the GET /wallet HTTP request to fetch virtual account details
+// GetWalletHttp godoc
+// @Summary Get wallet details
+// @Description Retrieve virtual account details for the authenticated user or a specific account number.
+// @Tags Wallet
+// @Produce json
+// @Security ApiKeyAuth
+// @Param accountNumber path string false "Account Number"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 404 {object} map[string]interface{} "Not Found"
+// @Router /wallet/{accountNumber} [get]
 func (wc *WalletController) GetWalletHttp(c *gin.Context) {
 	accountNumber := c.Param("accountNumber")
 	var account models.Account
@@ -223,6 +234,17 @@ func (wc *WalletController) GetWalletHttp(c *gin.Context) {
 }
 
 // GetTransactionsHttp handles the GET /wallet/:accountNumber/transactions HTTP request
+// GetTransactionsHttp godoc
+// @Summary Get wallet transactions
+// @Description Fetch transaction history for a specific wallet account number.
+// @Tags Wallet
+// @Produce json
+// @Security ApiKeyAuth
+// @Param accountNumber path string true "Account Number"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Failure 400 {object} map[string]interface{} "Bad Request"
+// @Failure 404 {object} map[string]interface{} "Not Found"
+// @Router /wallet/{accountNumber}/transactions [get]
 func (wc *WalletController) GetTransactionsHttp(c *gin.Context) {
 	accountNumber := c.Param("accountNumber")
 	var account models.Account
@@ -273,6 +295,15 @@ func (wc *WalletController) GetTransactionsHttp(c *gin.Context) {
 }
 
 // SimulatePaymentHttp handles POST /wallet/simulate (development only)
+// SimulatePaymentHttp godoc
+// @Summary Simulate payment (Dev only)
+// @Description Simulate a virtual account credit for testing purposes.
+// @Tags Wallet
+// @Accept json
+// @Produce json
+// @Param body body interface{} true "Simulation data"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/deposit/simulate [post]
 func (wc *WalletController) SimulatePaymentHttp(c *gin.Context) {
 	var req struct {
 		AccountNumber string `json:"account_number" binding:"required"`
@@ -341,6 +372,16 @@ func (wc *WalletController) SimulatePaymentHttp(c *gin.Context) {
 }
 
 // ResolveAccountHttp handles the POST /wallet/transfer/lookup HTTP request
+// ResolveAccountHttp godoc
+// @Summary Resolve bank account
+// @Description Lookup account name from account number and bank code.
+// @Tags Wallet
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param body body payloads.SquadAccountLookupPayload true "Lookup data"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/transfer/lookup [post]
 func (wc *WalletController) ResolveAccountHttp(c *gin.Context) {
 	var req payloads.SquadAccountLookupPayload
 
@@ -379,6 +420,16 @@ func (wc *WalletController) ResolveAccountHttp(c *gin.Context) {
 }
 
 // InitiateTransferHttp handles the POST /wallet/transfer HTTP request
+// InitiateTransferHttp godoc
+// @Summary Initiate transfer
+// @Description Transfer funds from wallet to a bank account.
+// @Tags Wallet
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param body body interface{} true "Transfer data"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/transfer [post]
 func (wc *WalletController) InitiateTransferHttp(c *gin.Context) {
 	var req struct {
 		Remark               string `json:"remark"`
@@ -456,6 +507,14 @@ func (wc *WalletController) InitiateTransferHttp(c *gin.Context) {
 }
 
 // GetBanksHttp handles the GET /wallet/banks HTTP request
+// GetBanksHttp godoc
+// @Summary Get bank list
+// @Description Retrieve a list of supported banks and their codes.
+// @Tags Wallet
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/banks [get]
 func (wc *WalletController) GetBanksHttp(c *gin.Context) {
 	success, errMsg, data := squadService.GetBanks(c.Request.Context())
 
@@ -482,6 +541,14 @@ func (wc *WalletController) GetBanksHttp(c *gin.Context) {
 }
 
 // GetAllDisputesHttp handles GET /wallet/disputes
+// GetAllDisputesHttp godoc
+// @Summary Get all disputes
+// @Description List all transaction disputes.
+// @Tags Wallet
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/disputes [get]
 func (wc *WalletController) GetAllDisputesHttp(c *gin.Context) {
 	success, errMsg, data := squadService.GetAllDisputes(c.Request.Context())
 
@@ -508,6 +575,16 @@ func (wc *WalletController) GetAllDisputesHttp(c *gin.Context) {
 }
 
 // GetDisputeUploadURLHttp handles GET /wallet/disputes/upload-url/:ticketId/:fileName
+// GetDisputeUploadURLHttp godoc
+// @Summary Get dispute upload URL
+// @Description Get a signed URL for uploading dispute evidence.
+// @Tags Wallet
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ticketId path string true "Ticket ID"
+// @Param fileName path string true "File Name"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/disputes/upload-url/{ticketId}/{fileName} [get]
 func (wc *WalletController) GetDisputeUploadURLHttp(c *gin.Context) {
 	ticketId := c.Param("ticketId")
 	fileName := c.Param("fileName")
@@ -537,6 +614,17 @@ func (wc *WalletController) GetDisputeUploadURLHttp(c *gin.Context) {
 }
 
 // ResolveDisputeHttp handles POST /wallet/disputes/:ticketId/resolve
+// ResolveDisputeHttp godoc
+// @Summary Resolve dispute
+// @Description Update the status or resolution of a dispute.
+// @Tags Wallet
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param ticketId path string true "Ticket ID"
+// @Param body body payloads.ResolveDisputePayload true "Resolution data"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/disputes/{ticketId}/resolve [post]
 func (wc *WalletController) ResolveDisputeHttp(c *gin.Context) {
 	ticketId := c.Param("ticketId")
 	var req payloads.ResolveDisputePayload
@@ -576,6 +664,16 @@ func (wc *WalletController) ResolveDisputeHttp(c *gin.Context) {
 }
 
 // CreateWalletHttp handles the POST /wallet/create HTTP request as a fallback/manual endpoint
+// CreateWalletHttp godoc
+// @Summary Create wallet account (Manual)
+// @Description Manually trigger virtual account creation for the authenticated user.
+// @Tags Wallet
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param body body dto.CreateWalletDto true "Wallet creation data"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/create [post]
 func (wc *WalletController) CreateWalletHttp(c *gin.Context) {
 	var req dto.CreateWalletDto
 
@@ -631,6 +729,14 @@ func (wc *WalletController) CreateWalletHttp(c *gin.Context) {
 }
 
 // GetAllTransfersHttp handles GET /wallet/transfer/list
+// GetAllTransfersHttp godoc
+// @Summary Get transfer history
+// @Description List all initiated bank transfers.
+// @Tags Wallet
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/transfer/list [get]
 func (wc *WalletController) GetAllTransfersHttp(c *gin.Context) {
 	success, errMsg, data := squadService.GetAllTransfers(c.Request.Context())
 
@@ -657,6 +763,16 @@ func (wc *WalletController) GetAllTransfersHttp(c *gin.Context) {
 }
 
 // RequeryTransferHttp handles POST /wallet/transfer/requery
+// RequeryTransferHttp godoc
+// @Summary Requery transfer status
+// @Description Check the current status of a bank transfer.
+// @Tags Wallet
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param body body payloads.SquadRequeryTransferPayload true "Requery data"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/transfer/requery [post]
 func (wc *WalletController) RequeryTransferHttp(c *gin.Context) {
 	var req payloads.SquadRequeryTransferPayload
 
@@ -695,6 +811,16 @@ func (wc *WalletController) RequeryTransferHttp(c *gin.Context) {
 }
 
 // CreatePaymentHttp handles POST /wallet/payments/new
+// CreatePaymentHttp godoc
+// @Summary Create new payment
+// @Description Create a locked payment for KYB verification.
+// @Tags Wallet
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param body body dto.CreatePaymentDto true "Payment data"
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/payments/new [post]
 func (wc *WalletController) CreatePaymentHttp(c *gin.Context) {
 	var req dto.CreatePaymentDto
 

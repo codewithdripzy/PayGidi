@@ -1,6 +1,7 @@
 package router
 
 import (
+	_ "github.com/PayGidi/AIService/docs"
 	"github.com/PayGidi/AIService/controllers"
 	"github.com/PayGidi/AIService/services/kyb"
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,9 @@ import (
 func SetupRoutes(r *gin.Engine, db *gorm.DB, orch *kyb.Orchestrator) {
 	// Swagger documentation
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// health check
+	r.GET("/health", controllers.HealthCheck)
 
 	kybController := controllers.NewKYBController(db, orch)
 

@@ -133,6 +133,99 @@
                 }
             }
         },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Logs out the current user by clearing the auth cookie and invalidating sessions.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User logout",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/otp/request/{otpType}": {
+            "post": {
+                "description": "Request an OTP to be sent via email or SMS.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Request OTP",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OTP type (email or phone)",
+                        "name": "otpType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "OTP request data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.RequestOTPDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/auth/verify": {
             "post": {
                 "description": "Verify the OTP sent to the user's phone number and return JWT tokens.",
@@ -174,6 +267,285 @@
                     },
                     "404": {
                         "description": "OTP or User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify/bvn-image": {
+            "post": {
+                "description": "Verify a user's face image against their BVN record.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify BVN Image",
+                "parameters": [
+                    {
+                        "description": "BVN and Image data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.VerifyBVNImageDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BVN image verified successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Image mismatch",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "502": {
+                        "description": "Service error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify/email": {
+            "post": {
+                "description": "Verify the OTP sent to the user's email address.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify email OTP",
+                "parameters": [
+                    {
+                        "description": "Email verification data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.VerifyEmailDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Email verified successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid OTP or expired",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "User or OTP not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify/nin": {
+            "post": {
+                "description": "Verify a user's National Identification Number (NIN).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify NIN",
+                "parameters": [
+                    {
+                        "description": "NIN data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.VerifyNINDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "NIN verified successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid NIN",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "502": {
+                        "description": "Service error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/business/docs": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update the verification documents for a business account.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Update business documents",
+                "parameters": [
+                    {
+                        "description": "Business documents data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.UpdateBusinessDocsDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business documents updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/business/profile": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve the profile information for the authenticated business account.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Get business profile",
+                "responses": {
+                    "200": {
+                        "description": "Business profile retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update the profile information for a business account.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Update business profile",
+                "parameters": [
+                    {
+                        "description": "Business profile data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.UpdateBusinessProfileDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business profile updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -230,6 +602,81 @@
                 }
             }
         },
+        "validators.RequestOTPDto": {
+            "type": "object",
+            "required": [
+                "forWhat"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "forWhat": {
+                    "type": "string",
+                    "enum": [
+                        "completeRegister",
+                        "login",
+                        "resetPassword",
+                        "twoFactorAuth"
+                    ]
+                },
+                "phone": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "minLength": 10
+                }
+            }
+        },
+        "validators.UpdateBusinessDocsDto": {
+            "type": "object",
+            "properties": {
+                "additionalDocs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "registrationDoc": {
+                    "type": "string"
+                }
+            }
+        },
+        "validators.UpdateBusinessProfileDto": {
+            "type": "object",
+            "properties": {
+                "businessType": {
+                    "type": "string"
+                },
+                "facebook": {
+                    "type": "string"
+                },
+                "industry": {
+                    "type": "string"
+                },
+                "instagram": {
+                    "type": "string"
+                },
+                "linkedIn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "registrationNumber": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 5
+                },
+                "twitter": {
+                    "type": "string"
+                },
+                "website": {
+                    "type": "string"
+                }
+            }
+        },
         "validators.VerifyAuthOtpDto": {
             "type": "object",
             "required": [
@@ -243,6 +690,59 @@
                 "phone": {
                     "type": "string",
                     "maxLength": 15,
+                    "minLength": 10
+                }
+            }
+        },
+        "validators.VerifyBVNImageDto": {
+            "type": "object",
+            "required": [
+                "base64Image",
+                "bvn"
+            ],
+            "properties": {
+                "base64Image": {
+                    "type": "string"
+                },
+                "bvn": {
+                    "type": "string"
+                }
+            }
+        },
+        "validators.VerifyEmailDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "forWhat",
+                "otp"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "forWhat": {
+                    "type": "string",
+                    "enum": [
+                        "completeRegister",
+                        "login",
+                        "resetPassword",
+                        "twoFactorAuth"
+                    ]
+                },
+                "otp": {
+                    "type": "string",
+                    "minLength": 4
+                }
+            }
+        },
+        "validators.VerifyNINDto": {
+            "type": "object",
+            "required": [
+                "nin"
+            ],
+            "properties": {
+                "nin": {
+                    "type": "string",
                     "minLength": 10
                 }
             }

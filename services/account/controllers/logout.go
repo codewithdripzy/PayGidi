@@ -9,6 +9,15 @@ import (
 	"gorm.io/gorm"
 )
 
+// Logout godoc
+// @Summary User logout
+// @Description Logs out the current user by clearing the auth cookie and invalidating sessions.
+// @Tags Auth
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]string "Logged out successfully"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Router /auth/logout [post]
 func Logout(c *gin.Context) {
 	db, exists := c.Get("db")
 	if !exists {

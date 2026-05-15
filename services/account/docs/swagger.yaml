@@ -14,6 +14,58 @@ definitions:
     required:
     - phone
     type: object
+  validators.RequestOTPDto:
+    properties:
+      email:
+        type: string
+      forWhat:
+        enum:
+        - completeRegister
+        - login
+        - resetPassword
+        - twoFactorAuth
+        type: string
+      phone:
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - forWhat
+    type: object
+  validators.UpdateBusinessDocsDto:
+    properties:
+      additionalDocs:
+        items:
+          type: string
+        type: array
+      registrationDoc:
+        type: string
+    type: object
+  validators.UpdateBusinessProfileDto:
+    properties:
+      businessType:
+        type: string
+      facebook:
+        type: string
+      industry:
+        type: string
+      instagram:
+        type: string
+      linkedIn:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      registrationNumber:
+        maxLength: 50
+        minLength: 5
+        type: string
+      twitter:
+        type: string
+      website:
+        type: string
+    type: object
   validators.VerifyAuthOtpDto:
     properties:
       otp:
@@ -25,6 +77,43 @@ definitions:
     required:
     - otp
     - phone
+    type: object
+  validators.VerifyBVNImageDto:
+    properties:
+      base64Image:
+        type: string
+      bvn:
+        type: string
+    required:
+    - base64Image
+    - bvn
+    type: object
+  validators.VerifyEmailDto:
+    properties:
+      email:
+        type: string
+      forWhat:
+        enum:
+        - completeRegister
+        - login
+        - resetPassword
+        - twoFactorAuth
+        type: string
+      otp:
+        minLength: 4
+        type: string
+    required:
+    - email
+    - forWhat
+    - otp
+    type: object
+  validators.VerifyNINDto:
+    properties:
+      nin:
+        minLength: 10
+        type: string
+    required:
+    - nin
     type: object
 host: localhost:8080
 info:
@@ -118,6 +207,68 @@ paths:
       summary: Complete account registration
       tags:
       - Auth
+  /auth/logout:
+    post:
+      description: Logs out the current user by clearing the auth cookie and invalidating
+        sessions.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logged out successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: User logout
+      tags:
+      - Auth
+  /auth/otp/request/{otpType}:
+    post:
+      consumes:
+      - application/json
+      description: Request an OTP to be sent via email or SMS.
+      parameters:
+      - description: OTP type (email or phone)
+        in: path
+        name: otpType
+        required: true
+        type: string
+      - description: OTP request data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.RequestOTPDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP sent successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Request OTP
+      tags:
+      - Auth
   /auth/verify:
     post:
       consumes:
@@ -151,6 +302,191 @@ paths:
       summary: Verify authentication OTP
       tags:
       - Auth
+  /auth/verify/bvn-image:
+    post:
+      consumes:
+      - application/json
+      description: Verify a user's face image against their BVN record.
+      parameters:
+      - description: BVN and Image data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.VerifyBVNImageDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: BVN image verified successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Image mismatch
+          schema:
+            additionalProperties: true
+            type: object
+        "502":
+          description: Service error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Verify BVN Image
+      tags:
+      - Auth
+  /auth/verify/email:
+    post:
+      consumes:
+      - application/json
+      description: Verify the OTP sent to the user's email address.
+      parameters:
+      - description: Email verification data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.VerifyEmailDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email verified successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid OTP or expired
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User or OTP not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Verify email OTP
+      tags:
+      - Auth
+  /auth/verify/nin:
+    post:
+      consumes:
+      - application/json
+      description: Verify a user's National Identification Number (NIN).
+      parameters:
+      - description: NIN data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.VerifyNINDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: NIN verified successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid NIN
+          schema:
+            additionalProperties: true
+            type: object
+        "502":
+          description: Service error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Verify NIN
+      tags:
+      - Auth
+  /business/docs:
+    put:
+      consumes:
+      - application/json
+      description: Update the verification documents for a business account.
+      parameters:
+      - description: Business documents data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.UpdateBusinessDocsDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business documents updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update business documents
+      tags:
+      - Business
+  /business/profile:
+    get:
+      description: Retrieve the profile information for the authenticated business
+        account.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business profile retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get business profile
+      tags:
+      - Business
+    put:
+      consumes:
+      - application/json
+      description: Update the profile information for a business account.
+      parameters:
+      - description: Business profile data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validators.UpdateBusinessProfileDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business profile updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update business profile
+      tags:
+      - Business
   /health:
     get:
       consumes:

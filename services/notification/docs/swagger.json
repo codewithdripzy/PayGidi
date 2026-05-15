@@ -1,0 +1,316 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the notification service for PayGidi, handling emails, SMS, and activity logs.",
+        "title": "PayGidi Notification Service API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/health": {
+            "get": {
+                "description": "Check the health of the service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "Service is healthy",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notification/activity": {
+            "post": {
+                "description": "Log a user activity for audit trails.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Activities"
+                ],
+                "summary": "Record user activity",
+                "parameters": [
+                    {
+                        "description": "Activity data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateActivityDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Activity"
+                        }
+                    }
+                }
+            }
+        },
+        "/notification/email": {
+            "post": {
+                "description": "Send an email via Resend.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Send email notification",
+                "parameters": [
+                    {
+                        "description": "Email data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SendEmailDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Notification"
+                        }
+                    }
+                }
+            }
+        },
+        "/notification/sms": {
+            "post": {
+                "description": "Send an SMS via Twilio.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Send SMS notification",
+                "parameters": [
+                    {
+                        "description": "SMS data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SendSMSDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Notification"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.CreateActivityDTO": {
+            "type": "object",
+            "required": [
+                "action",
+                "userId"
+            ],
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "details": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
+                "entityId": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "entityType": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "ipAddress": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "userAgent": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SendEmailDTO": {
+            "type": "object",
+            "required": [
+                "body",
+                "subject",
+                "to"
+            ],
+            "properties": {
+                "body": {
+                    "type": "string",
+                    "maxLength": 5000,
+                    "minLength": 3
+                },
+                "subject": {
+                    "type": "string",
+                    "maxLength": 150,
+                    "minLength": 3
+                },
+                "to": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SendSMSDTO": {
+            "type": "object",
+            "required": [
+                "message",
+                "to"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "minLength": 3
+                },
+                "to": {
+                    "type": "string",
+                    "maxLength": 25,
+                    "minLength": 7
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Activity": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "entityId": {
+                    "type": "string"
+                },
+                "entityType": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "ipAddress": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userAgent": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Notification": {
+            "type": "object",
+            "properties": {
+                "archived": {
+                    "type": "boolean"
+                },
+                "channel": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "string"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
