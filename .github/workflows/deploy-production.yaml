@@ -14,12 +14,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and Push Images
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        run: |
+          docker compose -f docker-compose.production.yml build
+          docker compose -f docker-compose.production.yml push
+
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.EC2_KEY }}
 
       - name: Deploy to EC2
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
         run: |
           ssh \
             -o StrictHostKeyChecking=no \
@@ -29,39 +44,14 @@ jobs:
 
             set -euxo pipefail
 
-            echo "===== SYSTEM INFO ====="
-            free -h
-            df -h
-
             # Install Docker if missing
             if ! command -v docker &> /dev/null; then
               echo "Installing Docker..."
-
               sudo apt-get update
-
-              sudo apt-get install -y \
-                docker.io \
-                docker-compose-v2 \
-                docker-buildx-plugin
-
+              sudo apt-get install -y docker.io docker-compose-v2
               sudo systemctl enable docker
               sudo systemctl start docker
-
               sudo usermod -aG docker ubuntu
-            fi
-
-            # Create swap if missing
-            if [ ! -f /swapfile ]; then
-              echo "Creating swap..."
-
-              sudo fallocate -l 2G /swapfile || \
-              sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
-
-              sudo chmod 600 /swapfile
-              sudo mkswap /swapfile
-              sudo swapon /swapfile
-
-              echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
             fi
 
             # Ensure repo exists
@@ -73,33 +63,25 @@ jobs:
               git clone git@github.com:${{ github.repository }}.git .
             fi
 
-            # Pull latest code
+            # Pull latest code (just for the docker-compose file)
             git fetch origin
             git reset --hard origin/main
 
+            echo "===== DOCKER LOGIN ====="
+            echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
             echo "===== CLEANUP ====="
+            sudo docker system prune -f || true
 
-            # Prevent disk exhaustion
-            sudo docker system prune -af || true
-
-            echo "===== BUILDING ====="
-
-            # Sequential builds only
-            sudo docker compose \
-              -f docker-compose.production.yml \
-              build \
-              --no-parallel
+            echo "===== PULLING IMAGES ====="
+            export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
+            sudo -E docker compose -f docker-compose.production.yml pull
 
             echo "===== STARTING ====="
-
-            sudo docker compose \
-              -f docker-compose.production.yml \
-              up -d
+            sudo -E docker compose -f docker-compose.production.yml up -d
 
             echo "===== CONTAINERS ====="
-
             sudo docker ps
 
             echo "===== DONE ====="
-
           EOF
