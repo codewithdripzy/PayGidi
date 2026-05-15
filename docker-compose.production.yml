@@ -120,10 +120,3 @@ networks:
 
 volumes:
   postgres_data:
-
-networks:
-  paygidi-network:
-    driver: bridge
-
-volumes:
-  postgres_data:
