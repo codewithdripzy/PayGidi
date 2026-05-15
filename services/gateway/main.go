@@ -29,14 +29,14 @@ func main() {
 
 	// --- Central Swagger UI ---
 	// We'll serve a custom HTML page that aggregates all swagger.json files.
-	r.GET("/swagger", serveSwaggerUI)
+	r.GET("/docs", serveSwaggerUI)
 	
 	// Proxy to each service's swagger.json
-	r.GET("/docs/account/swagger.json", gin.WrapH(proxyRewrite(accountProxy, "/swagger/doc.json")))
-	r.GET("/docs/wallet/swagger.json", gin.WrapH(proxyRewrite(walletProxy, "/swagger/doc.json")))
-	r.GET("/docs/transaction/swagger.json", gin.WrapH(proxyRewrite(transactionProxy, "/swagger/doc.json")))
-	r.GET("/docs/ai/swagger.json", gin.WrapH(proxyRewrite(aiProxy, "/swagger/doc.json")))
-	r.GET("/docs/notification/swagger.json", gin.WrapH(proxyRewrite(notificationProxy, "/swagger/doc.json")))
+	r.GET("/docs/account/swagger.json", gin.WrapH(proxyRewrite(accountProxy, "/docs/doc.json")))
+	r.GET("/docs/wallet/swagger.json", gin.WrapH(proxyRewrite(walletProxy, "/docs/doc.json")))
+	r.GET("/docs/transaction/swagger.json", gin.WrapH(proxyRewrite(transactionProxy, "/docs/doc.json")))
+	r.GET("/docs/ai/swagger.json", gin.WrapH(proxyRewrite(aiProxy, "/docs/doc.json")))
+	r.GET("/docs/notification/swagger.json", gin.WrapH(proxyRewrite(notificationProxy, "/docs/doc.json")))
 
 
 	// --- API Routing ---
@@ -96,7 +96,7 @@ func serveSwaggerUI(c *gin.Context) {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PayGidi API Gateway</title>
+  <title>PayGidi API Documentation</title>
   <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" >
   <style>
     html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
@@ -112,10 +112,10 @@ func serveSwaggerUI(c *gin.Context) {
     window.onload = function() {
       const ui = SwaggerUIBundle({
         urls: [
-          { url: "/docs/account/swagger.json", name: "Account Service" },
-          { url: "/docs/wallet/swagger.json", name: "Wallet Service" },
-          { url: "/docs/transaction/swagger.json", name: "Transaction Service" },
-          { url: "/docs/ai/swagger.json", name: "AI/KYB Service" },
+          { url: "/docs/account/swagger.json", name: "Account & Auth Service" },
+          { url: "/docs/wallet/swagger.json", name: "Wallet & Payments Service" },
+          { url: "/docs/transaction/swagger.json", name: "Transaction History Service" },
+          { url: "/docs/ai/swagger.json", name: "AI & KYB Verification Service" },
           { url: "/docs/notification/swagger.json", name: "Notification Service" }
         ],
         dom_id: '#swagger-ui',
