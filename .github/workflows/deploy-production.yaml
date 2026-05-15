@@ -24,8 +24,21 @@ jobs:
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
         run: |
-          docker compose -f docker-compose.production.yml build
-          docker compose -f docker-compose.production.yml push
+          # Build each service
+          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-gateway:latest -f ./services/gateway/Dockerfile .
+          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-account:latest -f ./services/account/Dockerfile .
+          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-wallet:latest -f ./services/wallet/Dockerfile .
+          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-transaction:latest -f ./services/transaction/Dockerfile .
+          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-ai:latest -f ./services/ai/Dockerfile .
+          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-notification:latest -f ./services/notification/Dockerfile .
+
+          # Push images
+          docker push ${DOCKER_HUB_USERNAME}/paygidi-gateway:latest
+          docker push ${DOCKER_HUB_USERNAME}/paygidi-account:latest
+          docker push ${DOCKER_HUB_USERNAME}/paygidi-wallet:latest
+          docker push ${DOCKER_HUB_USERNAME}/paygidi-transaction:latest
+          docker push ${DOCKER_HUB_USERNAME}/paygidi-ai:latest
+          docker push ${DOCKER_HUB_USERNAME}/paygidi-notification:latest
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
