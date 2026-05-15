@@ -3,6 +3,8 @@ import 'package:app/features/auth/presentation/screens/individual/individual_for
 import 'package:app/features/auth/presentation/screens/individual/individual_login_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_otp_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_sign_up_screen.dart';
+import 'package:app/features/auth/presentation/screens/individual/individual_complete_account_1_screen.dart';
+import 'package:app/features/auth/presentation/screens/individual/individual_complete_account_2_screen.dart';
 import 'package:app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:app/features/onboarding/presentation/screens/role_screen.dart';
 import 'package:app/routes/pg_route_names.dart';
@@ -62,8 +64,30 @@ class PayGidiRouter {
       GoRoute(
         path: "/${PgRouteNames.individualOtp}",
         name: PgRouteNames.individualOtp,
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final isLogin = extra?['isLogin'] ?? false;
+          return CustomTransitionPage(
+            child: IndividualOtpScreen(isLogin: isLogin),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                RouteTransitions.slideRight(animation, child),
+          );
+        },
+      ),
+      GoRoute(
+        path: "/${PgRouteNames.individualCompleteAccount1}",
+        name: PgRouteNames.individualCompleteAccount1,
         pageBuilder: (context, state) => CustomTransitionPage(
-          child: const IndividualOtpScreen(),
+          child: const IndividualCompleteAccount1Screen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              RouteTransitions.slideRight(animation, child),
+        ),
+      ),
+      GoRoute(
+        path: "/${PgRouteNames.individualCompleteAccount2}",
+        name: PgRouteNames.individualCompleteAccount2,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const IndividualCompleteAccount2Screen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               RouteTransitions.slideRight(animation, child),
         ),

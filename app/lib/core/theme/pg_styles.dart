@@ -20,7 +20,7 @@ class PgStyles {
       fontSize: objectWidth(context: context, size: fontSize),
       decoration: textDecoration,
       decorationColor: color,
-      fontFamily: fontFamily ?? 'StackSansNotch',
+      fontFamily: fontFamily ?? 'Google Sans Flex',
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class PgTextField extends StatefulWidget {
@@ -19,6 +20,8 @@ class PgTextField extends StatefulWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final bool isPassword;
+  final List<TextInputFormatter>? inputFormatters;
+  final Widget? prefix;
 
   const PgTextField({
     super.key,
@@ -36,6 +39,8 @@ class PgTextField extends StatefulWidget {
     this.readOnly = false,
     this.onTap,
     this.isPassword = false,
+    this.inputFormatters,
+    this.prefix,
   });
 
   @override
@@ -84,6 +89,7 @@ class _PgTextFieldState extends State<PgTextField> {
             color: PgColors.black,
             fontFamily: PgFonts.googleSans,
           ),
+          inputFormatters: widget.inputFormatters,
           decoration: InputDecoration(
             hintText: widget.hintText,
             hintStyle: PgStyles.textStyle(
@@ -94,6 +100,7 @@ class _PgTextFieldState extends State<PgTextField> {
               fontFamily: PgFonts.googleSans,
             ),
             prefixIcon: widget.prefixIcon,
+            prefix: widget.prefix,
             suffixIcon: widget.isPassword
                 ? IconButton(
                     onPressed: () {

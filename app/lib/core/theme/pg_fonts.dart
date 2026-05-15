@@ -10,7 +10,7 @@ class PgFonts {
   static const String googleSans72 = 'Google Sans Flex 72pt';
   static const String googleSans120 = 'Google Sans Flex 120pt';
 
-  static const String fontFamily = stackSans;
+  static const String fontFamily = googleSans;
 
   static const TextStyle extraLight = TextStyle(
     fontFamily: fontFamily,

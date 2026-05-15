@@ -10,7 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 class IndividualOtpScreen extends StatelessWidget {
-  const IndividualOtpScreen({super.key});
+  final bool isLogin;
+  const IndividualOtpScreen({super.key, this.isLogin = false});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,7 @@ class IndividualOtpScreen extends StatelessWidget {
               heightSpacing(18),
               PgTexts.text700(
                 context,
-                text: "Verify your Account",
+                text: "Verification",
                 fontSize: 28,
                 color: PgColors.black,
                 fontFamily: PgFonts.stackSans,
@@ -40,8 +41,7 @@ class IndividualOtpScreen extends StatelessWidget {
               heightSpacing(12),
               PgTexts.text400(
                 context,
-                text:
-                    "We've sent a 4-digit code to your email and phone number.",
+                text: "We've sent a 5-digit code to your phone number.",
                 fontSize: 14,
                 color: Colors.black54,
               ),
@@ -50,7 +50,7 @@ class IndividualOtpScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(
-                  4,
+                  5,
                   (index) => _buildOtpBox(context, index == 0),
                 ),
               ),
@@ -69,6 +69,7 @@ class IndividualOtpScreen extends StatelessWidget {
                         context,
                         text: "Resend Code",
                         color: PgColors.primary,
+                        fontSize: 14,
                       ),
                     ),
                   ],
@@ -78,7 +79,11 @@ class IndividualOtpScreen extends StatelessWidget {
               const Spacer(),
               PgScaleButton(
                 onTap: () {
-                  context.pushNamed(PgRouteNames.individualHome);
+                  if (isLogin) {
+                    context.goNamed(PgRouteNames.individualHome);
+                  } else {
+                    context.pushNamed(PgRouteNames.individualCompleteAccount1);
+                  }
                 },
                 child: Container(
                   height: objectHeight(size: 56, context: context),
@@ -108,8 +113,8 @@ class IndividualOtpScreen extends StatelessWidget {
 
   Widget _buildOtpBox(BuildContext context, bool autoFocus) {
     return SizedBox(
-      height: 70,
-      width: 70,
+      height: 60,
+      width: 60,
       child: TextFormField(
         autofocus: autoFocus,
         onChanged: (value) {
@@ -128,21 +133,20 @@ class IndividualOtpScreen extends StatelessWidget {
           fontSize: 24,
           fontWeight: FontWeight.w700,
           color: PgColors.black,
-          fontFamily: PgFonts.googleSans,
         ),
         decoration: InputDecoration(
           fillColor: Colors.white,
           filled: true,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade200),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: PgColors.primary, width: 2),
           ),
         ),

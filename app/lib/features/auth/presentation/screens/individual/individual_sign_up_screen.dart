@@ -8,6 +8,7 @@ import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class IndividualSignUpScreen extends StatefulWidget {
@@ -18,45 +19,18 @@ class IndividualSignUpScreen extends StatefulWidget {
 }
 
 class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _dobController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
     _phoneController.dispose();
-    _dobController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: PgColors.primary,
-              onPrimary: Colors.white,
-              onSurface: PgColors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      setState(() {
-        _dobController.text = "${picked.day} / ${picked.month} / ${picked.year}";
-      });
+  void _submit() {
+    if (_formKey.currentState!.validate()) {
+      context.pushNamed(PgRouteNames.individualOtp);
     }
   }
 
@@ -68,119 +42,107 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
       child: Scaffold(
         backgroundColor: PgColors.scaffoldBackground,
         body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              heightSpacing(24),
-              PgScaleButton(
-                child: const Icon(Icons.arrow_back_outlined),
-                onTap: () => context.pop(),
-              ),
-              heightSpacing(18),
-              PgTexts.text700(
-                context,
-                text: "Create an Individual Account",
-                fontSize: 28,
-                color: PgColors.black,
-                textOverflow: TextOverflow.clip,
-                fontFamily: PgFonts.stackSans,
-              ),
-              heightSpacing(12),
-              PgTexts.text400(
-                context,
-                text: "Join PayGidi and start transacting with confidence.",
-                fontSize: 14,
-                color: Colors.black54,
-                fontFamily: PgFonts.googleSans36,
-              ),
-              heightSpacing(40),
-
-              PgTextField(
-                label: "Full Name",
-                hintText: "Enter your full name",
-                controller: _nameController,
-                prefixIcon: const Icon(Iconsax.user_copy, size: 20),
-                textInputAction: TextInputAction.next,
-              ),
-              heightSpacing(20),
-              PgTextField(
-                label: "Email Address",
-                hintText: "Enter your email address",
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                prefixIcon: const Icon(Iconsax.sms_copy, size: 20),
-                textInputAction: TextInputAction.next,
-              ),
-              heightSpacing(20),
-              PgTextField(
-                label: "Phone Number",
-                hintText: "Enter your phone number",
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                prefixIcon: const Icon(Iconsax.call_copy, size: 20),
-                textInputAction: TextInputAction.next,
-              ),
-              heightSpacing(20),
-              PgTextField(
-                label: "Date of Birth",
-                hintText: "Select your date of birth",
-                controller: _dobController,
-                readOnly: true,
-                onTap: () => _selectDate(context),
-                prefixIcon: const Icon(Iconsax.calendar_1_copy, size: 20),
-              ),
-              heightSpacing(20),
-              PgTextField(
-                label: "Password",
-                hintText: "Create a strong password",
-                controller: _passwordController,
-                isPassword: true,
-                prefixIcon: const Icon(Iconsax.lock_copy, size: 20),
-                textInputAction: TextInputAction.done,
-              ),
-              
-              heightSpacing(40),
-              PgScaleButton(
-                onTap: () => context.pushNamed(PgRouteNames.individualOtp),
-                child: Container(
-                  height: objectHeight(size: 56, context: context),
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: const LinearGradient(
-                      colors: [PgColors.primary, PgColors.secondary],
-                    ),
-                  ),
-                  child: PgTexts.text600(
-                    context,
-                    text: "Sign Up",
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                heightSpacing(24),
+                PgScaleButton(
+                  child: const Icon(Icons.arrow_back_outlined),
+                  onTap: () => context.pop(),
                 ),
-              ),
-              heightSpacing(24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  PgTexts.text400(context, text: "Already have an account? "),
-                  GestureDetector(
-                    onTap: () => context.pushNamed(PgRouteNames.individualLogin),
+                heightSpacing(18),
+                PgTexts.text700(
+                  context,
+                  text: "Verify Phone Number",
+                  fontSize: 28,
+                  color: PgColors.black,
+                  fontFamily: PgFonts.stackSans,
+                ),
+                heightSpacing(12),
+                PgTexts.text400(
+                  context,
+                  text: "Enter your phone number to receive a verification code.",
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+                heightSpacing(40),
+                PgTextField(
+                  label: "Phone Number",
+                  hintText: "800 000 0000",
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  prefixIcon: const Icon(Iconsax.call_copy, size: 20),
+                  textInputAction: TextInputAction.done,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                  ],
+                  prefix: Padding(
+                    padding: const EdgeInsets.only(right: 8),
                     child: PgTexts.text600(
                       context,
-                      text: "Login",
-                      color: PgColors.primary,
+                      text: "+234",
+                      fontSize: 16,
+                      color: PgColors.black,
                     ),
                   ),
-                ],
-              ),
-              heightSpacing(40),
-            ],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Phone number is required";
+                    }
+                    if (value.length != 10) {
+                      return "Phone number must be 10 digits";
+                    }
+                    return null;
+                  },
+                ),
+                heightSpacing(40),
+                PgScaleButton(
+                  onTap: _submit,
+                  child: Container(
+                    height: objectHeight(size: 56, context: context),
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        colors: [PgColors.primary, PgColors.secondary],
+                      ),
+                    ),
+                    child: PgTexts.text600(
+                      context,
+                      text: "Send Code",
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                heightSpacing(24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    PgTexts.text400(context, text: "Already have an account? "),
+                    GestureDetector(
+                      onTap: () => context.pushNamed(PgRouteNames.individualLogin),
+                      child: PgTexts.text600(
+                        context,
+                        text: "Login",
+                        color: PgColors.primary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+
