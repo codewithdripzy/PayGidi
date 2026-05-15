@@ -7,8 +7,8 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o service
+RUN go build -o gateway
 
-EXPOSE 50055 8081
+EXPOSE 8080
 
-CMD ["./service"]
+CMD ["./gateway"]

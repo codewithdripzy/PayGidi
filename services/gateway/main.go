@@ -1,0 +1,130 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"os"
+
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	r := gin.Default()
+
+	// Target URLs from environment variables or defaults
+	accountURL := getEnv("ACCOUNT_SERVICE_URL", "http://account-service:8080")
+	walletURL := getEnv("WALLET_SERVICE_URL", "http://wallet-service:8082")
+	transactionURL := getEnv("TRANSACTION_SERVICE_URL", "http://transaction-service:8081")
+	aiURL := getEnv("AI_SERVICE_URL", "http://ai-service:8083")
+	notificationURL := getEnv("NOTIFICATION_SERVICE_URL", "http://notification-service:8080")
+
+	// Create reverse proxies
+	accountProxy := httputil.NewSingleHostReverseProxy(parseURL(accountURL))
+	walletProxy := httputil.NewSingleHostReverseProxy(parseURL(walletURL))
+	transactionProxy := httputil.NewSingleHostReverseProxy(parseURL(transactionURL))
+	aiProxy := httputil.NewSingleHostReverseProxy(parseURL(aiURL))
+	notificationProxy := httputil.NewSingleHostReverseProxy(parseURL(notificationURL))
+
+	// --- Central Swagger UI ---
+	// We'll serve a custom HTML page that aggregates all swagger.json files.
+	r.GET("/swagger", serveSwaggerUI)
+	
+	// Proxy to each service's swagger.json
+	r.GET("/docs/account/swagger.json", gin.WrapH(proxyRewrite(accountProxy, "/swagger/doc.json")))
+	r.GET("/docs/wallet/swagger.json", gin.WrapH(proxyRewrite(walletProxy, "/swagger/doc.json")))
+	r.GET("/docs/transaction/swagger.json", gin.WrapH(proxyRewrite(transactionProxy, "/swagger/doc.json")))
+	r.GET("/docs/ai/swagger.json", gin.WrapH(proxyRewrite(aiProxy, "/swagger/doc.json")))
+	r.GET("/docs/notification/swagger.json", gin.WrapH(proxyRewrite(notificationProxy, "/swagger/doc.json")))
+
+
+	// --- API Routing ---
+	api := r.Group("/api/v1")
+	
+	// Account Service routes
+	api.Any("/auth/*path", gin.WrapH(accountProxy))
+	api.Any("/business/*path", gin.WrapH(accountProxy))
+	
+	// Wallet Service routes
+	api.Any("/wallet/*path", gin.WrapH(walletProxy))
+	api.Any("/payment/*path", gin.WrapH(walletProxy))
+	
+	// Transaction Service routes
+	api.Any("/transactions/*path", gin.WrapH(transactionProxy))
+	
+	// AI Service routes
+	api.Any("/kyb/*path", gin.WrapH(aiProxy))
+	
+	// Notification Service routes
+	api.Any("/notification/*path", gin.WrapH(notificationProxy))
+
+	port := getEnv("PORT", "8080")
+	log.Printf("Gateway starting on port %s", port)
+	r.Run(":" + port)
+}
+
+func getEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
+}
+
+func parseURL(rawUrl string) *url.URL {
+	u, err := url.Parse(rawUrl)
+	if err != nil {
+		log.Fatalf("Invalid URL %s: %v", rawUrl, err)
+	}
+	return u
+}
+
+// proxyRewrite creates a handler that rewrites the request path before proxying
+func proxyRewrite(proxy *httputil.ReverseProxy, newPath string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = newPath
+		proxy.ServeHTTP(w, r)
+	})
+}
+
+func serveSwaggerUI(c *gin.Context) {
+	html := `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PayGidi API Gateway</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" >
+  <style>
+    html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
+    *, *:before, *:after { box-sizing: inherit; }
+    body { margin: 0; background: #fafafa; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"> </script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"> </script>
+  <script>
+    window.onload = function() {
+      const ui = SwaggerUIBundle({
+        urls: [
+          { url: "/docs/account/swagger.json", name: "Account Service" },
+          { url: "/docs/wallet/swagger.json", name: "Wallet Service" },
+          { url: "/docs/transaction/swagger.json", name: "Transaction Service" },
+          { url: "/docs/ai/swagger.json", name: "AI/KYB Service" },
+          { url: "/docs/notification/swagger.json", name: "Notification Service" }
+        ],
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [ SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset ],
+        plugins: [ SwaggerUIBundle.plugins.DownloadUrl ],
+        layout: "StandaloneLayout"
+      })
+      window.ui = ui
+    }
+  </script>
+</body>
+</html>`
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
+}

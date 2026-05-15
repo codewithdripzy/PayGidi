@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/PayGidi/TransactionService/services/squad"
+	"github.com/PayGidi/TransactionService/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/patrickmn/go-cache"
 )
 
 // GetCustomerTransactions godoc
@@ -29,6 +31,18 @@ func GetCustomerTransactions(c *gin.Context) {
 		return
 	}
 
+	// Check Cache
+	cacheKey := "transactions:" + customerIdentifier
+	if cachedData, found := utils.AppCache.Get(cacheKey); found {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  200,
+			"success": true,
+			"message": "Success (from cache)",
+			"data":    cachedData,
+		})
+		return
+	}
+
 	success, errMsg, data := squad.GetCustomerTransactions(c.Request.Context(), customerIdentifier)
 
 	if !success {
@@ -44,6 +58,9 @@ func GetCustomerTransactions(c *gin.Context) {
 		})
 		return
 	}
+
+	// Store in Cache (Expires in 5 minutes)
+	utils.AppCache.Set(cacheKey, data, cache.DefaultExpiration)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  200,

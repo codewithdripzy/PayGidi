@@ -30,4 +30,32 @@ paths:
       summary: Health Check
       tags:
       - Health
+  /transactions/{customerIdentifier}:
+    get:
+      consumes:
+      - application/json
+      description: Fetch transaction history for a specific customer identifier using
+        the Squad API.
+      parameters:
+      - description: Customer Identifier (e.g. email or UID)
+        in: path
+        name: customerIdentifier
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get customer transactions
+      tags:
+      - Transactions
 swagger: "2.0"

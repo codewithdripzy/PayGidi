@@ -12,6 +12,8 @@ import (
 	"github.com/PayGidi/WalletService/models"
 	"github.com/PayGidi/WalletService/proto/connection/pb"
 	"github.com/PayGidi/WalletService/services/account"
+	"github.com/PayGidi/WalletService/utils"
+	"github.com/patrickmn/go-cache"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -146,6 +148,12 @@ func (s *WalletServer) GetTransactions(ctx context.Context, req *pb.GetTransacti
 		return nil, status.Error(codes.InvalidArgument, "request body is required")
 	}
 
+	// Check Cache
+	cacheKey := "transactions:" + req.CustomerIdentifier
+	if cached, found := utils.AppCache.Get(cacheKey); found {
+		return cached.(*pb.GetTransactionsResponse), nil
+	}
+
 	success, errMsg, data := s.walletController.GetTransactions(ctx, req.CustomerIdentifier)
 
 	if !success {
@@ -171,16 +179,27 @@ func (s *WalletServer) GetTransactions(ctx context.Context, req *pb.GetTransacti
 		})
 	}
 
-	return &pb.GetTransactionsResponse{
+	res := &pb.GetTransactionsResponse{
 		Success:      true,
 		Message:      "transactions retrieved successfully",
 		Transactions: transactions,
-	}, nil
+	}
+
+	// Store in Cache (5 minutes)
+	utils.AppCache.Set(cacheKey, res, cache.DefaultExpiration)
+
+	return res, nil
 }
 
 func (s *WalletServer) ResolveAccount(ctx context.Context, req *pb.ResolveAccountRequest) (*pb.ResolveAccountResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "request body is required")
+	}
+
+	// Check Cache
+	cacheKey := "resolve:" + req.BankCode + ":" + req.AccountNumber
+	if cached, found := utils.AppCache.Get(cacheKey); found {
+		return cached.(*pb.ResolveAccountResponse), nil
 	}
 
 	success, errMsg, data := s.walletController.ResolveAccount(ctx, payloads.SquadAccountLookupPayload{
@@ -199,12 +218,17 @@ func (s *WalletServer) ResolveAccount(ctx context.Context, req *pb.ResolveAccoun
 		}, nil
 	}
 
-	return &pb.ResolveAccountResponse{
+	res := &pb.ResolveAccountResponse{
 		Success:       true,
 		Message:       "account resolved successfully",
 		AccountName:   data.AccountName,
 		AccountNumber: data.AccountNumber,
-	}, nil
+	}
+
+	// Store in Cache (1 hour - bank accounts don't change names often)
+	utils.AppCache.Set(cacheKey, res, 1*time.Hour)
+
+	return res, nil
 }
 
 func (s *WalletServer) GetPayment(ctx context.Context, req *pb.GetPaymentRequest) (*pb.GetPaymentResponse, error) {

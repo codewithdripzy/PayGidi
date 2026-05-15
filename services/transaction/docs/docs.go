@@ -49,6 +49,46 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/transactions/{customerIdentifier}": {
+            "get": {
+                "description": "Fetch transaction history for a specific customer identifier using the Squad API.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get customer transactions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer Identifier (e.g. email or UID)",
+                        "name": "customerIdentifier",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     }
 }`
