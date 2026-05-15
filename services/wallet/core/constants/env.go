@@ -34,14 +34,13 @@ var (
 )
 
 func ConfigDotenv() error {
-	// Load base .env if present.
-	_ = godotenv.Load(".env")
+	// Attempt to load .env.production, then .env
+	_ = godotenv.Load(".env.production")
+	_ = godotenv.Load()
 
 	// Allow explicit env file selection (e.g. ENV_FILE=.env.production).
 	if envFile := strings.TrimSpace(os.Getenv("ENV_FILE")); envFile != "" {
-		if err := godotenv.Overload(envFile); err != nil {
-			return fmt.Errorf("error loading %s: %w", envFile, err)
-		}
+		_ = godotenv.Overload(envFile)
 	} else {
 		// Load environment-specific file if APP_ENV is already exported.
 		if env := strings.TrimSpace(os.Getenv("APP_ENV")); env != "" {

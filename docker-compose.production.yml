@@ -13,18 +13,13 @@ services:
       - WALLET_SERVICE_URL=http://wallet-service:8082
       - TRANSACTION_SERVICE_URL=http://transaction-service:8081
       - AI_SERVICE_URL=http://ai-service:8083
-      - NOTIFICATION_SERVICE_URL=http://notification-service:8080
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8084
     depends_on:
-      account-service:
-        condition: service_healthy
-      wallet-service:
-        condition: service_healthy
-      transaction-service:
-        condition: service_healthy
-      ai-service:
-        condition: service_healthy
-      notification-service:
-        condition: service_healthy
+      - account-service
+      - wallet-service
+      - transaction-service
+      - ai-service
+      - notification-service
     networks:
       - paygidi-network
 
@@ -39,11 +34,6 @@ services:
       - "50051"
     env_file:
       - ./services/account/.env.production
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/v1/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       - postgres
     networks:
@@ -60,11 +50,6 @@ services:
       - "50053"
     env_file:
       - ./services/wallet/.env.production
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/docs/index.html"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       - postgres
     networks:
@@ -81,11 +66,6 @@ services:
       - "50055"
     env_file:
       - ./services/transaction/.env.production
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/docs/index.html"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       - postgres
     networks:
@@ -102,11 +82,6 @@ services:
       - "50054"
     env_file:
       - ./services/ai/.env.production
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8083/api/v1/kyb/status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       - postgres
     networks:
@@ -119,15 +94,9 @@ services:
       context: .
       dockerfile: ./services/notification/Dockerfile
     expose:
-      - "8080"
       - "50052"
     env_file:
       - ./services/notification/.env.production
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/docs/index.html"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       - postgres
     networks:
@@ -142,13 +111,15 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U paygidi_api -d paygidi"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - paygidi-network
+
+networks:
+  paygidi-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
 
 networks:
   paygidi-network:

@@ -15,3 +15,4 @@ Squad_API_Summary_v2.pptx
 deploy-env.sh
 
 vendor
+*.log

@@ -19,8 +19,11 @@ var (
 )
 
 func ConfigDotenv() error {
+	// Attempt to load .env.production, then .env
+	_ = godotenv.Load(".env.production")
 	_ = godotenv.Load()
 
+	// Prioritize environment variables injected by Docker/Compose
 	if value := os.Getenv("DB_HOST"); value != "" {
 		DB_HOST = value
 	}
