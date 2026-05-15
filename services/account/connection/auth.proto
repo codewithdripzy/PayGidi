@@ -38,7 +38,7 @@ message UserData {
   string status = 11;
   Preference preference = 12;
   string lastLogin = 13;
-  string lastPasswordChange = 14;
+  string lastPinChange = 14;
   repeated Role roles = 15;
   string createdAt = 16;
   string updatedAt = 17;

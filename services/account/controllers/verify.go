@@ -39,8 +39,8 @@ func VerifyEmail(c *gin.Context) {
 	validatedBody, exists := c.Get("validatedBody")
 	if !exists {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":  payGidiErrors.PHONE_OR_PASSWORD_MISSING,
-			"error": "Please provide phone and password",
+			"code":  payGidiErrors.PHONE_OR_PIN_MISSING,
+			"error": "Please provide phone and PIN",
 		})
 		return
 	}
@@ -166,7 +166,7 @@ func VerifyEmail(c *gin.Context) {
 
 	message := "Welcome back 👋🏽, " + data.Person.FirstName
 	if data.IsFirstTime {
-		message = "Welcome to SpiritPay! Please change your password to continue."
+		message = "Welcome to PayGidi! Please set your PIN to continue."
 
 		data.IsFirstTime = false // Update the user's first-time login status
 		if err := db.(*gorm.DB).Model(&models.User{}).Where("id = ?", data.ID).Update("is_first_time", false).Error; err != nil {

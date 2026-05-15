@@ -14,15 +14,16 @@ var (
 	DB_PASSWORD string
 	DB_NAME     string
 
-	WALLET_SERVICE_ADDR string = "localhost:50053"
+	WALLET_SERVICE_ADDR       string = "localhost:50053"
+	NOTIFICATION_SERVICE_ADDR string = "localhost:50052"
 
 	// JWT constants
 	JWT_SECRET             string
 	JWT_EXPIRATION         string = "24h" // Default JWT expiration time
-	JWT_ISSUER             string = "spiritpay"
+	JWT_ISSUER             string = "paygidi"
 	JWT_REFRESH_SECRET     string
 	JWT_REFRESH_EXPIRATION string = "7d" // Default JWT refresh token expiration time
-	JWT_REFRESH_ISSUER     string = "spiritpay_refresh"
+	JWT_REFRESH_ISSUER     string = "paygidi_refresh"
 
 	// Application mode
 	APP_ENV   string = "development" // Default to development mode
@@ -31,9 +32,9 @@ var (
 )
 
 func ConfigDotenv() error {
-	// Attempt to load .env.production, then .env
+	// Load .env first so local development variables take precedence, then fallback to .env.production
+	_ = godotenv.Load(".env")
 	_ = godotenv.Load(".env.production")
-	_ = godotenv.Load()
 
 	// Override constants with environment variables if they exist
 	if host := os.Getenv("DB_HOST"); host != "" {
@@ -88,6 +89,10 @@ func ConfigDotenv() error {
 
 	if walletServiceAddr := os.Getenv("WALLET_SERVICE_ADDR"); walletServiceAddr != "" {
 		WALLET_SERVICE_ADDR = walletServiceAddr
+	}
+
+	if notificationServiceAddr := os.Getenv("NOTIFICATION_SERVICE_ADDR"); notificationServiceAddr != "" {
+		NOTIFICATION_SERVICE_ADDR = notificationServiceAddr
 	}
 
 	if grpcPort := os.Getenv("GRPC_PORT"); grpcPort != "" {

@@ -53,20 +53,27 @@ func main() {
 	api := r.Group("/api/v1")
 	
 	// Account Service routes
+	api.Any("/auth", gin.WrapH(accountProxy))
 	api.Any("/auth/*path", gin.WrapH(accountProxy))
+	api.Any("/business", gin.WrapH(accountProxy))
 	api.Any("/business/*path", gin.WrapH(accountProxy))
 	
 	// Wallet Service routes
+	api.Any("/wallet", gin.WrapH(walletProxy))
 	api.Any("/wallet/*path", gin.WrapH(walletProxy))
+	api.Any("/payment", gin.WrapH(walletProxy))
 	api.Any("/payment/*path", gin.WrapH(walletProxy))
 	
 	// Transaction Service routes
+	api.Any("/transactions", gin.WrapH(transactionProxy))
 	api.Any("/transactions/*path", gin.WrapH(transactionProxy))
 	
 	// AI Service routes
+	api.Any("/kyb", gin.WrapH(aiProxy))
 	api.Any("/kyb/*path", gin.WrapH(aiProxy))
 	
 	// Notification Service routes
+	api.Any("/notification", gin.WrapH(notificationProxy))
 	api.Any("/notification/*path", gin.WrapH(notificationProxy))
 
 	// Webhook routes (routed to wallet service)

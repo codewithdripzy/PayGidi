@@ -51,16 +51,9 @@ func main() {
 		c.Next()
 	})
 
-	// Run automigrations if in development mode
-	if constants.IsDevMode() {
-		if err := config.RunAutoMigrations(db); err != nil {
-			panic("Error running auto migrations: " + err.Error())
-		}
-		log.Println("Running in development mode")
-		gin.SetMode(gin.DebugMode)
-	} else {
-		log.Println("Running in production mode")
-		gin.SetMode(gin.ReleaseMode)
+	// Run automigrations
+	if err := config.RunAutoMigrations(db); err != nil {
+		panic("Error running auto migrations: " + err.Error())
 	}
 
 	// Setup routes

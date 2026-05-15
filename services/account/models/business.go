@@ -25,5 +25,5 @@ type Business struct {
 }
 
 func (Business) TableName() string {
-	return "businesses"
+	return "account_businesses"
 }

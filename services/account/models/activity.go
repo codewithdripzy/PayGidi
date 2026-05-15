@@ -18,5 +18,5 @@ type Activity struct {
 }
 
 func (Activity) TableName() string {
-	return "activities"
+	return "account_activities"
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/PayGidi/AccountService/core/constants"
 	"github.com/PayGidi/AccountService/models"
 	walletService "github.com/PayGidi/AccountService/services/wallet"
 	"github.com/PayGidi/AccountService/utils"
@@ -160,7 +161,7 @@ func CompleteAccount(c *gin.Context) {
 
 	// Create wallet for all accounts
 	go func() {
-		walletClient, err := walletService.NewWalletService("")
+		walletClient, err := walletService.NewWalletService(constants.WALLET_SERVICE_ADDR)
 		if err != nil {
 			log.Printf("[CompleteAccount] failed to connect to wallet service: %v", err)
 			return

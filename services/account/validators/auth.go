@@ -11,14 +11,14 @@ type VerifyAuthOtpDto struct {
 }
 
 type IndividualCompleteAccountDto struct {
-	FirstName       string `json:"firstName" validate:"required,min=2,max=30"`
-	LastName        string `json:"lastName" validate:"required,min=2,max=30"`
-	DateOfBirth     string `json:"dateOfBirth" validate:"required,datetime=2006-01-02"`
-	Email           string `json:"email" validate:"required,email"`
-	NIN             string `json:"nin" validate:"required,len=10"`
-	BVN             string `json:"bvn" validate:"omitempty,len=11"`
-	ReferralCode    string `json:"referralCode" validate:"omitempty,len=6"`
-	Gender          string `json:"gender" validate:"required,oneof=1 2"`
+	FirstName    string `json:"firstName" validate:"required,min=2,max=30"`
+	LastName     string `json:"lastName" validate:"required,min=2,max=30"`
+	DateOfBirth  string `json:"dateOfBirth" validate:"required,datetime=2006-01-02"`
+	Email        string `json:"email" validate:"required,email"`
+	NIN          string `json:"nin" validate:"required,len=10"`
+	BVN          string `json:"bvn" validate:"omitempty,len=11"`
+	ReferralCode string `json:"referralCode" validate:"omitempty,len=6"`
+	Gender       string `json:"gender" validate:"required,oneof=1 2"`
 }
 
 type BusinessCompleteAccountDto struct {
@@ -31,13 +31,13 @@ type BusinessCompleteAccountDto struct {
 }
 
 type VerifyEmailDto struct {
-	ForWhat string `json:"forWhat" validate:"required,oneof=completeRegister login resetPassword twoFactorAuth"`
+	ForWhat string `json:"forWhat" validate:"required,oneof=completeRegister login setPin updatePin twoFactorAuth"`
 	Email   string `json:"email" validate:"required,email"`
 	Code    string `json:"otp" validate:"required,min=4"`
 }
 
 type RequestOTPDto struct {
-	ForWhat string `json:"forWhat" validate:"required,oneof=completeRegister login resetPassword twoFactorAuth"`
+	ForWhat string `json:"forWhat" validate:"required,oneof=completeRegister login setPin updatePin twoFactorAuth"`
 	Phone   string `json:"phone" validate:"omitempty,min=10,max=15"`
 	Email   string `json:"email" validate:"omitempty,email"`
 }
@@ -58,4 +58,15 @@ type BiometricAuthDto struct {
 
 type RegisterBiometricDto struct {
 	BiometricID string `json:"biometricID" validate:"required"`
+}
+
+type SetPinDto struct {
+	Pin        string `json:"pin" validate:"required,len=4,numeric"`
+	ConfirmPin string `json:"confirmPin" validate:"required,eqfield=Pin"`
+}
+
+type UpdatePinDto struct {
+	OldPin     string `json:"oldPin" validate:"required,len=4,numeric"`
+	NewPin     string `json:"newPin" validate:"required,len=4,numeric"`
+	ConfirmPin string `json:"confirmPin" validate:"required,eqfield=NewPin"`
 }

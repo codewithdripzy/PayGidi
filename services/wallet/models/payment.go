@@ -34,3 +34,7 @@ type Payment struct {
 	UpdatedAt           time.Time     `json:"updatedAt"`
 	DeletedAt           gorm.DeletedAt `gorm:"index" json:"-"`
 }
+
+func (Payment) TableName() string {
+	return "wallet_payments"
+}

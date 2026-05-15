@@ -11,7 +11,7 @@ import (
 func SendSMS(to, message string) error {
 	sid := os.Getenv("TWILIO_SID")
 	token := os.Getenv("TWILIO_AUTH_TOKEN")
-	from := os.Getenv("TWILIO_PHONE")
+	from := os.Getenv("TWILIO_PHONE_NUMBER")
 
 	if sid == "" || token == "" || from == "" {
 		return errors.New("twilio credentials are not fully configured")

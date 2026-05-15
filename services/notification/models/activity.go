@@ -17,6 +17,5 @@ type Activity struct {
 }
 
 func (Activity) TableName() string {
-	return "activities"
-	// return "notification_activities"
+	return "notification_activities"
 }

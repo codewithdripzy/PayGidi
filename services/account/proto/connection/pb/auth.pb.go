@@ -190,7 +190,7 @@ type UserData struct {
 	Status             string      `protobuf:"bytes,11,opt,name=status,proto3" json:"status,omitempty"`
 	Preference         *Preference `protobuf:"bytes,12,opt,name=preference,proto3" json:"preference,omitempty"`
 	LastLogin          string      `protobuf:"bytes,13,opt,name=lastLogin,proto3" json:"lastLogin,omitempty"`
-	LastPasswordChange string      `protobuf:"bytes,14,opt,name=lastPasswordChange,proto3" json:"lastPasswordChange,omitempty"`
+	LastPinChange string      `protobuf:"bytes,14,opt,name=lastPinChange,proto3" json:"lastPinChange,omitempty"`
 	Roles              []*Role     `protobuf:"bytes,15,rep,name=roles,proto3" json:"roles,omitempty"`
 	CreatedAt          string      `protobuf:"bytes,16,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
 	UpdatedAt          string      `protobuf:"bytes,17,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`
@@ -317,9 +317,9 @@ func (x *UserData) GetLastLogin() string {
 	return ""
 }
 
-func (x *UserData) GetLastPasswordChange() string {
+func (x *UserData) GetLastPinChange() string {
 	if x != nil {
-		return x.LastPasswordChange
+		return x.LastPinChange
 	}
 	return ""
 }

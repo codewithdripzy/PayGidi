@@ -82,6 +82,7 @@ func Auth(c *gin.Context) {
 		data = &models.User{
 			UID:         uid,
 			Phone:       authData.Phone,
+			Username:    "user_" + uid, // Temporary unique username
 			AccountType: authData.AccountType,
 			IsFirstTime: true,
 			Status:      "pending",
@@ -97,7 +98,7 @@ func Auth(c *gin.Context) {
 
 		// Also create default AuthInfo
 		authInfo := models.AuthInfo{
-			UserID: fmt.Sprintf("%d", data.ID),
+			UserID: data.ID,
 		}
 		if err := db.(*gorm.DB).Create(&authInfo).Error; err != nil {
 			fmt.Printf("Failed to create default auth info: %v\n", err)
@@ -159,7 +160,7 @@ func Auth(c *gin.Context) {
 		return
 	}
 
-	// Generate an OTP for passwordless login
+	// Generate an OTP for verification
 	otp := utils.GenerateOTPCode(5)
 
 	// add a new OTP to the user's auth info

@@ -47,11 +47,12 @@ func main() {
 		c.Next()
 	})
 
-	// Run automigrations if in development mode
+	// Run automigrations
+	if err := config.RunAutoMigrations(db); err != nil {
+		panic("Error running auto migrations: " + err.Error())
+	}
+	
 	if constants.IsDevMode() {
-		if err := config.RunAutoMigrations(db); err != nil {
-			panic("Error running auto migrations: " + err.Error())
-		}
 		log.Println("Running TransactionService in development mode")
 		gin.SetMode(gin.DebugMode)
 	} else {

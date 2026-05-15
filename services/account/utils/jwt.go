@@ -1,13 +1,12 @@
 package utils
 
 import (
-	"encoding/json"
 	"time"
 
 	"database/sql"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/PayGidi/AccountService/core/constants"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var db *sql.DB
@@ -58,7 +57,7 @@ func GenerateJWTtokens(userID uint, email string) (string, string, error) {
 	return tokenString, refreshTokenString, nil
 }
 
-func VerifyJWT(tokenString string) (jwt.MapClaims, error) {
+func VerifyJWT(tokenString string) (uint, error) {
 	jwtSecret := constants.JWT_SECRET
 
 	// Parse the token
@@ -70,27 +69,17 @@ func VerifyJWT(tokenString string) (jwt.MapClaims, error) {
 	})
 
 	if err != nil || !token.Valid {
-		return nil, err
+		return 0, err
 	}
 
-	claims, err := VerifyJWT(tokenString)
-	if err != nil {
-		return nil, err
+	// Extract claims
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if userID, ok := claims["user_id"].(float64); ok {
+			return uint(userID), nil
+		}
 	}
 
-	// Serialize to JSON before storing
-	claimsJSON, err := json.Marshal(claims)
-	if err != nil {
-		return nil, err
-	}
-
-	// Now store claimsJSON in a database column of type TEXT or JSONB
-	_, err = db.Exec("INSERT INTO sessions (claims) VALUES ($1)", claimsJSON)
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, jwt.ErrTokenMalformed
+	return 0, jwt.ErrTokenMalformed
 }
 
 func VerifyRefreshJWT(tokenString string) (jwt.MapClaims, error) {
