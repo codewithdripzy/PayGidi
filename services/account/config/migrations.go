@@ -30,7 +30,7 @@ func RunAutoMigrations(db *gorm.DB) error {
 		&models.Person{},
 		&models.Session{},
 		&models.AuthInfo{},
-		// &models.Activity{},
+		&models.Activity{},
 		&models.Business{},
 		&models.Preference{},
 		&models.Role{},
