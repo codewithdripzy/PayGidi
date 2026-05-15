@@ -23,6 +23,7 @@ export interface Payment {
   merchantPhoneNumber: string;
   merchantEmail: string;
   advanceOptions?: string;
+  businessName?: string;
   status: PaymentStatus;
   summary?: string;
   trustScore?: number;

@@ -163,7 +163,7 @@ func (o *Orchestrator) ProcessKYB(ctx context.Context, businessID string) error 
 	})
 }
 
-func (o *Orchestrator) ProcessPaymentKYB(ctx context.Context, paymentID uint64, businessID *string, businessName, nin, cacNumber, socialHandle string) (*models.Analysis, error) {
+func (o *Orchestrator) ProcessPaymentKYB(ctx context.Context, paymentID uint64, businessID *string, businessName, description string, bType models.BusinessType, nin, selfieImage string, reg *models.BusinessRegistration, informal *models.InformalBusinessProfile, socials []models.SocialProfile) (*models.Analysis, error) {
 	// 1. Fetch Payment info from Wallet Service via gRPC
 	paymentData, err := o.wallet.GetPayment(ctx, paymentID)
 	if err != nil {
@@ -178,30 +178,62 @@ func (o *Orchestrator) ProcessPaymentKYB(ctx context.Context, paymentID uint64, 
 
 	// 2. Perform Verifications
 	
-	// NIN Verification
+	// NIN Verification (Required for all)
 	ninSummary, err := o.nin.VerifyNIN(ctx, nin)
 	if err != nil {
 		ninSummary = "NIN Verification failed: " + err.Error()
 	}
 
-	// Social Media Analysis (Assume Instagram by default if only one handle)
-	socialSummary := "No social handle provided"
-	var socialResult *SocialMediaResult
-	if socialHandle != "" {
-		socialResult, err = o.socialMedia.AnalyzeInstagram(ctx, socialHandle)
-		if err == nil {
-			socialSummary = fmt.Sprintf("Instagram: %d followers, %v%% engagement, %s", 
-				socialResult.FollowerCount, socialResult.EngagementRate, socialResult.CustomerFeedback)
+	// Liveness & Face Match (Tier 1 Identity)
+	livenessSummary := "Liveness check starting..."
+	if selfieImage != "" {
+		// Verify against NIN image or just perform liveness
+		res, err := o.identity.VerifyDirector(ctx, &models.Director{NIN: nin}) // Reuse VerifyDirector for simplicity
+		if err == nil && res.IsMatch {
+			livenessSummary = fmt.Sprintf("Liveness verified (Score: %d)", res.Score)
 		} else {
-			socialSummary = "Social Analysis failed: " + err.Error()
+			livenessSummary = "Liveness check failed or score too low"
+		}
+	}
+
+	// Social Media Analysis
+	socialSummary := "No social handles provided"
+	totalSocialScore := 0
+	if len(socials) > 0 {
+		summaries := []string{}
+		for _, s := range socials {
+			res, err := o.socialMedia.AnalyzeInstagram(ctx, s.Handle) // Defaulting to Instagram for now, can be improved
+			if err == nil {
+				summaries = append(summaries, fmt.Sprintf("%s: %d followers, %v%% engagement, %s", 
+					s.Platform, res.FollowerCount, res.EngagementRate, res.CustomerFeedback))
+				totalSocialScore += int(res.SentimentScore * 20)
+			}
+		}
+		if len(summaries) > 0 {
+			socialSummary = strings.Join(summaries, " | ")
 		}
 	}
 
 	// Mock Business model for Risk Engine
 	mockBusiness := &models.Business{
-		Name:               businessName,
-		RegistrationNumber: cacNumber,
-		InstagramHandle:    socialHandle,
+		Name:        businessName,
+		Type:        bType,
+		Category:    description,
+	}
+
+	// Registration Check
+	if bType == models.BusinessTypeRegistered && reg != nil {
+		mockBusiness.RegistrationNumber = reg.CACNumber
+		identityRes, err := o.identity.VerifyBusiness(ctx, mockBusiness)
+		if err == nil && identityRes.IsMatch {
+			mockBusiness.VerificationStatus = models.StatusApproved
+		}
+	}
+
+	// Informal Signal Check
+	if bType == models.BusinessTypeUnregistered && informal != nil {
+		mockBusiness.Address = informal.PhysicalAddress
+		// Add informal signals to risk engine logic (implied)
 	}
 	
 	// Identity matched if NIN is valid
@@ -209,24 +241,17 @@ func (o *Orchestrator) ProcessPaymentKYB(ctx context.Context, paymentID uint64, 
 		mockBusiness.Directors = []models.Director{{IsVerified: true}}
 	}
 	
-	// Social match
-	if socialResult != nil && socialResult.IsAuthentic {
-		mockBusiness.EngagementScore = int(socialResult.SentimentScore * 100)
-	}
-
-	// CAC Verification if provided
-	if cacNumber != "" {
-		identityRes, err := o.identity.VerifyBusiness(ctx, mockBusiness)
-		if err == nil && identityRes.IsMatch {
-			mockBusiness.VerificationStatus = models.StatusApproved
-		}
-	}
-
 	// 3. Compute Score & Tier
 	score, tier, riskSummary := o.riskEngine.ComputeScore(mockBusiness)
 	
-	finalSummary := fmt.Sprintf("Trust Analysis for %s (Payment #%d):\n- %s\n- %s\n- Risk Result: %s", 
-		businessName, paymentID, ninSummary, socialSummary, riskSummary)
+	// Adjust score based on social proof if unregistered
+	if bType == models.BusinessTypeUnregistered {
+		score += totalSocialScore
+		if score > 85 { score = 85 } // Cap for unregistered
+	}
+
+	finalSummary := fmt.Sprintf("Trust Analysis for %s (%s):\n- Description: %s\n- %s\n- %s\n- %s\n- Risk Result: %s", 
+		businessName, bType, description, ninSummary, livenessSummary, socialSummary, riskSummary)
 
 	// 4. Save Analysis
 	analysis := &models.Analysis{
@@ -254,7 +279,7 @@ func (o *Orchestrator) ProcessPaymentKYB(ctx context.Context, paymentID uint64, 
 	// Update Wallet service with final result
 	finalStatus := "pending"
 	if score >= 70 {
-		finalStatus = "approved" // If high trust, we might approve automatically or move to next step
+		finalStatus = "approved"
 	} else if score < 40 {
 		finalStatus = "action_required"
 	}

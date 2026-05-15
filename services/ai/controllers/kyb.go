@@ -25,13 +25,30 @@ func NewKYBController(db *gorm.DB, orch *kyb.Orchestrator) *KYBController {
 }
 
 type PaymentKYBRequest struct {
-	PaymentID    uint64  `json:"paymentId" binding:"required"`
+	PaymentID    uint64 `json:"paymentId" binding:"required" validate:"required"`
 	BusinessID   *string `json:"businessId"`
-	BusinessName string  `json:"businessName" binding:"required"`
-	NIN          string  `json:"nin" binding:"required"`
-	CACNumber    string  `json:"cacNumber"` // Optional for Informal
-	SocialHandle string  `json:"socialHandle" binding:"required"`
+	BusinessName string `json:"businessName" binding:"required" validate:"required"`
+	Description  string `json:"description" binding:"required" validate:"required"` // Description of goods/services
+	BusinessType models.BusinessType `json:"businessType" binding:"required" validate:"required,oneof=registered unregistered"`
+
+	// Always required identity layer
+	NIN string `json:"nin" binding:"required" validate:"required,len=11"`
+	SelfieImage string `json:"selfieImage" binding:"required" validate:"required"` // Base64 image for liveness check
+
+	// Optional depending on business type
+	Registration *models.BusinessRegistration `json:"registration,omitempty"`
+
+	// Required for informal trust building
+	InformalProfile *models.InformalBusinessProfile `json:"informalProfile,omitempty"`
+
+	SocialProfiles []models.SocialProfile `json:"socialProfiles" binding:"required"`
+
+	Contact models.ContactInfo `json:"contact" binding:"required"`
+
+	Metadata models.VerificationMetadata `json:"metadata"`
 }
+
+// (Removed redundant PaymentKYBRequest as it's merged above)
 
 // SubmitPaymentKYB godoc
 // @Summary Submit Payment KYB
@@ -44,11 +61,12 @@ type PaymentKYBRequest struct {
 // @Failure 400 {object} map[string]interface{} "Bad Request"
 // @Router /kyb/payment/submit [post]
 func (c *KYBController) SubmitPaymentKYB(ctx *gin.Context) {
-	var req PaymentKYBRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request payload: " + err.Error()})
+	val, exists := ctx.Get("validatedBody")
+	if !exists {
+		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Missing validated request payload"})
 		return
 	}
+	req := val.(*PaymentKYBRequest)
 
 	// For Payment KYB, we still run it synchronously or at least return immediately if needed.
 	// But usually, payment flow needs the result or a 'pending' state.
@@ -60,9 +78,13 @@ func (c *KYBController) SubmitPaymentKYB(ctx *gin.Context) {
 			req.PaymentID,
 			req.BusinessID,
 			req.BusinessName,
+			req.Description,
+			req.BusinessType,
 			req.NIN,
-			req.CACNumber,
-			req.SocialHandle,
+			req.SelfieImage,
+			req.Registration,
+			req.InformalProfile,
+			req.SocialProfiles,
 		)
 		if err != nil {
 			log.Printf("Background Payment KYB failed for Payment %d: %v", req.PaymentID, err)
@@ -86,11 +108,12 @@ func (c *KYBController) SubmitPaymentKYB(ctx *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Bad Request"
 // @Router /kyb/submit [post]
 func (c *KYBController) SubmitKYB(ctx *gin.Context) {
-	var business models.Business
-	if err := ctx.ShouldBindJSON(&business); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request payload"})
+	val, exists := ctx.Get("validatedBody")
+	if !exists {
+		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Missing validated business data"})
 		return
 	}
+	business := val.(*models.Business)
 
 	if err := c.db.Create(&business).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to save business data"})
