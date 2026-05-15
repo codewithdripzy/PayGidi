@@ -17,7 +17,6 @@ spirit
 build
 
 # Go vendor directory
-vendor/
 tests/
 
 *.sql

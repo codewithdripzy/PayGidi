@@ -2,18 +2,17 @@ FROM golang:1.26-alpine
 
 WORKDIR /app
 
-# Copy go.mod and go.sum
-COPY go.mod go.sum ./
+# Copy transaction service source
+COPY services/transaction /app/services/transaction
+
+WORKDIR /app/services/transaction
 
 # Download dependencies
 RUN go mod download
 
-# Copy the rest of the source code
-COPY . .
-
 # Build the application
 RUN go build -o service
 
-EXPOSE 50055 8081
+EXPOSE 50055 8085
 
 CMD ["./service"]

@@ -2,14 +2,16 @@ FROM golang:1.26-alpine
 
 WORKDIR /app
 
-# Copy go.mod and go.sum
-COPY go.mod go.sum ./
+# Copy local dependencies
+COPY services/notification /app/services/notification
+
+# Copy wallet service source
+COPY services/wallet /app/services/wallet
+
+WORKDIR /app/services/wallet
 
 # Download dependencies
 RUN go mod download
-
-# Copy the rest of the source code
-COPY . .
 
 # Build the application
 RUN go build -o service
