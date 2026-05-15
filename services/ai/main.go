@@ -9,11 +9,27 @@ import (
 	"github.com/PayGidi/AIService/core/constants"
 	"github.com/PayGidi/AIService/proto/connection/aipb"
 	"github.com/PayGidi/AIService/router"
+	_ "github.com/PayGidi/AIService/docs"
 	"github.com/PayGidi/AIService/services/kyb"
 	"github.com/PayGidi/AIService/services/wallet"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
+
+// @title PayGidi AI Service API
+// @version 1.0
+// @description This is the AI orchestration service for PayGidi KYB.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8083
+// @BasePath /api/v1
 
 func main() {
 	if err := constants.ConfigDotenv(); err != nil {

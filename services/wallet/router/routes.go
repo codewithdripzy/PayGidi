@@ -4,12 +4,18 @@ import (
 	"github.com/PayGidi/WalletService/controllers"
 	"github.com/PayGidi/WalletService/core/constants"
 	"github.com/PayGidi/WalletService/middlewares"
+	"github.com/PayGidi/WalletService/services/account"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(r *gin.Engine, db *gorm.DB) {
-	walletController := controllers.NewWalletController(db)
+func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
+	// Swagger documentation
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	walletController := controllers.NewWalletController(db, accClient)
 
 	walletGroup := r.Group("/wallet")
 	// Public unauthenticated payment fetch

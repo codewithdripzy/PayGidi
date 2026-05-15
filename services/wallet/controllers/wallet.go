@@ -13,13 +13,19 @@ import (
 	"github.com/PayGidi/WalletService/core/interfaces/responses"
 	"github.com/PayGidi/WalletService/dto"
 	"github.com/PayGidi/WalletService/models"
+	"github.com/PayGidi/WalletService/services/account"
 	squadService "github.com/PayGidi/WalletService/services/squad"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type WalletController struct {
-	db *gorm.DB
+	db      *gorm.DB
+	account *account.AccountClient
+}
+
+func NewWalletController(db *gorm.DB, accClient *account.AccountClient) *WalletController {
+	return &WalletController{db: db, account: accClient}
 }
 
 type CreateWalletResult struct {
@@ -27,10 +33,6 @@ type CreateWalletResult struct {
 	Code    string
 	Message string
 	Data    *responses.CreateClientResponseData
-}
-
-func NewWalletController(db *gorm.DB) *WalletController {
-	return &WalletController{db: db}
 }
 
 func (wc *WalletController) CreateWallet(ctx context.Context, request dto.CreateWalletDto) *CreateWalletResult {
@@ -759,6 +761,16 @@ func (wc *WalletController) CreatePaymentHttp(c *gin.Context) {
 
 // GetPaymentHttp handles GET /wallet/payments/:payment_id
 // This is used by the frontend to retrieve payment details for KYB
+// GetPaymentHttp godoc
+// @Summary Get payment details
+// @Description Retrieve details of a specific payment by its ID, including customer information
+// @Tags payments
+// @Produce json
+// @Param payment_id path string true "Payment ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /wallet/payments/{payment_id} [get]
 func (wc *WalletController) GetPaymentHttp(c *gin.Context) {
 	paymentIDStr := c.Param("payment_id")
 	paymentID, err := strconv.ParseUint(paymentIDStr, 10, 32)
@@ -792,14 +804,22 @@ func (wc *WalletController) GetPaymentHttp(c *gin.Context) {
 		return
 	}
 
+	// Fetch customer info from Account Service
+	customer, _ := wc.account.GetUser(c.Request.Context(), payment.UserID)
+
 	msg := "Payment details retrieved successfully"
+	responseData := gin.H{
+		"payment":  payment,
+		"customer": customer,
+	}
+
 	switch payment.Status {
 	case models.PaymentDisbursed:
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  400,
 			"success": false,
 			"message": "This payment has already been disbursed and cannot be modified.",
-			"data":    payment,
+			"data":    responseData,
 		})
 		return
 	case models.PaymentRefunded:
@@ -807,7 +827,7 @@ func (wc *WalletController) GetPaymentHttp(c *gin.Context) {
 			"status":  400,
 			"success": false,
 			"message": "This payment has already been refunded.",
-			"data":    payment,
+			"data":    responseData,
 		})
 		return
 	case models.PaymentActionRequired:

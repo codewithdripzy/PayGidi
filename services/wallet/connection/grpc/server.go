@@ -11,6 +11,7 @@ import (
 	"github.com/PayGidi/WalletService/dto"
 	"github.com/PayGidi/WalletService/models"
 	"github.com/PayGidi/WalletService/proto/connection/pb"
+	"github.com/PayGidi/WalletService/services/account"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -21,8 +22,8 @@ type WalletServer struct {
 	pb.UnimplementedWalletServiceServer
 }
 
-func NewWalletServer(db *gorm.DB) *WalletServer {
-	return &WalletServer{walletController: controllers.NewWalletController(db)}
+func NewWalletServer(db *gorm.DB, accClient *account.AccountClient) *WalletServer {
+	return &WalletServer{walletController: controllers.NewWalletController(db, accClient)}
 }
 
 func (s *WalletServer) HealthCheck(context.Context, *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
