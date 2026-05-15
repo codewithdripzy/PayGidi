@@ -5,6 +5,8 @@ import 'package:app/core/widgets/pg_texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+/// A list of the user's most recent transactions.
+/// Displays transaction title, date, and amount with credit/debit indicators.
 class HomeRecentTransactions extends StatelessWidget {
   const HomeRecentTransactions({super.key});
 
@@ -73,6 +75,7 @@ class HomeRecentTransactions extends StatelessWidget {
     );
   }
 
+  /// Builds a single transaction row.
   Widget _buildTransaction(
     BuildContext context, {
     required String title,

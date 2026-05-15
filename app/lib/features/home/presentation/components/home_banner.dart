@@ -3,6 +3,8 @@ import 'package:app/core/theme/pg_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+/// A promotional banner displayed on the Home Screen.
+/// Currently displays a static squad advertisement.
 class HomeBanner extends StatelessWidget {
   const HomeBanner({super.key});
 

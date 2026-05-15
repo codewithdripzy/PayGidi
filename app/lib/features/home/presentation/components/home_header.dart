@@ -9,6 +9,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
 
+/// A custom header for the Home Screen that displays the app logo,
+/// a personalized greeting for the user, and a notification icon.
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 

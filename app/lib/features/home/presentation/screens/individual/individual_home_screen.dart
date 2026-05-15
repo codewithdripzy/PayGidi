@@ -7,6 +7,9 @@ import 'package:app/features/home/presentation/components/home_quick_actions.dar
 import 'package:app/features/home/presentation/components/home_recent_transactions.dart';
 import 'package:flutter/material.dart';
 
+/// The primary Home Screen for individual users.
+/// It assembles the header, balance card, quick actions, promotional banner,
+/// and recent transactions list.
 class IndividualHomeScreen extends StatelessWidget {
   const IndividualHomeScreen({super.key});
 

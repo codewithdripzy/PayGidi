@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
+/// A card component that displays the user's total balance.
+/// It includes a toggle to show or hide the balance amount for privacy.
 class HomeBalanceCard extends StatefulWidget {
   const HomeBalanceCard({super.key});
 
@@ -12,6 +14,7 @@ class HomeBalanceCard extends StatefulWidget {
   State<HomeBalanceCard> createState() => _HomeBalanceCardState();
 }
 
+/// State class for [HomeBalanceCard] to manage balance visibility.
 class _HomeBalanceCardState extends State<HomeBalanceCard> {
   bool _showBalance = true;
 
