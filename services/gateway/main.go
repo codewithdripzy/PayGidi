@@ -21,11 +21,21 @@ func main() {
 	notificationURL := getEnv("NOTIFICATION_SERVICE_URL", "http://notification-service:8080")
 
 	// Create reverse proxies
-	accountProxy := httputil.NewSingleHostReverseProxy(parseURL(accountURL))
-	walletProxy := httputil.NewSingleHostReverseProxy(parseURL(walletURL))
-	transactionProxy := httputil.NewSingleHostReverseProxy(parseURL(transactionURL))
-	aiProxy := httputil.NewSingleHostReverseProxy(parseURL(aiURL))
-	notificationProxy := httputil.NewSingleHostReverseProxy(parseURL(notificationURL))
+	createProxy := func(target string) *httputil.ReverseProxy {
+		proxy := httputil.NewSingleHostReverseProxy(parseURL(target))
+		proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+			log.Printf("Proxy Error (%s): %v", target, err)
+			w.WriteHeader(http.StatusBadGateway)
+			w.Write([]byte("Bad Gateway: " + err.Error()))
+		}
+		return proxy
+	}
+
+	accountProxy := createProxy(accountURL)
+	walletProxy := createProxy(walletURL)
+	transactionProxy := createProxy(transactionURL)
+	aiProxy := createProxy(aiURL)
+	notificationProxy := createProxy(notificationURL)
 
 	// --- Central Swagger UI ---
 	// We'll serve a custom HTML page that aggregates all swagger.json files.
