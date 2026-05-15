@@ -1,0 +1,24 @@
+PayGidi: The AI Trust Layer for Payments
+
+THE PROBLEM
+In the rapidly growing African digital economy, trust is the missing currency. High fraud rates, suspicious vendor behavior, and the lack of real-time risk intelligence lead to significant financial loss and transaction friction. Current payment gateways focus almost exclusively on "money movement," leaving both customers and businesses vulnerable to risky or fraudulent transactions.
+
+THE SOLUTION: PAYGIDI
+PayGidi is a Trust Infrastructure Layer that adds an intelligence engine on top of payment processing. We don't just process payments; we decide if a transaction is safe before funds are released. Our solution provides:
+
+1. Intelligent Fund Shielding: Funds are secured in isolated virtual accounts until AI-driven safety conditions are met.
+2. AI Trust Layer: A real-time risk analysis engine that evaluates social behavior, account activity, and fraud patterns to flag anomalies.
+3. Business Verification Automation: Validating vendor legitimacy using identity signals and historical fulfillment data to build a "Trust Score."
+
+SQUAD APIS USED
+We have leveraged Squad's robust API ecosystem to build our secure foundation:
+
+- Virtual Accounts (Personal & Business): Used to create secure holding environments where funds are "shielded" during the verification period.
+- Payouts API: Powers our intelligent fund release mechanism, ensuring vendors receive payout only after AI validation.
+- Transaction API: Used for initiating secure checkout sessions and real-time transaction status requerying.
+
+PILLAR ADDRESSED: TRUST & SECURITY (TRUST INFRASTRUCTURE)
+PayGidi directly addresses the Trust & Security pillar. We are building the Trust Infrastructure for the next generation of African commerce. By adding an intelligence layer that decides the safety of a transaction before money moves, we eliminate fraud at the source and empower businesses to scale through verified legitimacy.
+
+--------------------------------------------------------------------------------
+PayGidi - It’s not just about moving money; it’s about knowing which money is safe to move.

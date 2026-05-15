@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-const defaultNotificationAddress = "localhost:50052"
+const defaultNotificationAddress = "127.0.0.1:50052"
 
 type NotificationService struct {
 	conn   *grpc.ClientConn
