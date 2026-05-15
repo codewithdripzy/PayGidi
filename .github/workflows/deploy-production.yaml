@@ -24,11 +24,29 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
-            if [ ! -d "/home/ubuntu/paygidi/.git" ]; then
-              git clone https://github.com/${{ github.repository }}.git /home/ubuntu/paygidi
+          ssh -o StrictHostKeyChecking=no -A ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            # Install Docker if missing
+            if ! command -v docker &> /dev/null; then
+              echo "Installing Docker..."
+              sudo apt-get update
+              sudo apt-get install -y docker.io docker-compose-v2
+              sudo usermod -aG docker ubuntu
             fi
+
+            # Setup directory and Git
+            mkdir -p /home/ubuntu/paygidi
             cd /home/ubuntu/paygidi
-            git pull origin main
+            
+            if [ ! -d ".git" ]; then
+              echo "Initializing Git repository..."
+              git init
+              git remote add origin git@github.com:${{ github.repository }}.git
+            fi
+            
+            # Pull latest changes
+            git fetch origin
+            git reset --hard origin/main
+            
+            # Start the application
             sudo docker compose -f docker-compose.production.yml up -d --build
           EOF
