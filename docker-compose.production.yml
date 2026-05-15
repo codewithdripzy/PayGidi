@@ -1,6 +1,6 @@
 services:
   gateway:
-    image: ${DOCKER_HUB_USERNAME:-codewithdripzy}/paygidi-gateway:latest
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-gateway:latest
     build:
       context: .
       dockerfile: ./services/gateway/Dockerfile
@@ -14,7 +14,7 @@ services:
       - notification-service
 
   account-service:
-    image: ${DOCKER_HUB_USERNAME:-codewithdripzy}/paygidi-account:latest
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-account:latest
     build:
       context: .
       dockerfile: ./services/account/Dockerfile
@@ -26,7 +26,7 @@ services:
       - postgres
 
   wallet-service:
-    image: ${DOCKER_HUB_USERNAME:-codewithdripzy}/paygidi-wallet:latest
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-wallet:latest
     build:
       context: .
       dockerfile: ./services/wallet/Dockerfile
@@ -38,7 +38,7 @@ services:
       - postgres
 
   transaction-service:
-    image: ${DOCKER_HUB_USERNAME:-codewithdripzy}/paygidi-transaction:latest
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-transaction:latest
     build:
       context: .
       dockerfile: ./services/transaction/Dockerfile
@@ -50,7 +50,7 @@ services:
       - postgres
 
   ai-service:
-    image: ${DOCKER_HUB_USERNAME:-codewithdripzy}/paygidi-ai:latest
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-ai:latest
     build:
       context: .
       dockerfile: ./services/ai/Dockerfile
@@ -62,7 +62,7 @@ services:
       - postgres
 
   notification-service:
-    image: ${DOCKER_HUB_USERNAME:-codewithdripzy}/paygidi-notification:latest
+    image: ${REGISTRY:-ghcr.io/codewithdripzy}/paygidi-notification:latest
     build:
       context: .
       dockerfile: ./services/notification/Dockerfile

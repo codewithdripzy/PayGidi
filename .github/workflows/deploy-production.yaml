@@ -14,31 +14,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push Images
-        env:
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
         run: |
+          # GHCR requires lowercase registry paths
+          REGISTRY="ghcr.io/${{ github.repository_owner }}"
+          REGISTRY=$(echo "$REGISTRY" | tr '[:upper:]' '[:lower:]')
+          
+          echo "Building images for ${REGISTRY}..."
+
           # Build each service
-          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-gateway:latest -f ./services/gateway/Dockerfile .
-          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-account:latest -f ./services/account/Dockerfile .
-          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-wallet:latest -f ./services/wallet/Dockerfile .
-          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-transaction:latest -f ./services/transaction/Dockerfile .
-          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-ai:latest -f ./services/ai/Dockerfile .
-          docker build -t ${DOCKER_HUB_USERNAME}/paygidi-notification:latest -f ./services/notification/Dockerfile .
+          docker build -t ${REGISTRY}/paygidi-gateway:latest -f ./services/gateway/Dockerfile .
+          docker build -t ${REGISTRY}/paygidi-account:latest -f ./services/account/Dockerfile .
+          docker build -t ${REGISTRY}/paygidi-wallet:latest -f ./services/wallet/Dockerfile .
+          docker build -t ${REGISTRY}/paygidi-transaction:latest -f ./services/transaction/Dockerfile .
+          docker build -t ${REGISTRY}/paygidi-ai:latest -f ./services/ai/Dockerfile .
+          docker build -t ${REGISTRY}/paygidi-notification:latest -f ./services/notification/Dockerfile .
 
           # Push images
-          docker push ${DOCKER_HUB_USERNAME}/paygidi-gateway:latest
-          docker push ${DOCKER_HUB_USERNAME}/paygidi-account:latest
-          docker push ${DOCKER_HUB_USERNAME}/paygidi-wallet:latest
-          docker push ${DOCKER_HUB_USERNAME}/paygidi-transaction:latest
-          docker push ${DOCKER_HUB_USERNAME}/paygidi-ai:latest
-          docker push ${DOCKER_HUB_USERNAME}/paygidi-notification:latest
+          docker push ${REGISTRY}/paygidi-gateway:latest
+          docker push ${REGISTRY}/paygidi-account:latest
+          docker push ${REGISTRY}/paygidi-wallet:latest
+          docker push ${REGISTRY}/paygidi-transaction:latest
+          docker push ${REGISTRY}/paygidi-ai:latest
+          docker push ${REGISTRY}/paygidi-notification:latest
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -46,14 +51,16 @@ jobs:
           ssh-private-key: ${{ secrets.EC2_KEY }}
 
       - name: Deploy to EC2
-        env:
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
         run: |
+          # Prepare registry path for EC2 env
+          REGISTRY="ghcr.io/${{ github.repository_owner }}"
+          REGISTRY=$(echo "$REGISTRY" | tr '[:upper:]' '[:lower:]')
+
           ssh \
             -o StrictHostKeyChecking=no \
             -o ServerAliveInterval=60 \
             -o ServerAliveCountMax=10 \
-            ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            ubuntu@${{ secrets.EC2_HOST }} << EOF
 
             set -euxo pipefail
 
@@ -80,20 +87,20 @@ jobs:
             git fetch origin
             git reset --hard origin/main
 
-            echo "===== DOCKER LOGIN ====="
-            echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+            echo "===== DOCKER LOGIN (GHCR) ====="
+            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
             echo "===== CLEANUP ====="
             sudo docker system prune -f || true
 
             echo "===== PULLING IMAGES ====="
-            sudo DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}" docker compose -f docker-compose.production.yml pull
+            sudo REGISTRY="${REGISTRY}" docker compose -f docker-compose.production.yml pull
 
             echo "===== STARTING ====="
-            sudo DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}" docker compose -f docker-compose.production.yml up -d
+            sudo REGISTRY="${REGISTRY}" docker compose -f docker-compose.production.yml up -d
 
             echo "===== CONTAINERS ====="
             sudo docker ps
 
             echo "===== DONE ====="
-          EOF
+EOF
