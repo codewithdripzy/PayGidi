@@ -2,7 +2,6 @@ package router
 
 import (
 	"github.com/PayGidi/AIService/controllers"
-	"github.com/PayGidi/AIService/middlewares"
 	"github.com/PayGidi/AIService/services/kyb"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
