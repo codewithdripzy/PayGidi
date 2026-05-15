@@ -25,7 +25,10 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            if [ ! -d "/home/ubuntu/paygidi/.git" ]; then
+              git clone https://github.com/${{ github.repository }}.git /home/ubuntu/paygidi
+            fi
             cd /home/ubuntu/paygidi
             git pull origin main
-            docker compose -f docker-compose.production.yml up -d --build
+            sudo docker compose -f docker-compose.production.yml up -d --build
           EOF
