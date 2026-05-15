@@ -6,23 +6,32 @@ import (
 )
 
 func RunAutoMigrations(db *gorm.DB) error {
-	// delete all existing tables
-	// if err := db.Migrator().DropTable(
-	// 	&models.User{},
-	// 	&models.Person{},
-	// 	&models.Activity{},
-	// 	&models.Session{},
-	// 	&models.AuthInfo{},
-	// 	&models.Preference{},
-	// 	&models.Role{},
-	// 	&models.Permission{},
-	// 	&models.Account{},
-	// 	&models.ContactInfo{},
-	// 	&models.KYC{},
-	// 	&models.OTP{},
-	// ); err != nil {
-	// 	return err
-	// }
+	// Drop all old un-prefixed tables to clean up the database
+	oldTables := []string{
+		"users",
+		"auth_info",
+		"activities",
+		"businesses",
+		"contact_info",
+		"kyc",
+		"otps",
+		"persons",
+		"preferences",
+		"roles",
+		"sessions",
+		"permissions",
+		"accounts", // from wallet service originally
+		"payments", // from wallet service originally
+	}
+	
+	for _, table := range oldTables {
+		if db.Migrator().HasTable(table) {
+			if err := db.Migrator().DropTable(table); err != nil {
+				// Log the error but continue trying to drop others
+				continue
+			}
+		}
+	}
 
 	// Run auto migrations for all models
 	if err := db.AutoMigrate(
