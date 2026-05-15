@@ -2,6 +2,7 @@ package kyb
 
 import (
 	"context"
+	"fmt"
 	"github.com/PayGidi/AIService/models"
 )
 
@@ -35,4 +36,16 @@ func (p *MockIdentityProvider) VerifyBusiness(ctx context.Context, business *mod
 		Details: "Business found in CAC registry.",
 		Score:   100,
 	}, nil
+}
+
+type MockNINProvider struct{}
+
+func (p *MockNINProvider) VerifyNIN(ctx context.Context, nin string) (string, error) {
+	return fmt.Sprintf("NIN %s verified: Valid Nigerian Citizen", nin), nil
+}
+
+type MockSentimentProvider struct{}
+
+func (p *MockSentimentProvider) AnalyzeSocialSentiment(ctx context.Context, handle string) (string, error) {
+	return fmt.Sprintf("Sentiment analysis for @%s: 85%% Positive, Active merchant history", handle), nil
 }

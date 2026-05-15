@@ -95,3 +95,23 @@ func (doc *Document) BeforeCreate(tx *gorm.DB) (err error) {
 	doc.ID = uuid.New()
 	return
 }
+
+type Analysis struct {
+	ID              uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
+	PaymentID       uint64         `gorm:"index;not null" json:"paymentId"`
+	BusinessID      *uuid.UUID     `gorm:"type:uuid;index" json:"businessId"`
+	BusinessName    string         `json:"businessName"`
+	Summary         string         `gorm:"type:text" json:"summary"`
+	TrustScore      int            `json:"trustScore"`
+	NINData         string         `gorm:"type:text" json:"ninData"`
+	CACData         string         `gorm:"type:text" json:"cacData"`
+	SocialSentiment string         `gorm:"type:text" json:"socialSentiment"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+func (a *Analysis) BeforeCreate(tx *gorm.DB) (err error) {
+	a.ID = uuid.New()
+	return
+}

@@ -1,0 +1,48 @@
+package wallet
+
+import (
+	"context"
+
+	"github.com/PayGidi/AIService/proto/connection/pb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+type WalletClient struct {
+	client pb.WalletServiceClient
+}
+
+func NewWalletClient(addr string) (*WalletClient, error) {
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	return &WalletClient{client: pb.NewWalletServiceClient(conn)}, nil
+}
+
+func (w *WalletClient) GetPayment(ctx context.Context, paymentID uint64) (*pb.PaymentData, error) {
+	resp, err := w.client.GetPayment(ctx, &pb.GetPaymentRequest{PaymentId: paymentID})
+	if err != nil {
+		return nil, err
+	}
+	if !resp.Success {
+		return nil, nil
+	}
+	return resp.Data, nil
+}
+
+func (w *WalletClient) UpdatePaymentStatus(ctx context.Context, paymentID uint64, status string, trustScore float64, summary string) error {
+	resp, err := w.client.UpdatePaymentStatus(ctx, &pb.UpdatePaymentStatusRequest{
+		PaymentId:  paymentID,
+		Status:     status,
+		TrustScore: trustScore,
+		Summary:    summary,
+	})
+	if err != nil {
+		return err
+	}
+	if !resp.Success {
+		return nil
+	}
+	return nil
+}

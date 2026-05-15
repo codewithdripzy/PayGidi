@@ -26,10 +26,11 @@ var (
 
 	// Application mode
 	APP_ENV   string = "development"
-	GRPC_PORT string = "50053"
-	HTTP_PORT string = "8082"
+	GRPC_PORT string = "50054"
+	HTTP_PORT string = "8083"
 
 	NOTIFICATION_SERVICE_ADDR string = "localhost:50052"
+	WALLET_SERVICE_ADDR       string = "localhost:50053"
 )
 
 func ConfigDotenv() error {
@@ -106,6 +107,10 @@ func ConfigDotenv() error {
 
 	if notificationAddress := os.Getenv("NOTIFICATION_SERVICE_ADDR"); notificationAddress != "" {
 		NOTIFICATION_SERVICE_ADDR = notificationAddress
+	}
+
+	if walletAddress := os.Getenv("WALLET_SERVICE_ADDR"); walletAddress != "" {
+		WALLET_SERVICE_ADDR = walletAddress
 	}
 
 	return nil

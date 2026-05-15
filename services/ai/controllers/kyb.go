@@ -6,7 +6,7 @@ import (
 
 	"github.com/PayGidi/AIService/models"
 	"github.com/PayGidi/AIService/services/kyb"
-	"github.com/PayGidi/AIService/utils"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -23,45 +23,79 @@ func NewKYBController(db *gorm.DB, orch *kyb.Orchestrator) *KYBController {
 	}
 }
 
-func (c *KYBController) SubmitKYB(w http.ResponseWriter, r *http.Request) {
+type PaymentKYBRequest struct {
+	PaymentID    uint64  `json:"paymentId" binding:"required"`
+	BusinessID   *string `json:"businessId"`
+	BusinessName string  `json:"businessName" binding:"required"`
+	NIN          string  `json:"nin" binding:"required"`
+	CACNumber    string  `json:"cacNumber" binding:"required"`
+	SocialHandle string  `json:"socialHandle" binding:"required"`
+}
+
+func (c *KYBController) SubmitPaymentKYB(ctx *gin.Context) {
+	var req PaymentKYBRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request payload: " + err.Error()})
+		return
+	}
+
+	analysis, err := c.orchestrator.ProcessPaymentKYB(
+		ctx.Request.Context(),
+		req.PaymentID,
+		req.BusinessID,
+		req.BusinessName,
+		req.NIN,
+		req.CACNumber,
+		req.SocialHandle,
+	)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"message": "Payment KYB analysis completed",
+		"data":    analysis,
+	})
+}
+
+func (c *KYBController) SubmitKYB(ctx *gin.Context) {
 	var business models.Business
-	if err := utils.DecodeJSON(r, &business); err != nil {
-		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid request payload")
+	if err := ctx.ShouldBindJSON(&business); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request payload"})
 		return
 	}
 
 	if err := c.db.Create(&business).Error; err != nil {
-		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to save business data")
+		ctx.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to save business data"})
 		return
 	}
 
-	// Trigger verification in background or foreground
-	// For now, let's do it synchronously to show it works
-	err := c.orchestrator.ProcessKYB(context.Background(), business.ID.String())
+	err := c.orchestrator.ProcessKYB(ctx.Request.Context(), business.ID.String())
 	if err != nil {
-		utils.ErrorResponse(w, http.StatusInternalServerError, "Verification failed: "+err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Verification failed: " + err.Error()})
 		return
 	}
 
-	// Reload to get updated status/score
 	c.db.Preload("Directors").Preload("Documents").First(&business, "id = ?", business.ID)
-
-	utils.SuccessResponse(w, http.StatusCreated, "KYB submitted and processed", business)
+	ctx.JSON(http.StatusCreated, gin.H{"success": true, "message": "KYB submitted and processed", "data": business})
 }
 
-func (c *KYBController) GetKYBStatus(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Query().Get("id")
+func (c *KYBController) GetKYBStatus(ctx *gin.Context) {
+	idStr := ctx.Query("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid business ID")
+		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid business ID"})
 		return
 	}
 
 	var business models.Business
 	if err := c.db.Preload("Directors").Preload("Documents").First(&business, "id = ?", id).Error; err != nil {
-		utils.ErrorResponse(w, http.StatusNotFound, "Business not found")
+		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Business not found"})
 		return
 	}
 
-	utils.SuccessResponse(w, http.StatusOK, "KYB status retrieved", business)
+	ctx.JSON(http.StatusOK, gin.H{"success": true, "message": "KYB status retrieved", "data": business})
 }

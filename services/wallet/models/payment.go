@@ -14,6 +14,7 @@ const (
 	PaymentRefunded       PaymentStatus = "refunded"
 	PaymentActionRequired PaymentStatus = "action_required"
 	PaymentRejected       PaymentStatus = "rejected"
+	PaymentInProgress     PaymentStatus = "in_progress"
 )
 
 type Payment struct {
@@ -26,6 +27,7 @@ type Payment struct {
 	MerchantEmail       string        `gorm:"not null" json:"merchantEmail"`
 	AdvanceOptions      string        `gorm:"type:text" json:"advanceOptions"` // JSON string for options/purchases
 	Status              PaymentStatus `gorm:"type:varchar(20);default:'pending'" json:"status"`
+	Summary             string        `gorm:"type:text" json:"summary"` // Analysis summary
 	TrustScore          *float64      `json:"trustScore"` // Score populated by AI later
 	ExpiresAt           *time.Time    `json:"expiresAt"`
 	CreatedAt           time.Time     `json:"createdAt"`

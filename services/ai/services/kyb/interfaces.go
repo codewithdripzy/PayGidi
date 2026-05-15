@@ -35,3 +35,11 @@ type RiskEngine interface {
 type LLMAnalyzer interface {
 	AnalyzeRisk(ctx context.Context, business *models.Business, signals map[string]interface{}) (string, error)
 }
+
+type NINProvider interface {
+	VerifyNIN(ctx context.Context, nin string) (string, error)
+}
+
+type SentimentProvider interface {
+	AnalyzeSocialSentiment(ctx context.Context, handle string) (string, error)
+}

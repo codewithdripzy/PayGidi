@@ -4,9 +4,12 @@ import (
 	"context"
 	"strings"
 
+	"time"
+
 	"github.com/PayGidi/WalletService/controllers"
 	"github.com/PayGidi/WalletService/core/interfaces/payloads"
 	"github.com/PayGidi/WalletService/dto"
+	"github.com/PayGidi/WalletService/models"
 	"github.com/PayGidi/WalletService/proto/connection/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -36,17 +39,17 @@ func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 	}
 
 	result := s.walletController.CreateWallet(ctx, dto.CreateWalletDto{
-		Firstname:   req.Firstname,
-		Middlename:  req.Middlename,
-		Lastname:    req.Lastname,
-		Nin:         req.Nin,
-		DateOfBirth: req.DateOfBirth,
-		Bvn:         req.Bvn,
-		Phone:       req.Phone,
-		Email:       req.Email,
-		Gender:      req.Gender,
-		UserID:      req.UserId,
-		AccountType: req.AccountType,
+		Firstname:    req.Firstname,
+		Middlename:   req.Middlename,
+		Lastname:     req.Lastname,
+		Nin:          req.Nin,
+		DateOfBirth:  req.DateOfBirth,
+		Bvn:          req.Bvn,
+		Phone:        req.Phone,
+		Email:        req.Email,
+		Gender:       req.Gender,
+		UserID:       req.UserId,
+		AccountType:  req.AccountType,
 		BusinessName: req.BusinessName,
 	})
 
@@ -200,5 +203,73 @@ func (s *WalletServer) ResolveAccount(ctx context.Context, req *pb.ResolveAccoun
 		Message:       "account resolved successfully",
 		AccountName:   data.AccountName,
 		AccountNumber: data.AccountNumber,
+	}, nil
+}
+
+func (s *WalletServer) GetPayment(ctx context.Context, req *pb.GetPaymentRequest) (*pb.GetPaymentResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "request body is required")
+	}
+
+	payment, err := s.walletController.GetPaymentByID(ctx, uint(req.PaymentId))
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &pb.GetPaymentResponse{
+				Success: false,
+				Message: "payment not found",
+			}, nil
+		}
+		return &pb.GetPaymentResponse{
+			Success: false,
+			Message: err.Error(),
+		}, nil
+	}
+
+	var trustScore float64
+	if payment.TrustScore != nil {
+		trustScore = *payment.TrustScore
+	}
+
+	var expiresAt string
+	if payment.ExpiresAt != nil {
+		expiresAt = payment.ExpiresAt.Format(time.RFC3339)
+	}
+
+	return &pb.GetPaymentResponse{
+		Success: true,
+		Message: "payment retrieved successfully",
+		Data: &pb.PaymentData{
+			Id:                  uint64(payment.ID),
+			UserId:              payment.UserID,
+			Amount:              payment.Amount,
+			AccountNumber:       payment.AccountNumber,
+			Bank:                payment.Bank,
+			MerchantPhoneNumber: payment.MerchantPhoneNumber,
+			MerchantEmail:       payment.MerchantEmail,
+			AdvanceOptions:      payment.AdvanceOptions,
+			Status:              string(payment.Status),
+			TrustScore:          trustScore,
+			ExpiresAt:           expiresAt,
+			CreatedAt:           payment.CreatedAt.Format(time.RFC3339),
+		},
+	}, nil
+}
+
+func (s *WalletServer) UpdatePaymentStatus(ctx context.Context, req *pb.UpdatePaymentStatusRequest) (*pb.UpdatePaymentStatusResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "request body is required")
+	}
+
+	err := s.walletController.UpdatePaymentStatus(ctx, uint(req.PaymentId), models.PaymentStatus(req.Status), &req.TrustScore, req.Summary)
+	if err != nil {
+		return &pb.UpdatePaymentStatusResponse{
+			Success: false,
+			Message: err.Error(),
+		}, nil
+	}
+
+	return &pb.UpdatePaymentStatusResponse{
+		Success: true,
+		Message: "payment status updated successfully",
 	}, nil
 }

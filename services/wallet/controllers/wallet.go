@@ -772,12 +772,21 @@ func (wc *WalletController) GetPaymentHttp(c *gin.Context) {
 		return
 	}
 
-	var payment models.Payment
-	if err := wc.db.First(&payment, uint(paymentID)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"status":  404,
+	payment, err := wc.GetPaymentByID(c.Request.Context(), uint(paymentID))
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  404,
+				"success": false,
+				"message": "Payment not found",
+				"data":    gin.H{},
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  500,
 			"success": false,
-			"message": "Payment not found",
+			"message": "Failed to retrieve payment",
 			"data":    gin.H{},
 		})
 		return
@@ -811,4 +820,27 @@ func (wc *WalletController) GetPaymentHttp(c *gin.Context) {
 		"message": msg,
 		"data":    payment,
 	})
+}
+
+// GetPaymentByID is an internal method used by gRPC and HTTP handlers
+func (wc *WalletController) GetPaymentByID(ctx context.Context, id uint) (*models.Payment, error) {
+	var payment models.Payment
+	if err := wc.db.WithContext(ctx).First(&payment, id).Error; err != nil {
+		return nil, err
+	}
+	return &payment, nil
+}
+
+// UpdatePaymentStatus updates the status and optionally the trust score and summary of a payment
+func (wc *WalletController) UpdatePaymentStatus(ctx context.Context, id uint, status models.PaymentStatus, trustScore *float64, summary string) error {
+	updates := map[string]interface{}{
+		"status": status,
+	}
+	if trustScore != nil {
+		updates["trust_score"] = *trustScore
+	}
+	if summary != "" {
+		updates["summary"] = summary
+	}
+	return wc.db.WithContext(ctx).Model(&models.Payment{}).Where("id = ?", id).Updates(updates).Error
 }

@@ -8,7 +8,10 @@ import (
 	grpcserver "github.com/PayGidi/AIService/connection/grpc"
 	"github.com/PayGidi/AIService/core/constants"
 	"github.com/PayGidi/AIService/proto/connection/pb"
+	"github.com/PayGidi/AIService/router"
 	"github.com/PayGidi/AIService/services/kyb"
+	"github.com/PayGidi/AIService/services/wallet"
+	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
 
@@ -34,6 +37,12 @@ func main() {
 		log.Println("AI service running in production mode")
 	}
 
+	// Initialize Wallet gRPC Client
+	walletClient, err := wallet.NewWalletClient(constants.WALLET_SERVICE_ADDR)
+	if err != nil {
+		log.Printf("Warning: Failed to connect to Wallet service: %v", err)
+	}
+
 	// Initialize KYB Orchestrator with providers
 	orch := kyb.NewOrchestrator(
 		db,
@@ -41,8 +50,20 @@ func main() {
 		&kyb.MockIdentityProvider{},
 		&kyb.DefaultRiskEngine{},
 		nil, // LLM is optional
+		&kyb.MockNINProvider{},
+		&kyb.MockSentimentProvider{},
+		walletClient,
 	)
 
+	// Start Gin HTTP server
+	r := gin.Default()
+	router.SetupRoutes(r, db, orch)
+	go func() {
+		log.Printf("AI HTTP service listening on :%s", constants.HTTP_PORT)
+		if err := r.Run(":" + constants.HTTP_PORT); err != nil {
+			log.Fatalf("failed to start HTTP server: %v", err)
+		}
+	}()
 
 	lis, err := net.Listen("tcp", ":"+constants.GRPC_PORT)
 	if err != nil {
