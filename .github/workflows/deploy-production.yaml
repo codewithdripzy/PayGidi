@@ -153,8 +153,22 @@ jobs:
             git fetch origin && git reset --hard origin/main
             
             echo "${GITHUB_TOKEN}" | sudo docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
-            sudo docker system prune -f || true
+            
+            echo "===== DISK SPACE (BEFORE CLEANUP) ====="
+            df -h
+            
+            echo "===== AGGRESSIVE CLEANUP ====="
+            sudo docker system prune -a -f || true
+            
+            echo "===== DISK SPACE (AFTER CLEANUP) ====="
+            df -h
+
+            echo "===== PULLING IMAGES ====="
             sudo REGISTRY="${REGISTRY}" docker compose -f docker-compose.production.yml pull
-            sudo REGISTRY="${REGISTRY}" docker compose -f docker-compose.production.yml up -d
+
+            echo "===== STARTING ====="
+            sudo REGISTRY="${REGISTRY}" docker compose -f docker-compose.production.yml up -d --no-build
+
+            echo "===== CONTAINERS ====="
             sudo docker ps
           EOF
