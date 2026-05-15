@@ -3,6 +3,7 @@ import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
+import 'package:app/core/widgets/pg_snackbar.dart';
 import 'package:app/core/widgets/pg_text_field.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/routes/pg_route_names.dart';
@@ -10,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
+/// [IndividualCompleteAccount1Screen] is the first step of the account completion process.
+/// It collects basic identity information like name and email.
 class IndividualCompleteAccount1Screen extends StatefulWidget {
   const IndividualCompleteAccount1Screen({super.key});
 
@@ -89,7 +92,22 @@ class _IndividualCompleteAccount1ScreenState extends State<IndividualCompleteAcc
               ),
               heightSpacing(40),
               PgScaleButton(
-                onTap: () => context.pushNamed(PgRouteNames.individualCompleteAccount2),
+                onTap: () {
+                  if (_firstNameController.text.isNotEmpty &&
+                      _lastNameController.text.isNotEmpty &&
+                      _emailController.text.isNotEmpty) {
+                    context.pushNamed(
+                      PgRouteNames.individualCompleteAccount2,
+                      extra: {
+                        'firstName': _firstNameController.text,
+                        'lastName': _lastNameController.text,
+                        'email': _emailController.text,
+                      },
+                    );
+                  } else {
+                    PgSnackBar.show(context, message: "Please fill all fields", isError: true);
+                  }
+                },
                 child: Container(
                   height: objectHeight(size: 56, context: context),
                   width: double.infinity,

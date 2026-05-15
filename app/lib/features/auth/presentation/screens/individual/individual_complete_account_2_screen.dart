@@ -3,24 +3,42 @@ import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
+import 'package:app/core/widgets/pg_snackbar.dart';
 import 'package:app/core/widgets/pg_text_field.dart';
 import 'package:app/core/widgets/pg_success_dialog.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/auth/data/models/auth_models.dart';
+import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart';
 
+/// [IndividualCompleteAccount2Screen] is the final step of the account completion process.
+/// It collects verification data like NIN and BVN to finalize account registration.
 class IndividualCompleteAccount2Screen extends StatefulWidget {
-  const IndividualCompleteAccount2Screen({super.key});
+  final String firstName;
+  final String lastName;
+  final String email;
+
+  const IndividualCompleteAccount2Screen({
+    super.key,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+  });
 
   @override
-  State<IndividualCompleteAccount2Screen> createState() => _IndividualCompleteAccount2ScreenState();
+  State<IndividualCompleteAccount2Screen> createState() =>
+      _IndividualCompleteAccount2ScreenState();
 }
 
-class _IndividualCompleteAccount2ScreenState extends State<IndividualCompleteAccount2Screen> {
+class _IndividualCompleteAccount2ScreenState
+    extends State<IndividualCompleteAccount2Screen> {
   final _bvnController = TextEditingController();
+  final _ninController = TextEditingController();
   final _dobController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _selectedGender;
@@ -29,6 +47,7 @@ class _IndividualCompleteAccount2ScreenState extends State<IndividualCompleteAcc
   @override
   void dispose() {
     _bvnController.dispose();
+    _ninController.dispose();
     _dobController.dispose();
     super.dispose();
   }
@@ -55,36 +74,58 @@ class _IndividualCompleteAccount2ScreenState extends State<IndividualCompleteAcc
     if (picked != null) {
       setState(() {
         _birthDate = picked;
-        _dobController.text = "${picked.day} / ${picked.month} / ${picked.year}";
+        _dobController.text =
+            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
       });
     }
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       if (_birthDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please select your date of birth")),
-        );
-        return;
-      }
-
-      final age = DateTime.now().difference(_birthDate!).inDays / 365;
-      if (age < 18) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("You must be at least 18 years old")),
+        PgSnackBar.show(
+          context,
+          message: "Please select your date of birth",
+          isError: true,
         );
         return;
       }
 
       if (_selectedGender == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please select your gender")),
+        PgSnackBar.show(
+          context,
+          message: "Please select your gender",
+          isError: true,
         );
         return;
       }
 
-      _showSuccessDialog();
+      final authProvider = context.read<AuthProvider>();
+      final request = IndividualCompleteAccountRequest(
+        firstName: widget.firstName,
+        lastName: widget.lastName,
+        email: widget.email,
+        dateOfBirth: _dobController.text,
+        nin: _ninController.text,
+        bvn: _bvnController.text.isNotEmpty ? _bvnController.text : null,
+        gender: _selectedGender == "Male"
+            ? "1"
+            : "2", // Based on backend 1=Male, 2=Female
+      );
+
+      final success = await authProvider.completeIndividualAccount(request);
+
+      if (!mounted) return;
+
+      if (success) {
+        _showSuccessDialog();
+      } else {
+        PgSnackBar.show(
+          context,
+          message: authProvider.errorMessage ?? "Failed to complete account",
+          isError: true,
+        );
+      }
     }
   }
 
@@ -92,7 +133,8 @@ class _IndividualCompleteAccount2ScreenState extends State<IndividualCompleteAcc
     PgSuccessDialog.show(
       context,
       title: "Success!",
-      message: "Your account has been created successfully. Welcome to PayGidi!",
+      message:
+          "Your account has been created successfully. Welcome to PayGidi!",
       buttonText: "Go to Home",
       onButtonPressed: () => context.goNamed(PgRouteNames.individualHome),
     );
@@ -128,31 +170,45 @@ class _IndividualCompleteAccount2ScreenState extends State<IndividualCompleteAcc
                 heightSpacing(12),
                 PgTexts.text400(
                   context,
-                  text: "Provide your BVN and other details to secure your account.",
+                  text:
+                      "Provide your NIN and other details to secure your account.",
                   fontSize: 14,
                   color: Colors.black54,
                 ),
                 heightSpacing(40),
                 PgTextField(
-                  label: "BVN (Bank Verification Number)",
-                  hintText: "Enter your 11-digit BVN",
-                  controller: _bvnController,
+                  label: "NIN (National Identification Number)",
+                  hintText: "Enter your 10-digit NIN",
+                  controller: _ninController,
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Iconsax.shield_tick_copy, size: 20),
                   textInputAction: TextInputAction.next,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(11),
+                    LengthLimitingTextInputFormatter(10),
                   ],
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "BVN is required";
+                      return "NIN is required";
                     }
-                    if (value.length != 11) {
-                      return "BVN must be 11 digits";
+                    if (value.length < 10) {
+                      return "NIN must be at least 10 digits";
                     }
                     return null;
                   },
+                ),
+                heightSpacing(20),
+                PgTextField(
+                  label: "BVN (Optional)",
+                  hintText: "Enter your 11-digit BVN",
+                  controller: _bvnController,
+                  keyboardType: TextInputType.number,
+                  prefixIcon: const Icon(Iconsax.shield_security, size: 20),
+                  textInputAction: TextInputAction.next,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(11),
+                  ],
                 ),
                 heightSpacing(20),
                 PgTextField(
@@ -164,7 +220,6 @@ class _IndividualCompleteAccount2ScreenState extends State<IndividualCompleteAcc
                   prefixIcon: const Icon(Iconsax.calendar_1_copy, size: 20),
                 ),
                 heightSpacing(20),
-                
                 PgTexts.text500(
                   context,
                   text: "Gender",
@@ -182,39 +237,62 @@ class _IndividualCompleteAccount2ScreenState extends State<IndividualCompleteAcc
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _selectedGender,
-                      hint: PgTexts.text400(context, text: "Select Gender", color: Colors.grey),
+                      hint: PgTexts.text400(
+                        context,
+                        text: "Select Gender",
+                        color: Colors.grey,
+                      ),
                       isExpanded: true,
-                      items: ["Male", "Female", "Other"]
-                          .map((e) => DropdownMenuItem(
-                                value: e,
-                                child: PgTexts.text400(context, text: e),
-                              ))
+                      items: ["Male", "Female"]
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e,
+                              child: PgTexts.text400(context, text: e),
+                            ),
+                          )
                           .toList(),
                       onChanged: (val) => setState(() => _selectedGender = val),
                     ),
                   ),
                 ),
-    
                 heightSpacing(40),
-                PgScaleButton(
-                  onTap: _submit,
-                  child: Container(
-                    height: objectHeight(size: 56, context: context),
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: const LinearGradient(
-                        colors: [PgColors.primary, PgColors.secondary],
+                Consumer<AuthProvider>(
+                  builder: (context, auth, child) {
+                    return PgScaleButton(
+                      onTap: auth.isLoading ? () {} : _submit,
+                      child: Container(
+                        height: objectHeight(size: 56, context: context),
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            colors: auth.isLoading
+                                ? [
+                                    PgColors.primary.withValues(alpha: 0.5),
+                                    PgColors.secondary.withValues(alpha: 0.5),
+                                  ]
+                                : [PgColors.primary, PgColors.secondary],
+                          ),
+                        ),
+                        child: auth.isLoading
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : PgTexts.text600(
+                                context,
+                                text: "Submit",
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
                       ),
-                    ),
-                    child: PgTexts.text600(
-                      context,
-                      text: "Submit",
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
+                    );
+                  },
                 ),
                 heightSpacing(40),
               ],
@@ -225,4 +303,3 @@ class _IndividualCompleteAccount2ScreenState extends State<IndividualCompleteAcc
     );
   }
 }
-

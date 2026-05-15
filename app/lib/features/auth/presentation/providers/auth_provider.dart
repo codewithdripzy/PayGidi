@@ -1,47 +1,107 @@
+import 'package:app/features/auth/data/models/auth_models.dart';
+import 'package:app/features/auth/data/repositories/auth_repository.dart';
+import 'package:app/features/auth/data/services/auth_storage_service.dart';
 import 'package:flutter/material.dart';
 
 class AuthProvider extends ChangeNotifier {
+  final AuthRepository _repository;
+  final AuthStorageService _storageService;
+
+  AuthProvider(this._repository, this._storageService);
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
-  String? _userName;
-  String? get userName => _userName;
+  AuthResponseData? _userData;
+  AuthResponseData? get userData => _userData;
+
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
 
   void setLoading(bool value) {
     _isLoading = value;
+    _errorMessage = null;
     notifyListeners();
   }
 
-  Future<void> login(String email, String password) async {
-    setLoading(true);
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-    _isLoggedIn = true;
-    _userName = "Emmanuel Bankole";
-    setLoading(false);
-  }
-
-  Future<void> signUp({
-    required String name,
-    required String email,
+  Future<bool> initiateIndividualAuth({
     required String phone,
-    required String dob,
-    required String password,
+    bool isLogin = true,
   }) async {
     setLoading(true);
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-    _isLoggedIn = true;
-    _userName = name;
+    final response = await _repository.initiateAuth(
+      AuthRequest(
+        phone: phone,
+        // accountType: isLogin ? null : 'individual',
+      ),
+    );
     setLoading(false);
+
+    if (response.isSuccess) {
+      _userData = response.data;
+      return true;
+    } else {
+      _errorMessage = response.error ?? 'Authentication failed';
+      return false;
+    }
+  }
+
+  Future<bool> verifyOtp({required String phone, required String code}) async {
+    setLoading(true);
+    final response = await _repository.verifyOTP(
+      VerifyOtpRequest(phone: phone, code: code),
+    );
+    setLoading(false);
+
+    if (response.isSuccess) {
+      _userData = response.data;
+      if (response.data?.token != null) {
+        _isLoggedIn = true;
+        await _storageService.saveTokens(
+          token: response.data!.token!,
+          refreshToken: response.data!.refreshToken ?? "",
+        );
+      }
+      return true;
+    } else {
+      _errorMessage = response.error ?? 'Verification failed';
+      return false;
+    }
+  }
+
+  Future<bool> completeIndividualAccount(
+    IndividualCompleteAccountRequest request,
+  ) async {
+    setLoading(true);
+    final response = await _repository.completeIndividualAccount(
+      request,
+      token: _userData?.token,
+    );
+    setLoading(false);
+
+    if (response.isSuccess) {
+      _userData = response.data;
+      if (response.data?.token != null) {
+        _isLoggedIn = true;
+        await _storageService.saveTokens(
+          token: response.data!.token!,
+          refreshToken: response.data!.refreshToken ?? "",
+        );
+      }
+      return true;
+    } else {
+      _errorMessage = response.error ?? 'Failed to complete account';
+      return false;
+    }
   }
 
   void logout() {
     _isLoggedIn = false;
-    _userName = null;
+    _userData = null;
+    _storageService.clearTokens();
     notifyListeners();
   }
 }

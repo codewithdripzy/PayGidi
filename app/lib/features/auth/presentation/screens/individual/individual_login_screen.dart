@@ -3,14 +3,19 @@ import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
+import 'package:app/core/widgets/pg_snackbar.dart';
 import 'package:app/core/widgets/pg_text_field.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart';
 
+/// [IndividualLoginScreen] handles the authentication of existing individual users.
+/// It verifies the phone number and redirects to the OTP screen.
 class IndividualLoginScreen extends StatefulWidget {
   const IndividualLoginScreen({super.key});
 
@@ -28,10 +33,28 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      // Pass isLogin as true or handle via routing
-      context.pushNamed(PgRouteNames.individualOtp, extra: {'isLogin': true});
+      final authProvider = context.read<AuthProvider>();
+      final success = await authProvider.initiateIndividualAuth(
+        phone: "234${_phoneController.text}",
+        isLogin: true,
+      );
+
+      if (!mounted) return;
+
+      if (success) {
+        context.pushNamed(
+          PgRouteNames.individualOtp,
+          extra: {'isLogin': true, 'phone': "234${_phoneController.text}"},
+        );
+      } else {
+        PgSnackBar.show(
+          context,
+          message: authProvider.errorMessage ?? "An error occurred",
+          isError: true,
+        );
+      }
     }
   }
 
@@ -101,25 +124,47 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                   },
                 ),
                 heightSpacing(48),
-                PgScaleButton(
-                  onTap: _submit,
-                  child: Container(
-                    height: objectHeight(size: 56, context: context),
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: const LinearGradient(
-                        colors: [PgColors.primary, PgColors.secondary],
+                Consumer<AuthProvider>(
+                  builder: (context, auth, child) {
+                    return PgScaleButton(
+                      onTap: auth.isLoading
+                          ? () {}
+                          : () async {
+                              await _submit();
+                            },
+                      child: Container(
+                        height: objectHeight(size: 56, context: context),
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            colors: auth.isLoading
+                                ? [
+                                    PgColors.primary.withValues(alpha: 0.5),
+                                    PgColors.secondary.withValues(alpha: 0.5),
+                                  ]
+                                : [PgColors.primary, PgColors.secondary],
+                          ),
+                        ),
+                        child: auth.isLoading
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : PgTexts.text600(
+                                context,
+                                text: "Continue",
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
                       ),
-                    ),
-                    child: PgTexts.text600(
-                      context,
-                      text: "Continue",
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
+                    );
+                  },
                 ),
                 heightSpacing(24),
                 Row(
