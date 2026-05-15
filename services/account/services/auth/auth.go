@@ -115,22 +115,17 @@ func (s *AuthServer) ValidateToken(ctx context.Context, req *pb.ValidateTokenReq
 		panic("Error connecting to database: " + err.Error())
 	}
 
-	tokenClaims, err := utils.VerifyJWT(req.Token)
+	userID, err := utils.VerifyJWT(req.Token)
 
 	if err != nil {
-		return nil, err
-	}
-
-	// Check if the token is valid
-	if tokenClaims == nil {
 		return &pb.ValidateTokenResponse{
 			Valid: false,
-			Error: "Invalid token",
+			Error: "Invalid token: " + err.Error(),
 		}, nil
 	}
 
 	// get the userData from the userModel
-	userData, err := userService.GetUserById(db, uint(tokenClaims["user_id"].(float64)))
+	userData, err := userService.GetUserById(db, userID)
 	if err != nil {
 		return nil, err
 	}
