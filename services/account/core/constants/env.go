@@ -14,7 +14,8 @@ var (
 	DB_PASSWORD string
 	DB_NAME     string
 
-	WALLET_SERVICE_ADDR string = "localhost:50053"
+	WALLET_SERVICE_ADDR       string = "localhost:50053"
+	NOTIFICATION_SERVICE_ADDR string = "localhost:50052"
 
 	// JWT constants
 	JWT_SECRET             string
@@ -88,6 +89,10 @@ func ConfigDotenv() error {
 
 	if walletServiceAddr := os.Getenv("WALLET_SERVICE_ADDR"); walletServiceAddr != "" {
 		WALLET_SERVICE_ADDR = walletServiceAddr
+	}
+
+	if notificationServiceAddr := os.Getenv("NOTIFICATION_SERVICE_ADDR"); notificationServiceAddr != "" {
+		NOTIFICATION_SERVICE_ADDR = notificationServiceAddr
 	}
 
 	if grpcPort := os.Getenv("GRPC_PORT"); grpcPort != "" {

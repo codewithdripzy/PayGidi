@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/PayGidi/AccountService/core/constants"
 	notificationpb "github.com/PayGidi/NotificationService/proto/notificationpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -66,7 +67,7 @@ func (s *NotificationService) DeleteNotification(ctx context.Context, req *notif
 }
 
 func SendUserNotification(userID uint, title string, message string, channel string, recipient string, notificationType string) error {
-	client, err := NewNotificationService("")
+	client, err := NewNotificationService(constants.NOTIFICATION_SERVICE_ADDR)
 	if err != nil {
 		return err
 	}
