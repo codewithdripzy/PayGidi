@@ -16,7 +16,6 @@ func GetDBConnection() (*gorm.DB, error) {
 		constants.DB_USER,
 		constants.DB_NAME,
 		constants.DB_PASSWORD,
-		constants.DB_SSL_MODE,
 	)
 
 	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
