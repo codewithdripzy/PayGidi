@@ -10,7 +10,7 @@ import (
 
 func GetDBConnection() (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s dbname=%s password=%s sslmode=%s TimeZone=UTC",
+		"host=%s port=%s user=%s dbname=%s password=%s sslmode=require TimeZone=UTC",
 		constants.DB_HOST,
 		constants.DB_PORT,
 		constants.DB_USER,
