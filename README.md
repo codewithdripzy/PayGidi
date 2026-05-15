@@ -58,9 +58,12 @@ To become the trust layer for African digital commerce, enabling safe, transpare
 - AI-driven risk engine
 - integration with payment infrastructure providers
 
-## Status
+## Documentation
 
-MVP stage — building core escrow + trust system.
+For detailed technical information, architecture diagrams, and service-specific guides, please refer to:
+- [Technical Documentation Index](TECHNICAL_DOCS.md)
+- [Architecture Overview](services/ARCHITECTURE.md)
+- [API Reference (Swagger)](http://api.paygidi.site/docs)
 
 ## License
 
