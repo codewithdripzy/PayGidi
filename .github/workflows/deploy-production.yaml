@@ -17,26 +17,14 @@ jobs:
         run: |
           docker compose build
 
-      - name: Write SSH key to file
-        run: |
-          echo "${{ secrets.EC2_KEY }}" > ec2key.pem
-          chmod 600 ec2key.pem
-
-      
-      - name: Add EC2 to known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-
-
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ec2key.pem
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
           script: |
             cd /home/ubuntu/paygidi
             git pull origin main
-            docker compose up -d --build
+            docker compose -f docker-compose.prod.yml up -d --build
