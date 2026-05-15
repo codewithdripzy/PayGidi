@@ -1,8 +1,8 @@
-# version: "3.9"
-
 services:
   gateway:
-    build: ./services/gateway
+    build:
+      context: .
+      dockerfile: ./services/gateway/Dockerfile
     ports:
       - "8080:8080"
     depends_on:
@@ -13,7 +13,9 @@ services:
       - notification-service
 
   account-service:
-    build: ./services/account
+    build:
+      context: .
+      dockerfile: ./services/account/Dockerfile
     expose:
       - "50051"
     env_file:
@@ -22,7 +24,9 @@ services:
       - postgres
 
   wallet-service:
-    build: ./services/wallet
+    build:
+      context: .
+      dockerfile: ./services/wallet/Dockerfile
     expose:
       - "50053"
     env_file:
@@ -31,7 +35,9 @@ services:
       - postgres
 
   transaction-service:
-    build: ./services/transaction
+    build:
+      context: .
+      dockerfile: ./services/transaction/Dockerfile
     expose:
       - "50055"
     env_file:
@@ -40,7 +46,9 @@ services:
       - postgres
 
   ai-service:
-    build: ./services/ai
+    build:
+      context: .
+      dockerfile: ./services/ai/Dockerfile
     expose:
       - "50054"
     env_file:
@@ -49,7 +57,9 @@ services:
       - postgres
 
   notification-service:
-    build: ./services/notification
+    build:
+      context: .
+      dockerfile: ./services/notification/Dockerfile
     expose:
       - "50052"
     env_file:
