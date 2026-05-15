@@ -28,7 +28,7 @@ services:
       - "8080"
       - "50051"
     env_file:
-      - ./services/account/.env
+      - ./services/account/.env.production
     depends_on:
       - postgres
 
@@ -41,7 +41,7 @@ services:
       - "8082"
       - "50053"
     env_file:
-      - ./services/wallet/.env
+      - ./services/wallet/.env.production
     depends_on:
       - postgres
 
@@ -54,7 +54,7 @@ services:
       - "8081"
       - "50055"
     env_file:
-      - ./services/transaction/.env
+      - ./services/transaction/.env.production
     depends_on:
       - postgres
 
@@ -67,7 +67,7 @@ services:
       - "8083"
       - "50054"
     env_file:
-      - ./services/ai/.env
+      - ./services/ai/.env.production
     depends_on:
       - postgres
 
@@ -80,14 +80,14 @@ services:
       - "8080"
       - "50052"
     env_file:
-      - ./services/notification/.env
+      - ./services/notification/.env.production
     depends_on:
       - postgres
 
   postgres:
     image: postgres:16
     env_file:
-      - ./services/postgres/.env
+      - ./services/postgres/.env.production
     ports:
       - "5432:5432"
     volumes:
