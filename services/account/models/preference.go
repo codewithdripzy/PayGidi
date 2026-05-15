@@ -18,5 +18,5 @@ type Preference struct {
 }
 
 func (Preference) TableName() string {
-	return "preferences"
+	return "account_preferences"
 }

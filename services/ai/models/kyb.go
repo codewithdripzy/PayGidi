@@ -182,3 +182,19 @@ func (a *Analysis) BeforeCreate(tx *gorm.DB) (err error) {
 	a.ID = uuid.New()
 	return
 }
+
+func (Business) TableName() string {
+	return "ai_businesses"
+}
+
+func (Director) TableName() string {
+	return "ai_directors"
+}
+
+func (Document) TableName() string {
+	return "ai_documents"
+}
+
+func (Analysis) TableName() string {
+	return "ai_analyses"
+}

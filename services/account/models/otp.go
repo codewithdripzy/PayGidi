@@ -17,5 +17,5 @@ type OTP struct {
 }
 
 func (OTP) TableName() string {
-	return "otps"
+	return "account_otps"
 }

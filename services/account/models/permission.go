@@ -11,3 +11,7 @@ type Permission struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+func (Permission) TableName() string {
+	return "account_permissions"
+}

@@ -12,5 +12,5 @@ type ContactInfo struct {
 }
 
 func (ContactInfo) TableName() string {
-	return "contact_info"
+	return "account_contact_info"
 }

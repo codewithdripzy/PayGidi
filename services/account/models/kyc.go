@@ -16,5 +16,5 @@ type KYC struct {
 }
 
 func (KYC) TableName() string {
-	return "kyc"
+	return "account_kycs"
 }

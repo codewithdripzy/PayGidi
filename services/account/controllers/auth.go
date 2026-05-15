@@ -98,7 +98,7 @@ func Auth(c *gin.Context) {
 
 		// Also create default AuthInfo
 		authInfo := models.AuthInfo{
-			UserID: fmt.Sprintf("%d", data.ID),
+			UserID: data.ID,
 		}
 		if err := db.(*gorm.DB).Create(&authInfo).Error; err != nil {
 			fmt.Printf("Failed to create default auth info: %v\n", err)
