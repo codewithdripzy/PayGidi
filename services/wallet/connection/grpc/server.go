@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"time"
@@ -33,11 +34,15 @@ func (s *WalletServer) HealthCheck(context.Context, *pb.HealthCheckRequest) (*pb
 }
 
 func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletRequest) (*pb.CreateWalletResponse, error) {
+	log.Printf("[WalletServer] CreateWallet request for UserID: %s, Phone: %s", req.UserId, req.Phone)
+
 	if req == nil {
+		log.Printf("[WalletServer] Error: request body is nil")
 		return nil, status.Error(codes.InvalidArgument, "request body is required")
 	}
 
 	if strings.TrimSpace(req.Firstname) == "" || strings.TrimSpace(req.Lastname) == "" || strings.TrimSpace(req.Nin) == "" || strings.TrimSpace(req.DateOfBirth) == "" {
+		log.Printf("[WalletServer] Error: missing required fields")
 		return nil, status.Error(codes.InvalidArgument, "firstname, lastname, nin and dateOfBirth are required")
 	}
 
@@ -58,10 +63,12 @@ func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 	})
 
 	if result == nil {
+		log.Printf("[WalletServer] Error: wallet controller returned nil")
 		return nil, status.Error(codes.Internal, "wallet controller returned empty response")
 	}
 
 	if !result.Success || result.Data == nil {
+		log.Printf("[WalletServer] Wallet creation failed: %s (Code: %s)", result.Message, result.Code)
 		return &pb.CreateWalletResponse{
 			Success: false,
 			Code:    result.Code,
@@ -69,6 +76,7 @@ func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 		}, nil
 	}
 
+	log.Printf("[WalletServer] Wallet created successfully for UserID: %s, AccountNo: %s", req.UserId, result.Data.AccountNo)
 	return &pb.CreateWalletResponse{
 		Success:     true,
 		Code:        result.Code,

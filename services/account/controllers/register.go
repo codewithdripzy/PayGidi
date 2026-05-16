@@ -165,6 +165,7 @@ func CompleteAccount(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second) // Squad can be slow
 	defer cancel()
 
+	log.Printf("[CompleteAccount] calling CreateWalletForUser at %s", constants.WALLET_SERVICE_ADDR)
 	resp, err := walletClient.CreateWalletForUser(ctx, &walletpb.CreateWalletRequest{
 		Firstname:    firstName,
 		Middlename:   middleName,

@@ -33,8 +33,8 @@ var (
 
 func ConfigDotenv() error {
 	// Load .env first so local development variables take precedence, then fallback to .env.production
-	_ = godotenv.Load(".env")
 	_ = godotenv.Load(".env.production")
+	_ = godotenv.Load(".env")
 
 	// Override constants with environment variables if they exist
 	if host := os.Getenv("DB_HOST"); host != "" {

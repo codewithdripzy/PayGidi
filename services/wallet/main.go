@@ -31,6 +31,7 @@ import (
 // @BasePath /api/v1
 
 func main() {
+	log.Println("[WalletService] Starting main...")
 	if err := constants.ConfigDotenv(); err != nil {
 		log.Fatalf("failed to load configuration: %v", err)
 	}
