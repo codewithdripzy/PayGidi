@@ -11,6 +11,7 @@ type CreateSquadVirtualAccountPayload struct {
 	Gender             string `json:"gender"`
 	Email              string `json:"email"`
 	Address            string `json:"address"`
+	BeneficiaryAccount string `json:"beneficiary_account"`
 }
 
 type SquadAccountLookupPayload struct {

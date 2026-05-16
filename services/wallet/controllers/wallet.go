@@ -79,6 +79,7 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 			CustomerIdentifier: request.UserID,
 			MobileNum:          mobileNum,
 			Bvn:                bvn,
+			BeneficiaryAccount: "",
 		})
 	} else {
 		success, squadErr, response = squadService.CreateVirtualAccount(ctx, payloads.CreateSquadVirtualAccountPayload{
@@ -92,6 +93,7 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 			Gender:             request.Gender,
 			Email:              request.Email,
 			Address:            request.Address,
+			BeneficiaryAccount: "",
 		})
 	}
 
