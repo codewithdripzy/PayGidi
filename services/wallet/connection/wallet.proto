@@ -42,6 +42,7 @@ message CreateWalletResponse {
   string lastname = 6;
   string accountNo = 7;
   string currentTier = 8;
+  string customerIdentifier = 9;
 }
 
 message InitiatePaymentRequest {

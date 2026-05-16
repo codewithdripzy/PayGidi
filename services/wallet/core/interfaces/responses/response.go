@@ -28,7 +28,8 @@ type CreateClientResponseData struct {
 	Middlename string `json:"middlename"`
 	Lastname   string `json:"lastname"`
 	CurrenTier string `json:"currentTier"`
-	AccountNo  string `json:"accountNo"`
+	AccountNo          string `json:"accountNo"`
+	CustomerIdentifier string `json:"customerIdentifier"`
 }
 
 type UpgradeClientResponseData struct {

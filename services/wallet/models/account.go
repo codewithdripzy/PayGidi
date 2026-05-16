@@ -18,7 +18,8 @@ type Account struct {
 	AccountType           string                 `json:"accountType"`                        // Type of account (e.g., "savings", "checking")
 	AccountNickname       string                 `json:"accountNickname"`                    // User-defined nickname for easier identification
 	CurrencyCode          string                 `json:"currencyCode"`                       // Currency code in ISO format (e.g., "USD", "EUR")
-	AccountReference      string                 `json:"accountReference"`                   // Unique reference code for the account on the provider's system
+	AccountReference      string                 `json:"accountReference"`   // Unique reference code for the account on the provider's system
+	CustomerIdentifier    string                 `json:"customerIdentifier"` // Explicit identifier from Squad (used for transaction history)
 	AccountPin            string                 `json:"accountPin"`                         // PIN or security code for account access
 	Status                string                 `json:"status"`
 	Tier                  string                 `json:"tier"`                // Unique identifier for the account on the provider's system

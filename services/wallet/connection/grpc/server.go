@@ -84,8 +84,9 @@ func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 		Firstname:   result.Data.Firstname,
 		Middlename:  result.Data.Middlename,
 		Lastname:    result.Data.Lastname,
-		AccountNo:   result.Data.AccountNo,
-		CurrentTier: result.Data.CurrenTier,
+		AccountNo:          result.Data.AccountNo,
+		CurrentTier:        result.Data.CurrenTier,
+		CustomerIdentifier: result.Data.CustomerIdentifier,
 	}, nil
 }
 

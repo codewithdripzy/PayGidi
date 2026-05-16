@@ -202,8 +202,9 @@ func CompleteAccount(c *gin.Context) {
 			"type":      u.AccountType,
 			"firstName": firstName,
 			"lastName":  lastName,
-			"email":     email,
-			"accountNo": resp.AccountNo,
+			"email":              email,
+			"accountNo":          resp.AccountNo,
+			"customerIdentifier": resp.CustomerIdentifier,
 		},
 	})
 

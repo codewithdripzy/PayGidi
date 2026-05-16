@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -54,12 +55,23 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 
 	// Ensure phone number is max 11 digits for Squad (e.g. 080...)
 	mobileNum := request.Phone
-	if strings.HasPrefix(mobileNum, "+234") {
-		mobileNum = "0" + strings.TrimPrefix(mobileNum, "+234")
+	mobileNum = strings.ReplaceAll(mobileNum, " ", "")
+	mobileNum = strings.TrimPrefix(mobileNum, "+")
+
+	if strings.HasPrefix(mobileNum, "234") {
+		mobileNum = "0" + mobileNum[3:]
 	}
+
+	// If it's a 10-digit number (e.g. 8132961144), prepend 0
+	if len(mobileNum) == 10 {
+		mobileNum = "0" + mobileNum
+	}
+
+	// If it's still longer than 11 (e.g. some weird input), take the last 11
 	if len(mobileNum) > 11 {
 		mobileNum = mobileNum[len(mobileNum)-11:]
 	}
+	log.Printf("[WalletController] Normalized phone: %s (Original: %s)", mobileNum, request.Phone)
 
 	if request.AccountType == "business" {
 		success, squadErr, response = squadService.CreateBusinessVirtualAccount(ctx, payloads.CreateSquadBusinessVirtualAccountPayload{
@@ -113,6 +125,7 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 		Provider:              "squad",
 		ProviderAccountNumber: response.BankAccountNumber,
 		AccountReference:      response.CustomerIdentifier,
+		CustomerIdentifier:    response.CustomerIdentifier,
 		AccountNumber:         accountAlias, // Formatted alias
 		AccountType:           request.AccountType,
 		CurrencyCode:          "NGN",
@@ -129,9 +142,10 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 
 	// Map Squad response to existing CreateClientResponseData for backward compatibility
 	mappedResponse := &responses.CreateClientResponseData{
-		Firstname: response.FirstName,
-		Lastname:  response.LastName,
-		AccountNo: newAccount.AccountNumber,
+		Firstname:          response.FirstName,
+		Lastname:           response.LastName,
+		AccountNo:          newAccount.AccountNumber,
+		CustomerIdentifier: response.CustomerIdentifier,
 	}
 
 	return &CreateWalletResult{
@@ -883,7 +897,7 @@ func (wc *WalletController) CreatePaymentHttp(c *gin.Context) {
 	// Send an email conceptually to the merchant
 	kybLink := fmt.Sprintf("https://kyb.paygidi.site/%d", payment.ID)
 	// TODO: Dispatch to Notification Service
-	_ = kybLink 
+	_ = kybLink
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  200,
