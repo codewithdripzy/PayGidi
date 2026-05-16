@@ -184,8 +184,19 @@ func CompleteAccount(c *gin.Context) {
 
 	if err != nil {
 		tx.Rollback()
-		log.Printf("[CompleteAccount] wallet creation failed: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Wallet creation failed: " + err.Error() + ". Account registration rolled back."})
+		log.Printf("[CompleteAccount] wallet gRPC call failed: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Wallet service connection failed: " + err.Error() + ". Account registration rolled back."})
+		return
+	}
+
+	if !resp.Success {
+		tx.Rollback()
+		log.Printf("[CompleteAccount] wallet creation failed: %s (Code: %s)", resp.Message, resp.Code)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   resp.Message,
+			"code":    resp.Code,
+			"message": "Account registration rolled back due to provider error.",
+		})
 		return
 	}
 
