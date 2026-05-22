@@ -24,12 +24,13 @@ class OnboardingIndicator extends StatelessWidget {
             height: 5,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: currentIndex != index ? PgColors.black3 : null,
               gradient: currentIndex == index
                   ? const LinearGradient(
                       colors: [PgColors.primary, PgColors.secondary],
                     )
-                  : null,
+                  : const LinearGradient(
+                      colors: [PgColors.black3, PgColors.black3],
+                    ),
             ),
           ),
         ),

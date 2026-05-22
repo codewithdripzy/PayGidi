@@ -135,46 +135,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         heightSpacing(20),
 
                         // Bottom Action Button with Micro-interactions
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: PgScaleButton(
-                            onTap: () {
-                              if (_currentIndex < 2) {
-                                _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeInOutCubic,
-                                );
-                              } else {
-                                context.pushNamed(PgRouteNames.rolePage);
-                              }
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              alignment: Alignment.center,
-                              height: objectHeight(size: 50, context: context),
-                              width: _currentIndex == 2
-                                  ? objectWidth(size: 160, context: context)
-                                  : objectWidth(size: 50, context: context),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                color: PgColors.black1,
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                  width: 1,
-                                ),
+                        PgScaleButton(
+                          onTap: () {
+                            if (_currentIndex < 2) {
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOutCubic,
+                              );
+                            } else {
+                              context.pushNamed(PgRouteNames.rolePage);
+                            }
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            alignment: Alignment.center,
+                            height: objectHeight(size: 56, context: context),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: const LinearGradient(
+                                colors: [PgColors.primary, PgColors.secondary],
                               ),
-                              child: _currentIndex == 2
-                                  ? PgTexts.text600(
-                                      context,
-                                      text: "Get Started",
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                    )
-                                  : const Icon(
-                                      Icons.arrow_forward,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: PgColors.primary.withValues(alpha: 0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: PgTexts.text600(
+                              context,
+                              text: _currentIndex == 2 ? "Get Started" : "Continue",
+                              color: Colors.white,
+                              fontSize: 16,
                             ),
                           ),
                         ),

@@ -9,6 +9,7 @@ import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -73,11 +74,28 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 heightSpacing(24),
-                PgScaleButton(
-                  child: const Icon(Icons.arrow_back_outlined),
-                  onTap: () => context.pop(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    PgScaleButton(
+                      onTap: () => context.pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: const Icon(Icons.arrow_back_outlined, size: 20),
+                      ),
+                    ),
+                    SvgPicture.asset(
+                      "assets/logo/app cowry icon.svg",
+                      height: 32,
+                    ),
+                  ],
                 ),
-                heightSpacing(18),
+                heightSpacing(24),
                 PgTexts.text700(
                   context,
                   text: "Verify Phone Number",
@@ -143,6 +161,14 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                                   ]
                                 : [PgColors.primary, PgColors.secondary],
                           ),
+                          boxShadow: [
+                            if (!auth.isLoading)
+                              BoxShadow(
+                                color: PgColors.primary.withValues(alpha: 0.3),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                          ],
                         ),
                         child: auth.isLoading
                             ? const SizedBox(
