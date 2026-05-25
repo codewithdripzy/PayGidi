@@ -34,6 +34,7 @@ export const metadata: Metadata = {
 import GDPRBanner from "@/components/GDPRBanner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import OrelloVoice from "@/components/OrelloVoice";
 
 export default function RootLayout({
   children,
@@ -47,6 +48,7 @@ export default function RootLayout({
         <GDPRBanner />
         <Analytics />
         <SpeedInsights />
+        <OrelloVoice />
       </body>
     </html>
   );
