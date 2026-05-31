@@ -103,12 +103,12 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                   color: PgColors.black,
                   fontFamily: PgFonts.stackSans,
                 ),
-                heightSpacing(12),
+                heightSpacing(5),
                 PgTexts.text400(
                   context,
                   text:
                       "Enter your phone number to receive a verification code.",
-                  fontSize: 14,
+                  fontSize: 16,
                   color: Colors.black54,
                 ),
                 heightSpacing(40),
@@ -117,21 +117,47 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                   hintText: "800 000 0000",
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
-                  prefixIcon: const Icon(Iconsax.call_copy, size: 20),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 0,
+                    minHeight: 0,
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      top: 10,
+                      bottom: 10,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Icon(Iconsax.call_copy, size: 20),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: PgColors.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: PgTexts.text600(
+                            context,
+                            text: "+234",
+                            fontSize: 15,
+                            color: PgColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   textInputAction: TextInputAction.done,
+                  borderRadius: 10,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(10),
                   ],
-                  prefix: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: PgTexts.text600(
-                      context,
-                      text: "+234",
-                      fontSize: 16,
-                      color: PgColors.black,
-                    ),
-                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Phone number is required";
@@ -142,7 +168,7 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                     return null;
                   },
                 ),
-                heightSpacing(40),
+                heightSpacing(20),
                 Consumer<AuthProvider>(
                   builder: (context, auth, child) {
                     return PgScaleButton(
@@ -152,7 +178,7 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                         width: double.infinity,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(10),
                           gradient: LinearGradient(
                             colors: auth.isLoading
                                 ? [
@@ -161,14 +187,6 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                                   ]
                                 : [PgColors.primary, PgColors.secondary],
                           ),
-                          boxShadow: [
-                            if (!auth.isLoading)
-                              BoxShadow(
-                                color: PgColors.primary.withValues(alpha: 0.3),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                          ],
                         ),
                         child: auth.isLoading
                             ? const SizedBox(
@@ -183,17 +201,21 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                                 context,
                                 text: "Send Code",
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 16,
                               ),
                       ),
                     );
                   },
                 ),
-                heightSpacing(24),
+                heightSpacing(20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    PgTexts.text400(context, text: "Already have an account? "),
+                    PgTexts.text400(
+                      context,
+                      text: "Already have an account? ",
+                      fontSize: 16,
+                    ),
                     GestureDetector(
                       onTap: () =>
                           context.pushNamed(PgRouteNames.individualLogin),
@@ -201,7 +223,7 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                         context,
                         text: "Login",
                         color: PgColors.primary,
-                        fontSize: 14,
+                        fontSize: 16,
                       ),
                     ),
                   ],

@@ -93,7 +93,7 @@ class _RoleScreenState extends State<RoleScreen> {
                       color: PgColors.black,
                       fontFamily: PgFonts.stackSans,
                     ),
-                    heightSpacing(5),
+                    heightSpacing(2),
                     PgTexts.text400(
                       context,
                       text:
@@ -138,7 +138,7 @@ class _RoleScreenState extends State<RoleScreen> {
                           }
                         },
                         child: Container(
-                          height: objectHeight(size: 56, context: context),
+                          height: objectHeight(size: 60, context: context),
                           width: double.infinity,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
@@ -168,28 +168,28 @@ class _RoleScreenState extends State<RoleScreen> {
                         ),
                       ),
                     ),
-                    heightSpacing(16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        PgTexts.text400(
-                          context,
-                          text: 'Already have an account? ',
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                        GestureDetector(
-                          onTap: () =>
-                              context.pushNamed(PgRouteNames.individualLogin),
-                          child: PgTexts.text600(
-                            context,
-                            text: 'Login',
-                            fontSize: 16,
-                            color: PgColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
+                    // heightSpacing(16),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     PgTexts.text400(
+                    //       context,
+                    //       text: 'Already have an account? ',
+                    //       fontSize: 16,
+                    //       color: Colors.black54,
+                    //     ),
+                    //     GestureDetector(
+                    //       onTap: () =>
+                    //           context.pushNamed(PgRouteNames.individualLogin),
+                    //       child: PgTexts.text600(
+                    //         context,
+                    //         text: 'Login',
+                    //         fontSize: 16,
+                    //         color: PgColors.primary,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                     heightSpacing(24),
                   ],
                 ),
@@ -248,7 +248,7 @@ class _RoleScreenState extends State<RoleScreen> {
                             )
                           : null,
                       color: isSelected ? null : const Color(0xFFF1F4F9),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       icon,
@@ -290,7 +290,7 @@ class _RoleScreenState extends State<RoleScreen> {
                 heightSpacing(20),
                 ...features.map(
                   (feature) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.only(bottom: 10, left: 7),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
