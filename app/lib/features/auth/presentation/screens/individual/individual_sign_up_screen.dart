@@ -126,6 +126,7 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                       left: 16,
                       top: 10,
                       bottom: 10,
+                      right: 5,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
