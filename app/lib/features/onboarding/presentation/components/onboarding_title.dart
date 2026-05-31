@@ -1,4 +1,5 @@
 import 'package:app/core/theme/pg_colors.dart';
+import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,7 @@ class OnboardingTitle extends StatelessWidget {
                 fontSize: 34,
                 textAlign: TextAlign.start,
                 fontWeight: FontWeight.bold,
+                fontFamily: PgFonts.stackSans,
                 gradient: const LinearGradient(
                   colors: [PgColors.primary, PgColors.secondary],
                 ),
@@ -37,6 +39,7 @@ class OnboardingTitle extends StatelessWidget {
                 text: index == 0 ? 'with Confidence' : 'while Money Moves',
                 fontSize: 34,
                 color: Colors.white,
+                fontFamily: PgFonts.stackSans,
               ),
             ] else ...[
               PgTexts.text700(
@@ -45,6 +48,7 @@ class OnboardingTitle extends StatelessWidget {
                 text: 'Built for Smarter',
                 color: Colors.white,
                 fontSize: 34,
+                fontFamily: PgFonts.stackSans,
               ),
               const SizedBox(width: 8),
               PgTexts.gradientText(
@@ -53,6 +57,7 @@ class OnboardingTitle extends StatelessWidget {
                 fontSize: 34,
                 textAlign: TextAlign.start,
                 fontWeight: FontWeight.bold,
+                fontFamily: PgFonts.stackSans,
                 gradient: const LinearGradient(
                   colors: [PgColors.primary, PgColors.secondary],
                 ),

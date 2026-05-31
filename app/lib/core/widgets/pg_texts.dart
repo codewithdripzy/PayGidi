@@ -41,6 +41,7 @@ class PgTexts {
     double fontSize = 14,
     TextOverflow textOverflow = TextOverflow.ellipsis,
     String? fontFamily,
+    double? height,
   }) {
     return Text(
       text,
@@ -51,6 +52,7 @@ class PgTexts {
         fontSize: fontSize,
         fontWeight: FontWeight.w400,
         fontFamily: fontFamily,
+        height: height,
       ),
       textScaler: TextScaler.linear(ScaleSize.textScaleFactor(context)),
       overflow: textOverflow,
