@@ -3,10 +3,10 @@ import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
-import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/onboarding/presentation/components/onboarding_indicator.dart';
 import 'package:app/features/onboarding/presentation/components/onboarding_title.dart';
 import 'package:app/routes/pg_route_names.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -21,18 +21,38 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   late PageController _pageController;
+  Timer? _autoPlayTimer;
   int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoPlay());
   }
 
   @override
   void dispose() {
+    _autoPlayTimer?.cancel();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _startAutoPlay() {
+    _autoPlayTimer?.cancel();
+    _autoPlayTimer = Timer.periodic(const Duration(seconds: 6), (timer) {
+      if (!mounted || !_pageController.hasClients) {
+        return;
+      }
+
+      final nextIndex = (_currentIndex + 1) % 3;
+
+      _pageController.animateToPage(
+        nextIndex,
+        duration: const Duration(milliseconds: 950),
+        curve: Curves.easeInOutCubicEmphasized,
+      );
+    });
   }
 
   void _onPageChanged(int index) {
@@ -43,143 +63,185 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(
-        controller: _pageController,
-        itemCount: 3,
-        onPageChanged: _onPageChanged,
-        physics: NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) {
-          return AnimatedBuilder(
-            animation: _pageController,
-            builder: (context, child) {
-              double value = 0;
-              if (_pageController.position.haveDimensions) {
-                value = index - (_pageController.page ?? 0);
-              }
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: 3,
+              onPageChanged: _onPageChanged,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                return AnimatedBuilder(
+                  animation: _pageController,
+                  builder: (context, child) {
+                    double value = 0;
+                    if (_pageController.position.haveDimensions) {
+                      value = index - (_pageController.page ?? 0);
+                    }
 
-              // Transition values
-              final double opacity = (1 - (value.abs() * 0.8)).clamp(0.0, 1.0);
-              final double scale = (1 + (value.abs() * 0.15)).clamp(1.0, 1.5);
-              final double horizontalOffset = value * 200;
+                    final double opacity = (1 - (value.abs() * 0.75)).clamp(
+                      0.0,
+                      1.0,
+                    );
+                    final double scale = (1 + (value.abs() * 0.08)).clamp(
+                      1.0,
+                      1.18,
+                    );
 
-              return Stack(
-                children: [
-                  // Background with Zoom/Parallax
-                  Transform.scale(
-                    scale: scale,
-                    child: SizedBox.expand(
-                      child: Image.asset(
-                        'assets/onboarding_images/page${index + 1}.jpeg',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-
-                  // Dark Overlay
-                  Positioned.fill(
-                    child: Container(
-                      color: Colors.black.withValues(alpha: 0.4),
-                    ),
-                  ),
-
-                  // Content
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 48,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    return Stack(
+                      fit: StackFit.expand,
                       children: [
-                        // Header: Logo & Indicators
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SvgPicture.asset(
-                              "assets/logo/app cowry icon white.svg",
-                              width: 40,
-                            ),
-                            const Spacer(),
-                            OnboardingIndicator(
-                              currentIndex: _currentIndex,
-                              totalCount: 3,
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-
-                        // Animating Title and Description
-                        Transform.translate(
-                          offset: Offset(horizontalOffset, 0),
-                          child: Opacity(
-                            opacity: opacity,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                OnboardingTitle(index: index),
-                                heightSpacing(10),
-                                PgTexts.text400(
-                                  context,
-                                  textAlign: TextAlign.start,
-                                  text:
-                                      "Secure every transaction with escrow-backed payments and smart trust protection.",
-                                  fontSize: 14,
-                                  fontFamily: PgFonts.googleSans9,
-                                  color: Colors.white,
-                                  textOverflow: TextOverflow.clip,
-                                ),
-                              ],
+                        ClipRect(
+                          child: Transform.scale(
+                            scale: scale,
+                            child: Image.asset(
+                              'assets/onboarding_images/page${index + 1}.jpeg',
+                              fit: BoxFit.cover,
+                              filterQuality: FilterQuality.high,
                             ),
                           ),
                         ),
-                        heightSpacing(20),
-
-                        // Bottom Action Button with Micro-interactions
-                        PgScaleButton(
-                          onTap: () {
-                            if (_currentIndex < 2) {
-                              _pageController.nextPage(
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOutCubic,
-                              );
-                            } else {
-                              context.pushNamed(PgRouteNames.rolePage);
-                            }
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            alignment: Alignment.center,
-                            height: objectHeight(size: 56, context: context),
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
-                                colors: [PgColors.primary, PgColors.secondary],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: PgColors.primary.withValues(alpha: 0.3),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
+                        Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Color(0x99000000),
+                                Color(0x33000000),
+                                Color(0xE6000000),
                               ],
+                              stops: [0.0, 0.45, 1.0],
                             ),
-                            child: PgTexts.text600(
-                              context,
-                              text: _currentIndex == 2 ? "Get Started" : "Continue",
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
+                          ),
+                        ),
+                        Opacity(
+                          opacity: opacity,
+                          child: Container(
+                            color: Colors.black.withValues(alpha: 0.05),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/logo/app cowry icon white.svg',
+                        width: 40,
+                      ),
+                      const Spacer(),
+                    ],
+                  ),
+                  const Spacer(),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 350),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      final offsetTween = Tween<Offset>(
+                        begin: const Offset(0.08, 0),
+                        end: Offset.zero,
+                      );
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: animation.drive(offsetTween),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Column(
+                      key: ValueKey<int>(_currentIndex),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        OnboardingTitle(index: _currentIndex),
+                        heightSpacing(5),
+                        Text(
+                          'Secure every transaction with escrow-backed payments and smart trust protection.',
+                          textAlign: TextAlign.start,
+                          overflow: TextOverflow.clip,
+                          style: PgStyles.textStyle(
+                            context: context,
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300,
+                            fontFamily: PgFonts.googleSans9,
+                            height: 1.7,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  heightSpacing(18),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: OnboardingIndicator(
+                          currentIndex: _currentIndex,
+                          totalCount: 3,
+                        ),
+                      ),
+                      const Spacer(),
+                      PgScaleButton(
+                        onTap: () {
+                          context.pushNamed(PgRouteNames.rolePage);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 22,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(999),
+                            gradient: const LinearGradient(
+                              colors: [PgColors.primary, PgColors.secondary],
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Get Started',
+                                style: PgStyles.textStyle(
+                                  context: context,
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w300,
+                                  fontFamily: PgFonts.googleSans9,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(
+                                Icons.arrow_forward_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
-              );
-            },
-          );
-        },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
