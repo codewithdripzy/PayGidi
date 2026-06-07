@@ -39,6 +39,7 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
       final authProvider = context.read<AuthProvider>();
       final success = await authProvider.initiateIndividualAuth(
         phone: "234${_phoneController.text}",
+        accountType: 'individual',
         isLogin: false,
       );
 
@@ -66,172 +67,199 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
       color: PgColors.scaffoldBackground,
       child: Scaffold(
         backgroundColor: PgColors.scaffoldBackground,
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                heightSpacing(24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    PgScaleButton(
-                      onTap: () => context.pop(),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: const Icon(Icons.arrow_back_outlined, size: 20),
-                      ),
-                    ),
-                    SvgPicture.asset(
-                      "assets/logo/app cowry icon.svg",
-                      height: 32,
-                    ),
-                  ],
-                ),
-                heightSpacing(24),
-                PgTexts.text700(
-                  context,
-                  text: "Verify Phone Number",
-                  fontSize: 28,
-                  color: PgColors.black,
-                  fontFamily: PgFonts.stackSans,
-                ),
-                heightSpacing(5),
-                PgTexts.text400(
-                  context,
-                  text:
-                      "Enter your phone number to receive a verification code.",
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
-                heightSpacing(40),
-                PgTextField(
-                  label: "Phone Number",
-                  hintText: "800 000 0000",
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  prefixIconConstraints: const BoxConstraints(
-                    minWidth: 0,
-                    minHeight: 0,
-                  ),
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      top: 10,
-                      bottom: 10,
-                      right: 5,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Iconsax.call_copy, size: 20),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: PgColors.primary.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: PgTexts.text600(
-                            context,
-                            text: "+234",
-                            fontSize: 15,
-                            color: PgColors.primary,
-                          ),
+                        heightSpacing(24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            PgScaleButton(
+                              onTap: () => context.pop(),
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_back_outlined,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            SvgPicture.asset(
+                              "assets/logo/app cowry icon.svg",
+                              height: 32,
+                            ),
+                          ],
                         ),
+                        heightSpacing(24),
+                        PgTexts.text700(
+                          context,
+                          text: "Verify Phone Number",
+                          fontSize: 28,
+                          color: PgColors.black,
+                          fontFamily: PgFonts.stackSans,
+                        ),
+                        heightSpacing(3),
+                        PgTexts.text400(
+                          context,
+                          text: "Enter your phone number to continue.",
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                        heightSpacing(40),
+                        PgTextField(
+                          label: "Phone Number",
+                          hintText: "800 000 0000",
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          prefixIconConstraints: const BoxConstraints(
+                            minWidth: 0,
+                            minHeight: 0,
+                          ),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.only(
+                              left: 16,
+                              top: 10,
+                              bottom: 10,
+                              right: 5,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Icon(Iconsax.call_copy, size: 20),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: PgColors.primary.withValues(
+                                      alpha: 0.08,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: PgTexts.text600(
+                                    context,
+                                    text: "+234",
+                                    fontSize: 15,
+                                    color: PgColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          textInputAction: TextInputAction.done,
+                          borderRadius: 10,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(10),
+                          ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Phone number is required";
+                            }
+                            if (value.length != 10) {
+                              return "Phone number must be 10 digits";
+                            }
+                            return null;
+                          },
+                        ),
+                        const Spacer(),
+                        Consumer<AuthProvider>(
+                          builder: (context, auth, child) {
+                            return PgScaleButton(
+                              onTap: auth.isLoading ? () {} : _submit,
+                              child: Container(
+                                height: objectHeight(
+                                  size: 60,
+                                  context: context,
+                                ),
+                                width: double.infinity,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(100),
+                                  gradient: LinearGradient(
+                                    colors: auth.isLoading
+                                        ? [
+                                            PgColors.primary.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                            PgColors.secondary.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                          ]
+                                        : [
+                                            PgColors.primary,
+                                            PgColors.secondary,
+                                          ],
+                                  ),
+                                ),
+                                child: auth.isLoading
+                                    ? const SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : PgTexts.text600(
+                                        context,
+                                        text: "Send Code",
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                              ),
+                            );
+                          },
+                        ),
+                        heightSpacing(20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            PgTexts.text400(
+                              context,
+                              text: "Already have an account? ",
+                              fontSize: 16,
+                            ),
+                            GestureDetector(
+                              onTap: () => context.pushNamed(
+                                PgRouteNames.individualLogin,
+                              ),
+                              child: PgTexts.text600(
+                                context,
+                                text: "Login",
+                                color: PgColors.primary,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                        heightSpacing(30),
                       ],
                     ),
                   ),
-                  textInputAction: TextInputAction.done,
-                  borderRadius: 10,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(10),
-                  ],
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Phone number is required";
-                    }
-                    if (value.length != 10) {
-                      return "Phone number must be 10 digits";
-                    }
-                    return null;
-                  },
                 ),
-                heightSpacing(20),
-                Consumer<AuthProvider>(
-                  builder: (context, auth, child) {
-                    return PgScaleButton(
-                      onTap: auth.isLoading ? () {} : _submit,
-                      child: Container(
-                        height: objectHeight(size: 56, context: context),
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          gradient: LinearGradient(
-                            colors: auth.isLoading
-                                ? [
-                                    PgColors.primary.withValues(alpha: 0.5),
-                                    PgColors.secondary.withValues(alpha: 0.5),
-                                  ]
-                                : [PgColors.primary, PgColors.secondary],
-                          ),
-                        ),
-                        child: auth.isLoading
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : PgTexts.text600(
-                                context,
-                                text: "Send Code",
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                      ),
-                    );
-                  },
-                ),
-                heightSpacing(20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    PgTexts.text400(
-                      context,
-                      text: "Already have an account? ",
-                      fontSize: 16,
-                    ),
-                    GestureDetector(
-                      onTap: () =>
-                          context.pushNamed(PgRouteNames.individualLogin),
-                      child: PgTexts.text600(
-                        context,
-                        text: "Login",
-                        color: PgColors.primary,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

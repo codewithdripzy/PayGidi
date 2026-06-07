@@ -29,21 +29,26 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> initiateIndividualAuth({
     required String phone,
+    String? accountType,
     bool isLogin = true,
   }) async {
     setLoading(true);
     final response = await _repository.initiateAuth(
       AuthRequest(
         phone: phone,
-        // accountType: isLogin ? null : 'individual',
+        accountType: accountType,
       ),
     );
     setLoading(false);
 
+    debugPrint("--- Initiate Auth Response ---");
+    debugPrint("Success: ${response.isSuccess}");
     if (response.isSuccess) {
+      debugPrint("Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}");
       _userData = response.data;
       return true;
     } else {
+      debugPrint("Error: ${response.error}");
       _errorMessage = response.error ?? 'Authentication failed';
       return false;
     }
@@ -56,7 +61,10 @@ class AuthProvider extends ChangeNotifier {
     );
     setLoading(false);
 
+    debugPrint("--- Verify OTP Response ---");
+    debugPrint("Success: ${response.isSuccess}");
     if (response.isSuccess) {
+      debugPrint("Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}, Token: ${response.data?.token != null}");
       _userData = response.data;
       if (response.data?.token != null) {
         _isLoggedIn = true;

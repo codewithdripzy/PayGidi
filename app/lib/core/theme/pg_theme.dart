@@ -34,7 +34,7 @@ class PayGidiTheme {
           backgroundColor: PgColors.primary,
           foregroundColor: Colors.white,
           textStyle: const TextStyle(fontSize: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
         ),
       ),
     );
@@ -71,7 +71,7 @@ class PayGidiTheme {
           backgroundColor: PgColors.primary,
           foregroundColor: Colors.white,
           textStyle: const TextStyle(fontSize: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
         ),
       ),
     );

@@ -69,8 +69,8 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
 
     if (success) {
       final needsOnboarding = authProvider.userData?.needsOnboarding ?? false;
-      if (widget.isLogin && !needsOnboarding) {
-        context.goNamed(PgRouteNames.individualHome);
+      if (!needsOnboarding) {
+        context.goNamed(PgRouteNames.individualMain);
       } else {
         context.pushNamed(PgRouteNames.individualCompleteAccount1);
       }
@@ -95,6 +95,7 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              heightSpacing(15),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -124,7 +125,7 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
                 color: PgColors.black,
                 fontFamily: PgFonts.stackSans,
               ),
-              heightSpacing(12),
+              heightSpacing(3),
               PgTexts.text400(
                 context,
                 text: "We've sent a 5-digit code to ${widget.phone}.",
@@ -139,12 +140,14 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
                   (index) => _buildOtpBox(context, index),
                 ),
               ),
-              heightSpacing(32),
+              heightSpacing(24),
               Center(
-                child: Column(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  spacing: 3.0,
                   children: [
                     PgTexts.text400(context, text: "Didn't receive the code?"),
-                    heightSpacing(8),
+                    // heightSpacing(8),
                     PgScaleButton(
                       onTap: () {
                         // Resend OTP logic could be added here
@@ -165,11 +168,11 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
                   return PgScaleButton(
                     onTap: auth.isLoading ? () {} : _verify,
                     child: Container(
-                      height: objectHeight(size: 56, context: context),
+                      height: objectHeight(size: 60, context: context),
                       width: double.infinity,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(100),
                         gradient: LinearGradient(
                           colors: auth.isLoading
                               ? [
@@ -198,15 +201,15 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
                             )
                           : PgTexts.text600(
                               context,
-                              text: "Verify Now",
+                              text: "Verify Account",
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: 15,
                             ),
                     ),
                   );
                 },
               ),
-              heightSpacing(40),
+              heightSpacing(24),
             ],
           ),
         ),
@@ -216,7 +219,6 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
 
   Widget _buildOtpBox(BuildContext context, int index) {
     return SizedBox(
-      height: 60,
       width: 60,
       child: TextFormField(
         controller: _controllers[index],
@@ -238,6 +240,7 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
           LengthLimitingTextInputFormatter(1),
           FilteringTextInputFormatter.digitsOnly,
         ],
+        cursorHeight: 24,
         style: PgStyles.textStyle(
           context: context,
           fontSize: 24,
@@ -247,6 +250,7 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
         decoration: InputDecoration(
           fillColor: Colors.white,
           filled: true,
+          contentPadding: EdgeInsets.symmetric(vertical: 10.0),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade200),

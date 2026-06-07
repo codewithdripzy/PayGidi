@@ -17,10 +17,12 @@ class IndividualCompleteAccount1Screen extends StatefulWidget {
   const IndividualCompleteAccount1Screen({super.key});
 
   @override
-  State<IndividualCompleteAccount1Screen> createState() => _IndividualCompleteAccount1ScreenState();
+  State<IndividualCompleteAccount1Screen> createState() =>
+      _IndividualCompleteAccount1ScreenState();
 }
 
-class _IndividualCompleteAccount1ScreenState extends State<IndividualCompleteAccount1Screen> {
+class _IndividualCompleteAccount1ScreenState
+    extends State<IndividualCompleteAccount1Screen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -58,7 +60,7 @@ class _IndividualCompleteAccount1ScreenState extends State<IndividualCompleteAcc
                 color: PgColors.black,
                 fontFamily: PgFonts.stackSans,
               ),
-              heightSpacing(12),
+              heightSpacing(3),
               PgTexts.text400(
                 context,
                 text: "Tell us a bit more about yourself to get started.",
@@ -105,15 +107,19 @@ class _IndividualCompleteAccount1ScreenState extends State<IndividualCompleteAcc
                       },
                     );
                   } else {
-                    PgSnackBar.show(context, message: "Please fill all fields", isError: true);
+                    PgSnackBar.show(
+                      context,
+                      message: "Please fill all fields",
+                      isError: true,
+                    );
                   }
                 },
                 child: Container(
-                  height: objectHeight(size: 56, context: context),
+                  height: objectHeight(size: 60, context: context),
                   width: double.infinity,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(100),
                     gradient: const LinearGradient(
                       colors: [PgColors.primary, PgColors.secondary],
                     ),
@@ -122,7 +128,7 @@ class _IndividualCompleteAccount1ScreenState extends State<IndividualCompleteAcc
                     context,
                     text: "Next",
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 16,
                   ),
                 ),
               ),

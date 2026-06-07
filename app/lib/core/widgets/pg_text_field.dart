@@ -44,7 +44,7 @@ class PgTextField extends StatefulWidget {
     this.isPassword = false,
     this.inputFormatters,
     this.prefix,
-    this.borderRadius = 16,
+    this.borderRadius = 10,
   });
 
   @override
@@ -75,7 +75,7 @@ class _PgTextFieldState extends State<PgTextField> {
             fontFamily: PgFonts.googleSans,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
         TextFormField(
           controller: widget.controller,
           obscureText: _obscureText,

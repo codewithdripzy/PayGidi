@@ -161,7 +161,7 @@ class DepositScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: PgColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                   child: const Icon(
                     Iconsax.copy_copy,

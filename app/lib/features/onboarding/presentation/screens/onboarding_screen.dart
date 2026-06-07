@@ -176,10 +176,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           style: PgStyles.textStyle(
                             context: context,
                             color: Colors.white,
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w300,
                             fontFamily: PgFonts.googleSans9,
-                            height: 1.7,
+                            height: 1.5,
                           ),
                         ),
                       ],
@@ -220,8 +220,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 style: PgStyles.textStyle(
                                   context: context,
                                   color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w300,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
                                   fontFamily: PgFonts.googleSans9,
                                 ),
                               ),

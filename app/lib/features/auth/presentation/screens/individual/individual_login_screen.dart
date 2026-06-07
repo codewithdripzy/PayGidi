@@ -103,7 +103,7 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                   color: PgColors.black,
                   fontFamily: PgFonts.stackSans,
                 ),
-                heightSpacing(12),
+                heightSpacing(2),
                 PgTexts.text400(
                   context,
                   text: "Login securely to your PayGidi account.",
@@ -151,11 +151,11 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                               await _submit();
                             },
                       child: Container(
-                        height: objectHeight(size: 56, context: context),
+                        height: objectHeight(size: 60, context: context),
                         width: double.infinity,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(100),
                           gradient: LinearGradient(
                             colors: auth.isLoading
                                 ? [
@@ -164,14 +164,6 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                                   ]
                                 : [PgColors.primary, PgColors.secondary],
                           ),
-                          boxShadow: [
-                            if (!auth.isLoading)
-                              BoxShadow(
-                                color: PgColors.primary.withValues(alpha: 0.3),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                          ],
                         ),
                         child: auth.isLoading
                             ? const SizedBox(
@@ -186,13 +178,13 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                                 context,
                                 text: "Continue",
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 16,
                               ),
                       ),
                     );
                   },
                 ),
-                heightSpacing(24),
+                heightSpacing(20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

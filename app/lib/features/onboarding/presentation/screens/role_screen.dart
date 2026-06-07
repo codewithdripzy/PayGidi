@@ -59,16 +59,16 @@ class _RoleScreenState extends State<RoleScreen> {
                               context.pushNamed(PgRouteNames.individualLogin),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
+                              // horizontal: 16,
                               vertical: 10,
                             ),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  PgColors.primary.withValues(alpha: 0.10),
-                                  PgColors.secondary.withValues(alpha: 0.10),
-                                ],
-                              ),
+                              // gradient: LinearGradient(
+                              //   colors: [
+                              //     PgColors.primary.withValues(alpha: 0.10),
+                              //     PgColors.secondary.withValues(alpha: 0.10),
+                              //   ],
+                              // ),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: PgTexts.gradientText(
@@ -142,7 +142,7 @@ class _RoleScreenState extends State<RoleScreen> {
                           width: double.infinity,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(100),
                             gradient: const LinearGradient(
                               colors: [PgColors.primary, PgColors.secondary],
                             ),
@@ -214,7 +214,7 @@ class _RoleScreenState extends State<RoleScreen> {
       onTap: () => setState(() => _selectedRole = index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(1.4),
+        padding: const EdgeInsets.all(1),
         constraints: BoxConstraints(minHeight: isSelected ? 188 : 102),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -225,7 +225,7 @@ class _RoleScreenState extends State<RoleScreen> {
               : null,
           border: isSelected
               ? null
-              : Border.all(color: const Color(0xFFE3E7EE), width: 1.2),
+              : Border.all(color: const Color(0xFFE3E7EE), width: 0.5),
         ),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),

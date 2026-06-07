@@ -10,8 +10,9 @@ class HomeBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      PgAssets.customIcon(iconName: 'squad_ad'),
+    return Image.asset(
+      "assets/images/squad_ad_image.png",
+      // PgAssets.customIcon(iconName: 'squad_ad'),
       width: double.infinity,
       height: objectHeight(size: 114, context: context),
       fit: BoxFit.cover,

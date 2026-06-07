@@ -20,7 +20,7 @@ class OnboardingIndicator extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            width: currentIndex == index ? 28 : 16,
+            width: currentIndex == index ? 28 : 20,
             height: 5,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
@@ -28,9 +28,8 @@ class OnboardingIndicator extends StatelessWidget {
                   ? const LinearGradient(
                       colors: [PgColors.primary, PgColors.secondary],
                     )
-                  : const LinearGradient(
-                      colors: [Color(0x66FFFFFF), Color(0x66FFFFFF)],
-                    ),
+                  : null,
+              color: currentIndex == index ? null : const Color(0xFF454545),
             ),
           ),
         ),

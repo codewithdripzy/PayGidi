@@ -124,7 +124,7 @@ class PgSuccessDialog extends StatelessWidget {
                     width: double.infinity,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(100),
                       gradient: const LinearGradient(
                         colors: [PgColors.primary, PgColors.secondary],
                         begin: Alignment.topLeft,

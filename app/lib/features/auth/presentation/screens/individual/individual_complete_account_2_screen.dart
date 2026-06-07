@@ -136,7 +136,7 @@ class _IndividualCompleteAccount2ScreenState
       message:
           "Your account has been created successfully. Welcome to PayGidi!",
       buttonText: "Go to Home",
-      onButtonPressed: () => context.goNamed(PgRouteNames.individualHome),
+      onButtonPressed: () => context.goNamed(PgRouteNames.individualMain),
     );
   }
 
@@ -167,7 +167,7 @@ class _IndividualCompleteAccount2ScreenState
                   color: PgColors.black,
                   fontFamily: PgFonts.stackSans,
                 ),
-                heightSpacing(12),
+                heightSpacing(5),
                 PgTexts.text400(
                   context,
                   text:
@@ -185,14 +185,14 @@ class _IndividualCompleteAccount2ScreenState
                   textInputAction: TextInputAction.next,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(10),
+                    LengthLimitingTextInputFormatter(11),
                   ],
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "NIN is required";
                     }
-                    if (value.length < 10) {
-                      return "NIN must be at least 10 digits";
+                    if (value.length < 11) {
+                      return "NIN must be at least 11 digits";
                     }
                     return null;
                   },
@@ -231,7 +231,7 @@ class _IndividualCompleteAccount2ScreenState
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: Colors.grey.shade200),
                   ),
                   child: DropdownButtonHideUnderline(
@@ -261,11 +261,11 @@ class _IndividualCompleteAccount2ScreenState
                     return PgScaleButton(
                       onTap: auth.isLoading ? () {} : _submit,
                       child: Container(
-                        height: objectHeight(size: 56, context: context),
+                        height: objectHeight(size: 60, context: context),
                         width: double.infinity,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(100),
                           gradient: LinearGradient(
                             colors: auth.isLoading
                                 ? [
@@ -286,9 +286,9 @@ class _IndividualCompleteAccount2ScreenState
                               )
                             : PgTexts.text600(
                                 context,
-                                text: "Submit",
+                                text: "Complete Account",
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 16,
                               ),
                       ),
                     );
