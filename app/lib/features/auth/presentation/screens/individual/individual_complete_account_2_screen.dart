@@ -183,32 +183,11 @@ class _IndividualCompleteAccount2ScreenState
                   PgTexts.text400(
                     context,
                     text:
-                        "Provide your NIN and other details to secure your account.",
+                        "Provide your BVN and other details to secure your account.",
                     fontSize: 14,
                     color: Colors.black54,
                   ),
                   heightSpacing(40),
-                  PgTextField(
-                    label: "NIN (Optional)",
-                    hintText: "Enter your 11-digit NIN",
-                    controller: _ninController,
-                    keyboardType: TextInputType.number,
-                    prefixIcon: const Icon(Iconsax.shield_tick_copy, size: 20),
-                    textInputAction: TextInputAction.next,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(11),
-                    ],
-                    validator: (value) {
-                      if (value != null &&
-                          value.isNotEmpty &&
-                          value.length < 11) {
-                        return "NIN must be 11 digits";
-                      }
-                      return null;
-                    },
-                  ),
-                  heightSpacing(20),
                   PgTextField(
                     label: "BVN (Bank Verification Number)",
                     hintText: "Enter your 11-digit BVN",
@@ -226,6 +205,27 @@ class _IndividualCompleteAccount2ScreenState
                       }
                       if (value.length < 11) {
                         return "BVN must be 11 digits";
+                      }
+                      return null;
+                    },
+                  ),
+                  heightSpacing(20),
+                  PgTextField(
+                    label: "NIN (Optional)",
+                    hintText: "Enter your 11-digit NIN",
+                    controller: _ninController,
+                    keyboardType: TextInputType.number,
+                    prefixIcon: const Icon(Iconsax.shield_tick_copy, size: 20),
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(11),
+                    ],
+                    validator: (value) {
+                      if (value != null &&
+                          value.isNotEmpty &&
+                          value.length < 11) {
+                        return "NIN must be 11 digits";
                       }
                       return null;
                     },
