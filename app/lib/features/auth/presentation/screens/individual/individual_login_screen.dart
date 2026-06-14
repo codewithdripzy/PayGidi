@@ -90,7 +90,7 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                       ),
                     ),
                     SvgPicture.asset(
-                      "assets/logo/app cowry icon.svg",
+                      "assets/logo/app_cowry_icon.svg",
                       height: 32,
                     ),
                   ],
