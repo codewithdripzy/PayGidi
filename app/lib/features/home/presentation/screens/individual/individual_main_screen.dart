@@ -137,6 +137,8 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
+      floatingActionButton: _buildPayButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: Container(
         height: 100,
         decoration: BoxDecoration(
@@ -156,7 +158,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
             children: [
               _buildNavItem(0, Iconsax.home_2_copy, "Home"),
               _buildNavItem(1, Iconsax.card_copy, "Cards"),
-              _buildPayButton(),
+              const SizedBox(width: 60), // Space for FAB
               _buildNavItem(2, Iconsax.chart_2_copy, "Finance"),
               _buildNavItem(3, Iconsax.user_copy, "Me"),
             ],

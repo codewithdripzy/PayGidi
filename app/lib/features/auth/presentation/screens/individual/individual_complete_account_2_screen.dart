@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_places_autocomplete_widgets/address_autocomplete_widgets.dart';
-import 'package:google_maps_places_autocomplete_widgets/model/place.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -153,220 +152,234 @@ class _IndividualCompleteAccount2ScreenState
       color: PgColors.scaffoldBackground,
       child: Scaffold(
         backgroundColor: PgColors.scaffoldBackground,
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                heightSpacing(24),
-                PgScaleButton(
-                  child: const Icon(Icons.arrow_back_outlined),
-                  onTap: () => context.pop(),
-                ),
-                heightSpacing(18),
-                PgTexts.text700(
-                  context,
-                  text: "Final Step",
-                  fontSize: 28,
-                  color: PgColors.black,
-                  fontFamily: PgFonts.stackSans,
-                ),
-                heightSpacing(5),
-                PgTexts.text400(
-                  context,
-                  text:
-                      "Provide your NIN and other details to secure your account.",
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-                heightSpacing(40),
-                PgTextField(
-                  label: "NIN (Optional)",
-                  hintText: "Enter your 11-digit NIN",
-                  controller: _ninController,
-                  keyboardType: TextInputType.number,
-                  prefixIcon: const Icon(Iconsax.shield_tick_copy, size: 20),
-                  textInputAction: TextInputAction.next,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(11),
-                  ],
-                  validator: (value) {
-                    if (value != null && value.isNotEmpty && value.length < 11) {
-                      return "NIN must be 11 digits";
-                    }
-                    return null;
-                  },
-                ),
-                heightSpacing(20),
-                PgTextField(
-                  label: "BVN (Bank Verification Number)",
-                  hintText: "Enter your 11-digit BVN",
-                  controller: _bvnController,
-                  keyboardType: TextInputType.number,
-                  prefixIcon: const Icon(Iconsax.shield_security, size: 20),
-                  textInputAction: TextInputAction.next,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(11),
-                  ],
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "BVN is required";
-                    }
-                    if (value.length < 11) {
-                      return "BVN must be 11 digits";
-                    }
-                    return null;
-                  },
-                ),
-                heightSpacing(20),
-                PgTextField(
-                  label: "Date of Birth",
-                  hintText: "Select your date of birth",
-                  controller: _dobController,
-                  readOnly: true,
-                  onTap: () => _selectDate(context),
-                  prefixIcon: const Icon(Iconsax.calendar_1_copy, size: 20),
-                ),
-                heightSpacing(20),
-                PgTexts.text500(
-                  context,
-                  text: "Residential Address",
-                  fontSize: 12,
-                  color: PgColors.black,
-                  fontFamily: PgFonts.googleSans,
-                ),
-                heightSpacing(5),
-                AddressAutocompleteTextFormField(
-                  mapsApiKey: AppConfig.googleMapsApiKey,
-                  controller: _addressController,
-                  onSuggestionClick: (Place place) {
-                    _addressController.text = place.formattedAddress ?? "";
-                  },
-                  componentCountry: 'ng',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Address is required";
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                    hintText: "Search your address",
-                    hintStyle: PgStyles.textStyle(
-                      context: context,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.grey.shade400,
-                      fontFamily: PgFonts.googleSans,
-                    ),
-                    prefixIcon: const Icon(Iconsax.location_copy, size: 20),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 14,
-                    ),
-                    fillColor: Colors.white,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: PgColors.primary,
-                        width: 1.5,
+        body: RefreshIndicator(
+          onRefresh: () async {
+            // Add refresh logic here
+            await Future.delayed(const Duration(seconds: 1));
+          },
+          color: PgColors.primary,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  heightSpacing(24),
+                  PgScaleButton(
+                    child: const Icon(Icons.arrow_back_outlined),
+                    onTap: () => context.pop(),
+                  ),
+                  heightSpacing(18),
+                  PgTexts.text700(
+                    context,
+                    text: "Final Step",
+                    fontSize: 28,
+                    color: PgColors.black,
+                    fontFamily: PgFonts.stackSans,
+                  ),
+                  heightSpacing(5),
+                  PgTexts.text400(
+                    context,
+                    text:
+                        "Provide your NIN and other details to secure your account.",
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                  heightSpacing(40),
+                  PgTextField(
+                    label: "NIN (Optional)",
+                    hintText: "Enter your 11-digit NIN",
+                    controller: _ninController,
+                    keyboardType: TextInputType.number,
+                    prefixIcon: const Icon(Iconsax.shield_tick_copy, size: 20),
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(11),
+                    ],
+                    validator: (value) {
+                      if (value != null &&
+                          value.isNotEmpty &&
+                          value.length < 11) {
+                        return "NIN must be 11 digits";
+                      }
+                      return null;
+                    },
+                  ),
+                  heightSpacing(20),
+                  PgTextField(
+                    label: "BVN (Bank Verification Number)",
+                    hintText: "Enter your 11-digit BVN",
+                    controller: _bvnController,
+                    keyboardType: TextInputType.number,
+                    prefixIcon: const Icon(Iconsax.shield_security, size: 20),
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(11),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "BVN is required";
+                      }
+                      if (value.length < 11) {
+                        return "BVN must be 11 digits";
+                      }
+                      return null;
+                    },
+                  ),
+                  heightSpacing(20),
+                  PgTextField(
+                    label: "Date of Birth",
+                    hintText: "Select your date of birth",
+                    controller: _dobController,
+                    readOnly: true,
+                    onTap: () => _selectDate(context),
+                    prefixIcon: const Icon(Iconsax.calendar_1_copy, size: 20),
+                  ),
+                  heightSpacing(20),
+                  PgTexts.text500(
+                    context,
+                    text: "Residential Address",
+                    fontSize: 12,
+                    color: PgColors.black,
+                    fontFamily: PgFonts.googleSans,
+                  ),
+                  heightSpacing(5),
+                  AddressAutocompleteTextFormField(
+                    mapsApiKey: AppConfig.googleMapsApiKey,
+                    controller: _addressController,
+                    onSuggestionClick: (Place place) {
+                      _addressController.text = place.formattedAddress ?? "";
+                    },
+                    componentCountry: 'ng',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Address is required";
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      hintText: "Search your address",
+                      hintStyle: PgStyles.textStyle(
+                        context: context,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey.shade400,
+                        fontFamily: PgFonts.googleSans,
                       ),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.red, width: 1),
-                    ),
-                  ),
-                ),
-                heightSpacing(20),
-                PgTexts.text500(
-                  context,
-                  text: "Gender",
-                  fontSize: 14,
-                  color: PgColors.black,
-                ),
-                heightSpacing(8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedGender,
-                      hint: PgTexts.text400(
-                        context,
-                        text: "Select Gender",
-                        color: Colors.grey,
+                      prefixIcon: const Icon(Iconsax.location_copy, size: 20),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
                       ),
-                      isExpanded: true,
-                      items: ["Male", "Female"]
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e,
-                              child: PgTexts.text400(context, text: e),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (val) => setState(() => _selectedGender = val),
-                    ),
-                  ),
-                ),
-                heightSpacing(40),
-                Consumer<AuthProvider>(
-                  builder: (context, auth, child) {
-                    return PgScaleButton(
-                      onTap: auth.isLoading ? () {} : _submit,
-                      child: Container(
-                        height: objectHeight(size: 60, context: context),
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          gradient: LinearGradient(
-                            colors: auth.isLoading
-                                ? [
-                                    PgColors.primary.withValues(alpha: 0.5),
-                                    PgColors.secondary.withValues(alpha: 0.5),
-                                  ]
-                                : [PgColors.primary, PgColors.secondary],
-                          ),
+                      fillColor: Colors.white,
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: PgColors.primary,
+                          width: 1.5,
                         ),
-                        child: auth.isLoading
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : PgTexts.text600(
-                                context,
-                                text: "Complete Account",
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
                       ),
-                    );
-                  },
-                ),
-                heightSpacing(40),
-              ],
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  heightSpacing(20),
+                  PgTexts.text500(
+                    context,
+                    text: "Gender",
+                    fontSize: 14,
+                    color: PgColors.black,
+                  ),
+                  heightSpacing(8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedGender,
+                        hint: PgTexts.text400(
+                          context,
+                          text: "Select Gender",
+                          color: Colors.grey,
+                        ),
+                        isExpanded: true,
+                        items: ["Male", "Female"]
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: e,
+                                child: PgTexts.text400(context, text: e),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) =>
+                            setState(() => _selectedGender = val),
+                      ),
+                    ),
+                  ),
+                  heightSpacing(40),
+                  Consumer<AuthProvider>(
+                    builder: (context, auth, child) {
+                      return PgScaleButton(
+                        onTap: auth.isLoading ? () {} : _submit,
+                        child: Container(
+                          height: objectHeight(size: 60, context: context),
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            gradient: LinearGradient(
+                              colors: auth.isLoading
+                                  ? [
+                                      PgColors.primary.withValues(alpha: 0.5),
+                                      PgColors.secondary.withValues(alpha: 0.5),
+                                    ]
+                                  : [PgColors.primary, PgColors.secondary],
+                            ),
+                          ),
+                          child: auth.isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : PgTexts.text600(
+                                  context,
+                                  text: "Complete Account",
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                        ),
+                      );
+                    },
+                  ),
+                  heightSpacing(40),
+                ],
+              ),
             ),
           ),
         ),
