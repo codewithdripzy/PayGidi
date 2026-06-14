@@ -111,9 +111,9 @@ class _IndividualCompleteAccount2ScreenState
         lastName: widget.lastName,
         email: widget.email,
         dateOfBirth: _dobController.text,
-        nin: _ninController.text,
+        nin: _ninController.text.isNotEmpty ? _ninController.text : null,
         address: _addressController.text,
-        bvn: _bvnController.text.isNotEmpty ? _bvnController.text : null,
+        bvn: _bvnController.text,
         gender: _selectedGender == "Male"
             ? "1"
             : "2", // Based on backend 1=Male, 2=Female
@@ -183,8 +183,8 @@ class _IndividualCompleteAccount2ScreenState
                 ),
                 heightSpacing(40),
                 PgTextField(
-                  label: "NIN (National Identification Number)",
-                  hintText: "Enter your 10-digit NIN",
+                  label: "NIN (Optional)",
+                  hintText: "Enter your 11-digit NIN",
                   controller: _ninController,
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Iconsax.shield_tick_copy, size: 20),
@@ -194,18 +194,15 @@ class _IndividualCompleteAccount2ScreenState
                     LengthLimitingTextInputFormatter(11),
                   ],
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "NIN is required";
-                    }
-                    if (value.length < 11) {
-                      return "NIN must be at least 11 digits";
+                    if (value != null && value.isNotEmpty && value.length < 11) {
+                      return "NIN must be 11 digits";
                     }
                     return null;
                   },
                 ),
                 heightSpacing(20),
                 PgTextField(
-                  label: "BVN (Optional)",
+                  label: "BVN (Bank Verification Number)",
                   hintText: "Enter your 11-digit BVN",
                   controller: _bvnController,
                   keyboardType: TextInputType.number,
@@ -215,6 +212,15 @@ class _IndividualCompleteAccount2ScreenState
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(11),
                   ],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "BVN is required";
+                    }
+                    if (value.length < 11) {
+                      return "BVN must be 11 digits";
+                    }
+                    return null;
+                  },
                 ),
                 heightSpacing(20),
                 PgTextField(
