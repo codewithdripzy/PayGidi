@@ -139,26 +139,19 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
       body: _screens[_selectedIndex],
       floatingActionButton: _buildPayButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: Container(
-        height: 100,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        color: Colors.white,
+        elevation: 10,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildNavItem(0, Iconsax.home_2_copy, "Home"),
               _buildNavItem(1, Iconsax.card_copy, "Cards"),
-              const SizedBox(width: 60), // Space for FAB
+              const SizedBox(width: 40), // Space for FAB
               _buildNavItem(2, Iconsax.chart_2_copy, "Finance"),
               _buildNavItem(3, Iconsax.user_copy, "Me"),
             ],
