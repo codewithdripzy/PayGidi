@@ -69,8 +69,8 @@ class _PgTextFieldState extends State<PgTextField> {
           widget.label,
           style: PgStyles.textStyle(
             context: context,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
             color: PgColors.black,
             fontFamily: PgFonts.googleSans,
           ),

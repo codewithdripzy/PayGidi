@@ -19,7 +19,8 @@ void main(List<String> args) {
         Provider.value(value: authRepository),
         Provider.value(value: authStorageService),
         ChangeNotifierProvider(
-            create: (_) => AuthProvider(authRepository, authStorageService)),
+          create: (_) => AuthProvider(authRepository, authStorageService),
+        ),
       ],
       child: const PgApp(),
     ),

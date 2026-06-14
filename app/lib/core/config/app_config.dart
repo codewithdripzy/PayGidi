@@ -6,5 +6,7 @@ class AppConfig {
 
   static const String apiKey = String.fromEnvironment('API_KEY');
   
+  static const String googleMapsApiKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
+  
   // Add other config variables here
 }

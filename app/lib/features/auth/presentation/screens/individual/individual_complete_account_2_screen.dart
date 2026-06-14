@@ -1,3 +1,4 @@
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
@@ -13,6 +14,8 @@ import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_places_autocomplete_widgets/address_autocomplete_widgets.dart';
+import 'package:google_maps_places_autocomplete_widgets/model/place.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -40,6 +43,7 @@ class _IndividualCompleteAccount2ScreenState
   final _bvnController = TextEditingController();
   final _ninController = TextEditingController();
   final _dobController = TextEditingController();
+  final _addressController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _selectedGender;
   DateTime? _birthDate;
@@ -49,6 +53,7 @@ class _IndividualCompleteAccount2ScreenState
     _bvnController.dispose();
     _ninController.dispose();
     _dobController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -107,6 +112,7 @@ class _IndividualCompleteAccount2ScreenState
         email: widget.email,
         dateOfBirth: _dobController.text,
         nin: _ninController.text,
+        address: _addressController.text,
         bvn: _bvnController.text.isNotEmpty ? _bvnController.text : null,
         gender: _selectedGender == "Male"
             ? "1"
@@ -218,6 +224,65 @@ class _IndividualCompleteAccount2ScreenState
                   readOnly: true,
                   onTap: () => _selectDate(context),
                   prefixIcon: const Icon(Iconsax.calendar_1_copy, size: 20),
+                ),
+                heightSpacing(20),
+                PgTexts.text500(
+                  context,
+                  text: "Residential Address",
+                  fontSize: 12,
+                  color: PgColors.black,
+                  fontFamily: PgFonts.googleSans,
+                ),
+                heightSpacing(5),
+                AddressAutocompleteTextFormField(
+                  mapsApiKey: AppConfig.googleMapsApiKey,
+                  controller: _addressController,
+                  onSuggestionClick: (Place place) {
+                    _addressController.text = place.formattedAddress ?? "";
+                  },
+                  componentCountry: 'ng',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Address is required";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText: "Search your address",
+                    hintStyle: PgStyles.textStyle(
+                      context: context,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey.shade400,
+                      fontFamily: PgFonts.googleSans,
+                    ),
+                    prefixIcon: const Icon(Iconsax.location_copy, size: 20),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
+                    fillColor: Colors.white,
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: PgColors.primary,
+                        width: 1.5,
+                      ),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.red, width: 1),
+                    ),
+                  ),
                 ),
                 heightSpacing(20),
                 PgTexts.text500(

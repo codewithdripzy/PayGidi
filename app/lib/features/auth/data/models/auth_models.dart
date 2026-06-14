@@ -28,6 +28,7 @@ class IndividualCompleteAccountRequest {
   final String dateOfBirth;
   final String email;
   final String nin;
+  final String address;
   final String? bvn;
   final String? referralCode;
   final String gender;
@@ -38,6 +39,7 @@ class IndividualCompleteAccountRequest {
     required this.dateOfBirth,
     required this.email,
     required this.nin,
+    required this.address,
     this.bvn,
     this.referralCode,
     required this.gender,
@@ -49,6 +51,7 @@ class IndividualCompleteAccountRequest {
         'dateOfBirth': dateOfBirth,
         'email': email,
         'nin': nin,
+        'address': address,
         if (bvn != null) 'bvn': bvn,
         if (referralCode != null) 'referralCode': referralCode,
         'gender': gender,

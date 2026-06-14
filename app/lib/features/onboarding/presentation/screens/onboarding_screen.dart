@@ -220,7 +220,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 style: PgStyles.textStyle(
                                   context: context,
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: PgFonts.googleSans9,
                                 ),
