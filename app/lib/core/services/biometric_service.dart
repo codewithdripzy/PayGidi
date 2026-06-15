@@ -18,6 +18,13 @@ class BiometricService {
 
   Future<bool> authenticateLocally() async {
     try {
+      final bool canAuthenticateWithBiometrics = await _auth.canCheckBiometrics;
+      final bool isDeviceSupported = await _auth.isDeviceSupported();
+
+      if (!canAuthenticateWithBiometrics && !isDeviceSupported) {
+        return false;
+      }
+
       return await _auth.authenticate(
         localizedReason: 'Authenticate to access your PayGidi account',
       );

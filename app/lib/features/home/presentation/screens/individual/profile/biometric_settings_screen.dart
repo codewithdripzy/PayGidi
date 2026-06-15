@@ -78,6 +78,12 @@ class _BiometricSettingsScreenState extends State<BiometricSettingsScreen> {
             );
           }
         }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Authentication failed or cancelled")),
+          );
+        }
       }
     } else {
       await biometricService.setBiometricEnabled(false);
