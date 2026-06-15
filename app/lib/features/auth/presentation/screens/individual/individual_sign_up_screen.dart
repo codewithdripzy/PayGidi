@@ -6,6 +6,7 @@ import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_snackbar.dart';
 import 'package:app/core/widgets/pg_text_field.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/auth/data/models/country_model.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,8 @@ import 'package:provider/provider.dart';
 /// [IndividualSignUpScreen] is the starting point for the registration flow.
 /// It captures the user's phone number and initiates the OTP verification process.
 class IndividualSignUpScreen extends StatefulWidget {
-  const IndividualSignUpScreen({super.key});
+  final Country? country;
+  const IndividualSignUpScreen({super.key, this.country});
 
   @override
   State<IndividualSignUpScreen> createState() => _IndividualSignUpScreenState();
@@ -36,9 +38,10 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
+      final dialCode = widget.country?.dialCode.replaceAll('+', '') ?? "234";
       final authProvider = context.read<AuthProvider>();
       final success = await authProvider.initiateIndividualAuth(
-        phone: "234${_phoneController.text}",
+        phone: "$dialCode${_phoneController.text}",
         accountType: 'individual',
         isLogin: false,
       );
@@ -48,7 +51,10 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
       if (success) {
         context.pushNamed(
           PgRouteNames.individualOtp,
-          extra: {'isLogin': false, 'phone': "234${_phoneController.text}"},
+          extra: {
+            'isLogin': false,
+            'phone': "$dialCode${_phoneController.text}"
+          },
         );
       } else {
         PgSnackBar.show(
@@ -155,11 +161,20 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
                                     ),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: PgTexts.text600(
-                                    context,
-                                    text: "+234",
-                                    fontSize: 15,
-                                    color: PgColors.primary,
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        widget.country?.flag ?? "🇳🇬",
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      PgTexts.text600(
+                                        context,
+                                        text: widget.country?.dialCode ?? "+234",
+                                        fontSize: 15,
+                                        color: PgColors.primary,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],

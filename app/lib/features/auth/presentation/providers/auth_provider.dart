@@ -21,6 +21,15 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  Future<void> checkLoginStatus() async {
+    final token = await _storageService.getToken();
+    if (token != null) {
+      _isLoggedIn = true;
+      // Ideally fetch user data here too
+    }
+    notifyListeners();
+  }
+
   void setLoading(bool value) {
     _isLoading = value;
     _errorMessage = null;

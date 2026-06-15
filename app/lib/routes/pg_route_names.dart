@@ -11,5 +11,6 @@ class PgRouteNames {
   static const String individualCompleteAccount2 = 'individualCompleteAccount2';
   static const String individualHome = 'individualHome';
   static const String individualMain = 'individualMain';
+  static const String countrySelection = 'countrySelection';
   static const String deposit = 'deposit';
 }

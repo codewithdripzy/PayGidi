@@ -18,6 +18,7 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
 
+    debugPrint("user data: ${authProvider.userData}");
     return Row(
       children: [
         SvgPicture.asset(

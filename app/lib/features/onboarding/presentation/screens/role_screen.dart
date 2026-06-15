@@ -134,7 +134,7 @@ class _RoleScreenState extends State<RoleScreen> {
                       child: PgScaleButton(
                         onTap: () {
                           if (_selectedRole != null) {
-                            context.pushNamed(PgRouteNames.individualSignUp);
+                            context.pushNamed(PgRouteNames.countrySelection);
                           }
                         },
                         child: Container(

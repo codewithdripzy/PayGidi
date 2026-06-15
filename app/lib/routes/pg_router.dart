@@ -1,3 +1,5 @@
+import 'package:app/features/auth/data/models/country_model.dart';
+import 'package:app/features/auth/presentation/screens/country_selection_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_main_screen.dart';
 import 'package:app/features/wallet/presentation/screens/deposit_screen.dart';
@@ -48,8 +50,21 @@ class PayGidiRouter {
       GoRoute(
         path: "/${PgRouteNames.individualSignUp}",
         name: PgRouteNames.individualSignUp,
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final country = extra?['country'] as Country?;
+          return CustomTransitionPage(
+            child: IndividualSignUpScreen(country: country),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                RouteTransitions.slideRight(animation, child),
+          );
+        },
+      ),
+      GoRoute(
+        path: "/${PgRouteNames.countrySelection}",
+        name: PgRouteNames.countrySelection,
         pageBuilder: (context, state) => CustomTransitionPage(
-          child: const IndividualSignUpScreen(),
+          child: const CountrySelectionScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               RouteTransitions.slideRight(animation, child),
         ),

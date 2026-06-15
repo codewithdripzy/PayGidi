@@ -3,7 +3,9 @@ import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/home/presentation/screens/individual/individual_cards_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/individual_me_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -20,9 +22,9 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
 
   final List<Widget> _screens = [
     const IndividualHomeScreen(),
-    const Center(child: Text("Cards")),
+    const IndividualCardsScreen(),
     const Center(child: Text("Finance")),
-    const Center(child: Text("Me")),
+    const IndividualMeScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -141,7 +143,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
+        notchMargin: 10,
         color: Colors.white,
         elevation: 10,
         child: Padding(
@@ -151,7 +153,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
             children: [
               _buildNavItem(0, Iconsax.home_2_copy, "Home"),
               _buildNavItem(1, Iconsax.card_copy, "Cards"),
-              const SizedBox(width: 40), // Space for FAB
+              const SizedBox(width: 10), // Space for FAB
               _buildNavItem(2, Iconsax.chart_2_copy, "Finance"),
               _buildNavItem(3, Iconsax.user_copy, "Me"),
             ],
@@ -189,6 +191,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
     return PgScaleButton(
       onTap: _showPaymentSelection,
       child: Container(
+        margin: const EdgeInsets.only(top: 30),
         height: 60,
         width: 60,
         decoration: BoxDecoration(
@@ -200,7 +203,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: PgColors.primary.withValues(alpha: 0.3),
+              color: PgColors.black.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
