@@ -20,10 +20,6 @@ class BiometricService {
     try {
       return await _auth.authenticate(
         localizedReason: 'Authenticate to access your PayGidi account',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
       );
     } catch (e) {
       return false;

@@ -6,8 +6,10 @@ import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/biometric_settings_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/notifications_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/personal_info_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/profile_detail_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/security_pin_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/theme_selection_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/transaction_history_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -96,10 +98,7 @@ class IndividualMeScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const IndividualProfileDetailScreen(
-                            title: "Security & PIN",
-                            description: "Manage your login password and transaction PIN.",
-                          ),
+                          builder: (context) => const SecurityPinScreen(),
                         ),
                       ),
                     ),
@@ -119,10 +118,7 @@ class IndividualMeScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const IndividualProfileDetailScreen(
-                            title: "Notifications",
-                            description: "Choose what alerts you want to receive.",
-                          ),
+                          builder: (context) => const NotificationsScreen(),
                         ),
                       ),
                     ),

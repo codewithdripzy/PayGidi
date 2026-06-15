@@ -69,6 +69,7 @@ class AuthResponseData {
   final String? accountType;
   final bool? needsOnboarding;
   final String? requiredAction;
+  final bool hasPin;
 
   AuthResponseData({
     this.token,
@@ -81,6 +82,7 @@ class AuthResponseData {
     this.accountType,
     this.needsOnboarding,
     this.requiredAction,
+    this.hasPin = false,
   });
 
   factory AuthResponseData.fromJson(Map<String, dynamic> json) {
@@ -95,6 +97,7 @@ class AuthResponseData {
       accountType: json['accountType'] as String?,
       needsOnboarding: json['needsOnboarding'] as bool?,
       requiredAction: json['requiredAction'] as String?,
+      hasPin: json['hasPin'] as bool? ?? false,
     );
   }
 
@@ -109,6 +112,7 @@ class AuthResponseData {
         'accountType': accountType,
         'needsOnboarding': needsOnboarding,
         'requiredAction': requiredAction,
+        'hasPin': hasPin,
       };
 }
 
