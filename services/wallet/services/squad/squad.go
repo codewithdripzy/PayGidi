@@ -40,6 +40,7 @@ func CreateVirtualAccount(ctx context.Context, payload payloads.CreateSquadVirtu
 	if payload.BeneficiaryAccount == "" {
 		payload.BeneficiaryAccount = constants.SQUAD_BENEFICIARY_ACCOUNT
 	}
+	log.Printf("[Squad][CreateVirtualAccount] using beneficiary account: %s", payload.BeneficiaryAccount)
 	var response responses.SquadResponse[responses.SquadVirtualAccountResponseData]
 
 	_, err := httpclient.PostJSON(client, ctx, "/virtual-account", payload, &response)
@@ -58,6 +59,7 @@ func CreateBusinessVirtualAccount(ctx context.Context, payload payloads.CreateSq
 	if payload.BeneficiaryAccount == "" {
 		payload.BeneficiaryAccount = constants.SQUAD_BENEFICIARY_ACCOUNT
 	}
+	log.Printf("[Squad][CreateBusinessVirtualAccount] using beneficiary account: %s", payload.BeneficiaryAccount)
 	var response responses.SquadResponse[responses.SquadVirtualAccountResponseData]
 
 	_, err := httpclient.PostJSON(client, ctx, "/virtual-account/business", payload, &response)
