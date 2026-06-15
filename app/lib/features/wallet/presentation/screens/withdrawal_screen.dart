@@ -59,7 +59,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                 heightSpacing(4),
                 PgTexts.text400(
                   context,
-                  text: "Move money from your wallet to your bank account or use Tap to Pay.",
+                  text:
+                      "Move money from your wallet to your bank account or use Tap to Pay.",
                   fontSize: 16,
                   color: Colors.black54,
                 ),
@@ -160,7 +161,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: _isTapToPayActive ? PgColors.primary.withValues(alpha: 0.05) : Colors.white,
+          color: _isTapToPayActive
+              ? PgColors.primary.withValues(alpha: 0.05)
+              : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: _isTapToPayActive ? PgColors.primary : Colors.grey.shade100,
@@ -230,7 +233,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           heightSpacing(8),
           PgTexts.text400(
             context,
-            text: "Hold your phone near the contactless terminal to complete the withdrawal.",
+            text:
+                "Hold your phone near the contactless terminal to complete the withdrawal.",
             textAlign: TextAlign.center,
             color: Colors.black54,
           ),

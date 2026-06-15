@@ -20,11 +20,14 @@ class IndividualMeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return buildPGAnnotatedRegion(
-      brightness: Brightness.dark,
-      color: PgColors.scaffoldBackground,
+      brightness: theme.brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark,
+      color: theme.scaffoldBackgroundColor,
       child: Scaffold(
-        backgroundColor: PgColors.scaffoldBackground,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -36,7 +39,7 @@ class IndividualMeScreen extends StatelessWidget {
                   context,
                   text: "Account",
                   fontSize: 28,
-                  color: PgColors.black,
+                  color: theme.textTheme.titleLarge?.color ?? PgColors.black,
                   fontFamily: PgFonts.stackSans,
                 ),
                 heightSpacing(24),

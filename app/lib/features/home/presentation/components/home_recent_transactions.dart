@@ -12,6 +12,7 @@ class HomeRecentTransactions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Row(
@@ -21,7 +22,7 @@ class HomeRecentTransactions extends StatelessWidget {
               context,
               text: "Recent Transactions",
               fontSize: 18,
-              color: PgColors.black,
+              color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
             ),
             GestureDetector(
               onTap: () {},
@@ -75,7 +76,6 @@ class HomeRecentTransactions extends StatelessWidget {
     );
   }
 
-  /// Builds a single transaction row.
   Widget _buildTransaction(
     BuildContext context, {
     required String title,
@@ -83,6 +83,7 @@ class HomeRecentTransactions extends StatelessWidget {
     required String amount,
     required bool isCredit,
   }) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
@@ -90,7 +91,9 @@ class HomeRecentTransactions extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF1A1A1A)
+                  : Colors.grey.shade100,
               shape: BoxShape.circle,
             ),
             child: SvgPicture.asset(
@@ -111,7 +114,7 @@ class HomeRecentTransactions extends StatelessWidget {
                   context,
                   text: title,
                   fontSize: 14,
-                  color: PgColors.black,
+                  color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
                   fontFamily: PgFonts.googleSans,
                 ),
                 PgTexts.text400(

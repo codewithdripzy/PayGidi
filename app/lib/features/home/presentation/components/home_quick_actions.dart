@@ -14,6 +14,11 @@ class HomeQuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final actionBg = theme.brightness == Brightness.dark
+        ? const Color(0xFF1A1A1A)
+        : Colors.grey.shade200;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -22,7 +27,7 @@ class HomeQuickActions extends StatelessWidget {
           "Pay",
           PgAssets.customIcon(iconName: 'pay'),
           PgColors.secondary,
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             colors: [Color(0xffFE4B1F), Color(0xff9D0063)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -32,21 +37,21 @@ class HomeQuickActions extends StatelessWidget {
           context,
           "Deposit",
           PgAssets.customIcon(iconName: 'deposit'),
-          Colors.grey.shade200,
+          actionBg,
           onTap: () => context.pushNamed(PgRouteNames.deposit),
         ),
         _buildAction(
           context,
           "Statement",
           PgAssets.customIcon(iconName: 'invoice'),
-          Colors.grey.shade200,
+          actionBg,
           onTap: () => context.pushNamed(PgRouteNames.statementRequest),
         ),
         _buildAction(
           context,
           "Withdraw",
           PgAssets.customIcon(iconName: 'withdraw'),
-          Colors.grey.shade200,
+          actionBg,
           onTap: () => context.pushNamed(PgRouteNames.withdrawal),
         ),
       ],
@@ -63,6 +68,7 @@ class HomeQuickActions extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     final bool isHighlighted = label == "Pay";
+    final theme = Theme.of(context);
 
     return Column(
       children: [
@@ -75,12 +81,21 @@ class HomeQuickActions extends StatelessWidget {
               gradient: gradient,
               color: bgColor,
               shape: BoxShape.circle,
+              border: Border.all(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : Colors.transparent,
+              ),
             ),
             child: Center(
               child: SvgPicture.asset(
                 iconPath,
                 colorFilter: ColorFilter.mode(
-                  isHighlighted ? Colors.white : Colors.black,
+                  isHighlighted
+                      ? Colors.white
+                      : (theme.brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black),
                   BlendMode.srcIn,
                 ),
                 width: 24,
@@ -93,7 +108,7 @@ class HomeQuickActions extends StatelessWidget {
           context,
           text: label,
           fontSize: 12,
-          color: PgColors.black,
+          color: theme.textTheme.bodyMedium?.color ?? PgColors.black,
         ),
       ],
     );

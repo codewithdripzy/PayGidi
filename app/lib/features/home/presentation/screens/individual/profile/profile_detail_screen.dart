@@ -1,5 +1,5 @@
 import 'package:app/core/theme/pg_colors.dart';
-import 'package:app/core/theme/pg_styles.dart';
+// import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
@@ -19,11 +19,14 @@ class IndividualProfileDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return buildPGAnnotatedRegion(
-      brightness: Brightness.dark,
-      color: PgColors.scaffoldBackground,
+      brightness: theme.brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark,
+      color: theme.scaffoldBackgroundColor,
       child: Scaffold(
-        backgroundColor: PgColors.scaffoldBackground,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -36,11 +39,19 @@ class IndividualProfileDetailScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.cardTheme.color,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(
+                        color: theme.brightness == Brightness.dark
+                            ? const Color(0xFF2A2A2A)
+                            : Colors.grey.shade200,
+                      ),
                     ),
-                    child: const Icon(Icons.arrow_back_outlined, size: 20),
+                    child: Icon(
+                      Icons.arrow_back_outlined,
+                      size: 20,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
                   ),
                 ),
                 heightSpacing(24),
@@ -48,7 +59,7 @@ class IndividualProfileDetailScreen extends StatelessWidget {
                   context,
                   text: title,
                   fontSize: 28,
-                  color: PgColors.black,
+                  color: theme.textTheme.titleLarge?.color ?? PgColors.black,
                 ),
                 if (description != null) ...[
                   heightSpacing(4),
@@ -56,7 +67,8 @@ class IndividualProfileDetailScreen extends StatelessWidget {
                     context,
                     text: description!,
                     fontSize: 16,
-                    color: Colors.black54,
+                    color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
+                        .withValues(alpha: 0.7),
                   ),
                 ],
                 heightSpacing(32),
@@ -76,14 +88,17 @@ class IndividualProfileDetailScreen extends StatelessWidget {
                               context,
                               text: "Coming Soon",
                               fontSize: 18,
-                              color: PgColors.black,
+                              color: theme.textTheme.bodyLarge?.color ??
+                                  PgColors.black,
                             ),
                             heightSpacing(8),
                             PgTexts.text400(
                               context,
                               text: "We're working hard to bring you this feature.",
                               textAlign: TextAlign.center,
-                              color: Colors.black54,
+                              color: (theme.textTheme.bodyMedium?.color ??
+                                      PgColors.black)
+                                  .withValues(alpha: 0.7),
                             ),
                           ],
                         ),

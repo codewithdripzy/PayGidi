@@ -17,6 +17,7 @@ class HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final theme = Theme.of(context);
 
     debugPrint("user data: ${authProvider.userData}");
     return Row(
@@ -24,6 +25,9 @@ class HomeHeader extends StatelessWidget {
         SvgPicture.asset(
           PgAssets.customIcon(iconName: "agidi"),
           height: objectHeight(size: 50, context: context),
+          colorFilter: theme.brightness == Brightness.dark
+              ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+              : null,
         ),
         const SizedBox(width: 12),
         Column(
@@ -39,7 +43,7 @@ class HomeHeader extends StatelessWidget {
               context,
               text: authProvider.userData?.firstName ?? "Guest User",
               fontSize: 16,
-              color: PgColors.black,
+              color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
               fontFamily: PgFonts.googleSans,
             ),
           ],
@@ -47,7 +51,11 @@ class HomeHeader extends StatelessWidget {
         const Spacer(),
         Stack(
           children: [
-            const Icon(Iconsax.notification_copy, size: 28),
+            Icon(
+              Iconsax.notification_copy,
+              size: 28,
+              color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
+            ),
             Positioned(
               right: 2,
               top: 2,

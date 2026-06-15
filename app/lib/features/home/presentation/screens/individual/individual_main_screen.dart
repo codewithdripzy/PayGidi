@@ -34,9 +34,11 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
   }
 
   void _showPaymentSelection() {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: theme.cardTheme.color,
+      elevation: 0,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -52,7 +54,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
                   context,
                   text: "Select Payment Type",
                   fontSize: 20,
-                  color: PgColors.black,
+                  color: theme.textTheme.titleLarge?.color ?? PgColors.black,
                 ),
                 heightSpacing(24),
                 _buildPaymentOption(
@@ -89,14 +91,21 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
     required String subtitle,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return PgScaleButton(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF222222)
+              : const Color(0xFFF9FAFB),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          border: Border.all(
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF2A2A2A)
+                : const Color(0xFFE5E7EB),
+          ),
         ),
         child: Row(
           children: [
@@ -117,13 +126,14 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
                     context,
                     text: title,
                     fontSize: 16,
-                    color: PgColors.black,
+                    color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
                   ),
                   PgTexts.text400(
                     context,
                     text: subtitle,
                     fontSize: 14,
-                    color: Colors.black54,
+                    color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
+                        .withValues(alpha: 0.7),
                   ),
                 ],
               ),
@@ -137,16 +147,28 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: _screens[_selectedIndex],
       floatingActionButton: _buildPayButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 10,
-        color: Colors.white,
-        elevation: 10,
-        child: Padding(
+        color: theme.bottomNavigationBarTheme.backgroundColor,
+        elevation: 0,
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : Colors.grey.shade100,
+              ),
+            ),
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

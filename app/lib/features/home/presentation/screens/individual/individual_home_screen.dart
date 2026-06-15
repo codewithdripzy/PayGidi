@@ -15,11 +15,14 @@ class IndividualHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return buildPGAnnotatedRegion(
-      brightness: Brightness.dark,
-      color: PgColors.scaffoldBackground,
+      brightness: theme.brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark,
+      color: theme.scaffoldBackgroundColor,
       child: Scaffold(
-        backgroundColor: PgColors.scaffoldBackground,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: RefreshIndicator(
           onRefresh: () async {
             // Add refresh logic here
