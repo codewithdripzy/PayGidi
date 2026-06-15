@@ -135,10 +135,13 @@ func CompleteAccount(c *gin.Context) {
 	salt := os.Getenv("NIN_HASH_SALT")
 	updates := map[string]interface{}{
 		"email":          email,
-		"hashed_nin":     utils.HashNIN(nin, salt),
 		"status":         "active",
 		"is_first_time":  true,
 		"phone_verified": true, // Since they verified via OTP to get here
+	}
+
+	if nin != "" {
+		updates["hashed_nin"] = utils.HashNIN(nin, salt)
 	}
 
 	if err := tx.Model(&u).Updates(updates).Error; err != nil {

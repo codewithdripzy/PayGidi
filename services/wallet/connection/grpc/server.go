@@ -41,9 +41,9 @@ func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 		return nil, status.Error(codes.InvalidArgument, "request body is required")
 	}
 
-	if strings.TrimSpace(req.Firstname) == "" || strings.TrimSpace(req.Lastname) == "" || strings.TrimSpace(req.Nin) == "" || strings.TrimSpace(req.DateOfBirth) == "" {
+	if strings.TrimSpace(req.Firstname) == "" || strings.TrimSpace(req.Lastname) == "" || strings.TrimSpace(req.Bvn) == "" || strings.TrimSpace(req.DateOfBirth) == "" {
 		log.Printf("[WalletServer] Error: missing required fields")
-		return nil, status.Error(codes.InvalidArgument, "firstname, lastname, nin and dateOfBirth are required")
+		return nil, status.Error(codes.InvalidArgument, "firstname, lastname, bvn and dateOfBirth are required")
 	}
 
 	result := s.walletController.CreateWallet(ctx, dto.CreateWalletDto{
