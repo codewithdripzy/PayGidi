@@ -28,41 +28,35 @@ class TransactionHistoryScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 heightSpacing(24),
-                PgScaleButton(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: theme.cardTheme.color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: theme.brightness == Brightness.dark
-                            ? const Color(0xFF2A2A2A)
-                            : Colors.grey.shade200,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.arrow_back_outlined,
-                      size: 20,
-                      color: theme.textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                ),
-                heightSpacing(24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    PgTexts.text700(
-                      context,
-                      text: "Transaction History",
-                      fontSize: 28,
-                      color:
-                          theme.textTheme.titleLarge?.color ?? PgColors.black,
+                    PgScaleButton(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: theme.cardTheme.color,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: theme.brightness == Brightness.dark
+                                ? const Color(0xFF2A2A2A)
+                                : Colors.grey.shade200,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.arrow_back_outlined,
+                          size: 20,
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
+                      ),
                     ),
                     PgScaleButton(
-                      onTap: () => context.pushNamed(PgRouteNames.statementRequest),
+                      onTap: () =>
+                          context.pushNamed(PgRouteNames.statementRequest),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: PgColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(100),
@@ -76,6 +70,13 @@ class TransactionHistoryScreen extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+                heightSpacing(24),
+                PgTexts.text700(
+                  context,
+                  text: "Transaction History",
+                  fontSize: 28,
+                  color: theme.textTheme.titleLarge?.color ?? PgColors.black,
                 ),
                 heightSpacing(32),
                 Expanded(

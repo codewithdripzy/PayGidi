@@ -25,80 +25,85 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor =
+        isDark ? theme.scaffoldBackgroundColor : PgColors.homeBackground;
+
     return buildPGAnnotatedRegion(
-      brightness: Brightness.dark,
-      color: PgColors.scaffoldBackground,
+      brightness: isDark ? Brightness.light : Brightness.dark,
+      color: backgroundColor,
       child: Scaffold(
-        backgroundColor: PgColors.scaffoldBackground,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                heightSpacing(24),
-                PgScaleButton(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: const Icon(Icons.arrow_back_outlined, size: 20),
+        backgroundColor: backgroundColor,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              heightSpacing(24),
+              PgScaleButton(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: theme.cardTheme.color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: theme.dividerTheme.color ?? Colors.grey.shade100),
                   ),
+                  child: Icon(Icons.arrow_back_outlined,
+                      size: 20, color: theme.textTheme.bodyLarge?.color),
                 ),
-                heightSpacing(24),
-                PgTexts.text700(
-                  context,
-                  text: "Withdraw",
-                  fontSize: 28,
-                  color: PgColors.black,
-                ),
-                heightSpacing(4),
-                PgTexts.text400(
-                  context,
-                  text:
-                      "Move money from your wallet to your bank account or use Tap to Pay.",
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
+              ),
+              heightSpacing(24),
+              PgTexts.text700(
+                context,
+                text: "Withdraw",
+                fontSize: 28,
+                color: PgColors.black,
+              ),
+              heightSpacing(4),
+              PgTexts.text400(
+                context,
+                text:
+                    "Move money from your wallet to your bank account or use Tap to Pay.",
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+              heightSpacing(32),
+              _buildAmountInput(context),
+              heightSpacing(32),
+              _buildTapToPayToggle(context),
+              if (_isTapToPayActive) ...[
                 heightSpacing(32),
-                _buildAmountInput(context),
-                heightSpacing(32),
-                _buildTapToPayToggle(context),
-                if (_isTapToPayActive) ...[
-                  heightSpacing(32),
-                  _buildTapToPayUI(context),
-                ],
-                const Spacer(),
-                if (!_isTapToPayActive)
-                  PgScaleButton(
-                    onTap: () {
-                      // Handle withdrawal
-                    },
-                    child: Container(
-                      height: 60,
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        gradient: const LinearGradient(
-                          colors: [PgColors.primary, PgColors.secondary],
-                        ),
-                      ),
-                      child: PgTexts.text600(
-                        context,
-                        text: "Withdraw Funds",
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                heightSpacing(30),
+                _buildTapToPayUI(context),
               ],
-            ),
+              const Spacer(),
+              if (!_isTapToPayActive)
+                PgScaleButton(
+                  onTap: () {
+                    // Handle withdrawal
+                  },
+                  child: Container(
+                    height: 60,
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      gradient: const LinearGradient(
+                        colors: [PgColors.primary, PgColors.secondary],
+                      ),
+                    ),
+                    child: PgTexts.text600(
+                      context,
+                      text: "Withdraw Funds",
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              heightSpacing(30),
+            ],
           ),
         ),
       ),
@@ -125,6 +130,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           ),
           child: Row(
             children: [
+              const Icon(Iconsax.money_2_copy, color: Colors.grey, size: 24),
+              const SizedBox(width: 12),
               PgTexts.text700(
                 context,
                 text: "₦",

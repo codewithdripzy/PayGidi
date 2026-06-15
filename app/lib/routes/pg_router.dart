@@ -1,3 +1,6 @@
+import 'package:app/features/finance/presentation/screens/create_personal_saving_screen.dart';
+import 'package:app/features/finance/presentation/screens/create_saving_screen.dart';
+import 'package:app/features/finance/presentation/screens/create_thrift_saving_screen.dart';
 import 'package:app/features/wallet/presentation/screens/instant_payment_screen.dart';
 import 'package:app/features/wallet/presentation/screens/payment_link_screen.dart';
 import 'package:app/features/auth/data/models/country_model.dart';
@@ -244,6 +247,36 @@ class PayGidiRouter {
           name: PgRouteNames.paymentLink,
           pageBuilder: (context, state) => CustomTransitionPage(
             child: const PaymentLinkScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) =>
+                    RouteTransitions.slideRight(animation, child),
+          ),
+        ),
+        GoRoute(
+          path: "/${PgRouteNames.createSaving}",
+          name: PgRouteNames.createSaving,
+          pageBuilder: (context, state) => CustomTransitionPage(
+            child: const CreateSavingScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) =>
+                    RouteTransitions.slideRight(animation, child),
+          ),
+        ),
+        GoRoute(
+          path: "/${PgRouteNames.createPersonalSaving}",
+          name: PgRouteNames.createPersonalSaving,
+          pageBuilder: (context, state) => CustomTransitionPage(
+            child: const CreatePersonalSavingScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) =>
+                    RouteTransitions.slideRight(animation, child),
+          ),
+        ),
+        GoRoute(
+          path: "/${PgRouteNames.createThriftSaving}",
+          name: PgRouteNames.createThriftSaving,
+          pageBuilder: (context, state) => CustomTransitionPage(
+            child: const CreateThriftSavingScreen(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) =>
                     RouteTransitions.slideRight(animation, child),

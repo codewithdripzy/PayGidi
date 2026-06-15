@@ -17,4 +17,9 @@ class PgRouteNames {
   static const String statementRequest = 'statementRequest';
   static const String instantPayment = 'instantPayment';
   static const String paymentLink = 'paymentLink';
+  static const String createSaving = 'createSaving';
+  static const String createPersonalSaving = 'createPersonalSaving';
+  static const String createThriftSaving = 'createThriftSaving';
+  static const String thriftDetails = 'thriftDetails';
+  static const String discoverThrifts = 'discoverThrifts';
 }

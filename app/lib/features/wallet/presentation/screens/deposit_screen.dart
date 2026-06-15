@@ -24,11 +24,15 @@ class DepositScreen extends StatelessWidget {
     const bankName = "Wema Bank (PayGidi)";
     const accountName = "Joel Onuoha / PayGidi";
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark ? theme.scaffoldBackgroundColor : PgColors.homeBackground;
+
     return buildPGAnnotatedRegion(
-      brightness: Brightness.dark,
-      color: PgColors.scaffoldBackground,
+      brightness: isDark ? Brightness.light : Brightness.dark,
+      color: backgroundColor,
       child: Scaffold(
-        backgroundColor: PgColors.scaffoldBackground,
+        backgroundColor: backgroundColor,
         body: RefreshIndicator(
           onRefresh: () async {
             // Add refresh logic here
@@ -43,8 +47,16 @@ class DepositScreen extends StatelessWidget {
               children: [
               heightSpacing(24),
               PgScaleButton(
-                child: const Icon(Icons.arrow_back_outlined),
                 onTap: () => context.pop(),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: theme.cardTheme.color,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: theme.dividerTheme.color ?? Colors.grey.shade100),
+                  ),
+                  child: Icon(Icons.arrow_back_outlined, size: 20, color: theme.textTheme.bodyLarge?.color),
+                ),
               ),
               heightSpacing(18),
               PgTexts.text700(
