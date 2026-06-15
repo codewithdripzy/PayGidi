@@ -73,15 +73,11 @@ class FinanceGoals extends StatelessWidget {
     return Container(
       width: 220,
       decoration: BoxDecoration(
-        color: isDark ? null : PgColors.black1,
-        gradient: isDark
-            ? const LinearGradient(
-                colors: [PgColors.secondary, Color(0xFF6B0043)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
+        color: isDark ? PgColors.black1 : Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.white10 : Colors.grey.shade100,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,14 +104,14 @@ class FinanceGoals extends StatelessWidget {
                   context,
                   text: title,
                   fontSize: 14,
-                  color: Colors.white70,
+                  color: isDark ? Colors.white70 : Colors.grey,
                 ),
                 const SizedBox(height: 4),
                 PgTexts.text700(
                   context,
                   text: saved,
                   fontSize: 18,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : PgColors.black,
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -125,13 +121,13 @@ class FinanceGoals extends StatelessWidget {
                       context,
                       text: "Target: $target",
                       fontSize: 10,
-                      color: Colors.white60,
+                      color: isDark ? Colors.white60 : Colors.grey,
                     ),
                     PgTexts.text600(
                       context,
                       text: "${(percentage * 100).toInt()}%",
                       fontSize: 10,
-                      color: Colors.white70,
+                      color: isDark ? Colors.white70 : PgColors.black,
                     ),
                   ],
                 ),
@@ -140,9 +136,11 @@ class FinanceGoals extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                   child: LinearProgressIndicator(
                     value: percentage,
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Colors.white,
+                    backgroundColor: isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : PgColors.black.withValues(alpha: 0.1),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isDark ? Colors.white : PgColors.black,
                     ),
                     minHeight: 4,
                   ),

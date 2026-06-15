@@ -177,25 +177,21 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(24), // Standard padding
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isDark ? null : PgColors.black1,
-          gradient: isDark
-              ? const LinearGradient(
-                  colors: [
-                    PgColors.secondary,
-                    Color(0xFF6B0043),
-                  ], // Magenta gradient, no orange
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
-          borderRadius: BorderRadius.circular(16),
+          color: isDark ? PgColors.white : PgColors.black1,
+          // gradient: isDark
+          //     ? const LinearGradient(
+          //         colors: [PgColors.primary, PgColors.secondary],
+          //         begin: Alignment.topLeft,
+          //         end: Alignment.bottomRight,
+          //       )
+          //     : null,
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment
-              .center, // Center content vertically to reduce feeling of too much padding
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -206,7 +202,7 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                       context,
                       text: title,
                       fontSize: 14,
-                      color: Colors.white70,
+                      color: isDark ? PgColors.black : Colors.white70,
                     ),
                     const SizedBox(width: 8),
                     GestureDetector(
@@ -215,7 +211,7 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                         _showBalance
                             ? Iconsax.eye_copy
                             : Iconsax.eye_slash_copy,
-                        color: Colors.white70,
+                        color: isDark ? PgColors.black : Colors.white70,
                         size: 18,
                       ),
                     ),
@@ -235,9 +231,9 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
             PgTexts.text700(
               context,
               text: _showBalance ? amount : "₦ **********",
-              fontSize: 32,
+              fontSize: 36,
               fontFamily: PgFonts.googleSans,
-              color: Colors.white,
+              color: isDark ? PgColors.black : Colors.white,
             ),
           ],
         ),
@@ -253,6 +249,23 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
           _buildTabItem(context, "My Thrifts", 0),
           const SizedBox(width: 24),
           _buildTabItem(context, "Public Thrifts", 1),
+          const Spacer(),
+          PgScaleButton(
+            onTap: () {},
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: PgColors.black,
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: PgTexts.text600(
+                context,
+                text: "See All",
+                fontSize: 10,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -295,66 +308,40 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
   }
 
   Widget _buildJoinedThrifts(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              PgTexts.text700(
-                context,
-                text: "My Collections",
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-              PgTexts.gradientText(
-                context,
-                text: "See All",
-                fontSize: 14,
-                gradient: PgColors.primaryGradient,
-              ),
-            ],
+    return SizedBox(
+      height: 220,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        children: [
+          _buildThriftCard(
+            context,
+            name: "Tech Bro Circle",
+            description: "Monthly savings for tech professionals.",
+            contribution: "₦100k/mo",
+            members: 8,
+            image: "assets/onboarding_images/page1.jpeg",
           ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 210,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            children: [
-              _buildThriftCard(
-                context,
-                name: "Tech Bro Circle",
-                contribution: "₦100,000/mo",
-                members: 8,
-                isPublic: false,
-                image: "assets/onboarding_images/page1.jpeg",
-              ),
-              const SizedBox(width: 16),
-              _buildThriftCard(
-                context,
-                name: "Lagos Foodies",
-                contribution: "₦20,000/mo",
-                members: 15,
-                isPublic: true,
-                image: "assets/onboarding_images/page2.jpeg",
-              ),
-            ],
+          const SizedBox(width: 16),
+          _buildThriftCard(
+            context,
+            name: "Lagos Foodies",
+            description: "Saving for culinary adventures.",
+            contribution: "₦20k/mo",
+            members: 15,
+            image: "assets/onboarding_images/page2.jpeg",
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildThriftCard(
     BuildContext context, {
     required String name,
+    required String description,
     required String contribution,
     required int members,
-    required bool isPublic,
     String? image,
   }) {
     final theme = Theme.of(context);
@@ -366,17 +353,13 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
         extra: {'thriftName': name},
       ),
       child: Container(
-        width: 260,
+        width: 180,
         decoration: BoxDecoration(
-          color: isDark ? null : PgColors.black1,
-          gradient: isDark
-              ? const LinearGradient(
-                  colors: [PgColors.secondary, Color(0xFF6B0043)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
+          color: isDark ? PgColors.black1 : Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? Colors.white10 : Colors.grey.shade100,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,78 +369,84 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                 height: 100,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   image: DecorationImage(
                     image: AssetImage(image),
                     fit: BoxFit.cover,
                   ),
                 ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : PgColors.black.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Iconsax.status_up_copy,
+                    color: isDark ? Colors.white : PgColors.black,
+                    size: 20,
+                  ),
+                ),
               ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: PgTexts.text600(
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PgTexts.text700(
+                      context,
+                      text: name,
+                      fontSize: 14,
+                      color: isDark ? Colors.white : PgColors.black,
+                      textOverflow: TextOverflow.ellipsis,
+                    ),
+                    PgTexts.text400(
+                      context,
+                      text: description,
+                      fontSize: 11,
+                      color: isDark ? Colors.white60 : Colors.grey,
+                      maxLines: 2,
+                    ),
+                    const Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        PgTexts.gradientText(
                           context,
-                          text: isPublic ? "Public" : "Private",
-                          fontSize: 10,
-                          color: Colors.white,
+                          text: contribution,
+                          fontSize: 11,
+                          gradient: PgColors.primaryGradient,
                         ),
-                      ),
-                      const Icon(Iconsax.share_copy,
-                          size: 18, color: Colors.white54),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  PgTexts.text700(
-                    context,
-                    text: name,
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      PgTexts.gradientText(
-                        context,
-                        text: contribution,
-                        fontSize: 14,
-                        gradient: PgColors.primaryGradient,
-                      ),
-                      Row(
-                        children: [
-                          const Icon(
-                            Iconsax.people_copy,
-                            size: 14,
-                            color: Colors.white54,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
                           ),
-                          const SizedBox(width: 4),
-                          PgTexts.text400(
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white : PgColors.black,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: PgTexts.text600(
                             context,
-                            text: "$members members",
-                            fontSize: 12,
-                            color: Colors.white60,
+                            text: "Manage",
+                            fontSize: 10,
+                            color: isDark ? PgColors.black : Colors.white,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -467,66 +456,40 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
   }
 
   Widget _buildPublicThrifts(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              PgTexts.text700(
-                context,
-                text: "Recommendations",
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-              PgTexts.gradientText(
-                context,
-                text: "See All",
-                fontSize: 14,
-                gradient: PgColors.primaryGradient,
-              ),
-            ],
+    return SizedBox(
+      height: 220,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        children: [
+          _buildPublicThriftItem(
+            context,
+            name: "Entrepreneurs Hub",
+            description: "High volume monthly contribution.",
+            contribution: "₦500k/mo",
+            members: 42,
+            image: "assets/onboarding_images/page3.jpeg",
           ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 220,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            children: [
-              _buildPublicThriftItem(
-                context,
-                name: "Entrepreneurs Hub",
-                description: "High volume monthly contribution.",
-                contribution: "₦500k/mo",
-                members: 42,
-                image: "assets/onboarding_images/page3.jpeg",
-              ),
-              const SizedBox(width: 16),
-              _buildPublicThriftItem(
-                context,
-                name: "Student Savings",
-                description: "Small daily contributions.",
-                contribution: "₦500/day",
-                members: 128,
-                image: "assets/onboarding_images/page1.jpeg",
-              ),
-              const SizedBox(width: 16),
-              _buildPublicThriftItem(
-                context,
-                name: "Agro Investors",
-                description: "Saving for the next harvest.",
-                contribution: "₦50k/mo",
-                members: 64,
-                image: "assets/onboarding_images/page2.jpeg",
-              ),
-            ],
+          const SizedBox(width: 16),
+          _buildPublicThriftItem(
+            context,
+            name: "Student Savings",
+            description: "Small daily contributions.",
+            contribution: "₦500/day",
+            members: 128,
+            image: "assets/onboarding_images/page1.jpeg",
           ),
-        ),
-      ],
+          const SizedBox(width: 16),
+          _buildPublicThriftItem(
+            context,
+            name: "Agro Investors",
+            description: "Saving for the next harvest.",
+            contribution: "₦50k/mo",
+            members: 64,
+            image: "assets/onboarding_images/page2.jpeg",
+          ),
+        ],
+      ),
     );
   }
 
@@ -544,7 +507,7 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
     return Container(
       width: 180,
       decoration: BoxDecoration(
-        color: isDark ? null : PgColors.black1,
+        color: isDark ? null : Colors.white,
         gradient: isDark
             ? const LinearGradient(
                 colors: [PgColors.secondary, Color(0xFF6B0043)],
@@ -553,6 +516,9 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
               )
             : null,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.white10 : Colors.grey.shade100,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -562,8 +528,9 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
               height: 100,
               width: double.infinity,
               decoration: BoxDecoration(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
                 image: DecorationImage(
                   image: AssetImage(image),
                   fit: BoxFit.cover,
@@ -577,12 +544,14 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : PgColors.black.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Iconsax.status_up_copy,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : PgColors.black,
                   size: 20,
                 ),
               ),
@@ -597,14 +566,14 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                     context,
                     text: name,
                     fontSize: 14,
-                    color: Colors.white,
+                    color: isDark ? Colors.white : PgColors.black,
                     textOverflow: TextOverflow.ellipsis,
                   ),
                   PgTexts.text400(
                     context,
                     text: description,
                     fontSize: 11,
-                    color: Colors.white60,
+                    color: isDark ? Colors.white60 : Colors.grey,
                     maxLines: 2,
                   ),
                   const Spacer(),
@@ -625,14 +594,14 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? Colors.white : PgColors.black,
                             borderRadius: BorderRadius.circular(100),
                           ),
                           child: PgTexts.text600(
                             context,
                             text: "Join",
                             fontSize: 10,
-                            color: PgColors.black,
+                            color: isDark ? PgColors.black : Colors.white,
                           ),
                         ),
                       ),
