@@ -40,12 +40,14 @@ class HomeQuickActions extends StatelessWidget {
           "Statement",
           PgAssets.customIcon(iconName: 'invoice'),
           Colors.grey.shade200,
+          onTap: () => context.pushNamed(PgRouteNames.statementRequest),
         ),
         _buildAction(
           context,
           "Withdraw",
           PgAssets.customIcon(iconName: 'withdraw'),
           Colors.grey.shade200,
+          onTap: () => context.pushNamed(PgRouteNames.withdrawal),
         ),
       ],
     );

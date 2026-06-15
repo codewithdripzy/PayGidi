@@ -23,9 +23,13 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> checkLoginStatus() async {
     final token = await _storageService.getToken();
-    if (token != null) {
+    final userData = await _storageService.getUserData();
+    if (token != null && userData != null) {
       _isLoggedIn = true;
-      // Ideally fetch user data here too
+      _userData = userData;
+    } else {
+      _isLoggedIn = false;
+      _userData = null;
     }
     notifyListeners();
   }
@@ -55,6 +59,9 @@ class AuthProvider extends ChangeNotifier {
     if (response.isSuccess) {
       debugPrint("Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}");
       _userData = response.data;
+      if (response.data != null) {
+        await _storageService.saveUserData(response.data!);
+      }
       return true;
     } else {
       debugPrint("Error: ${response.error}");
@@ -75,12 +82,15 @@ class AuthProvider extends ChangeNotifier {
     if (response.isSuccess) {
       debugPrint("Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}, Token: ${response.data?.token != null}");
       _userData = response.data;
-      if (response.data?.token != null) {
-        _isLoggedIn = true;
-        await _storageService.saveTokens(
-          token: response.data!.token!,
-          refreshToken: response.data!.refreshToken ?? "",
-        );
+      if (response.data != null) {
+        await _storageService.saveUserData(response.data!);
+        if (response.data?.token != null) {
+          _isLoggedIn = true;
+          await _storageService.saveTokens(
+            token: response.data!.token!,
+            refreshToken: response.data!.refreshToken ?? "",
+          );
+        }
       }
       return true;
     } else {
@@ -101,12 +111,15 @@ class AuthProvider extends ChangeNotifier {
 
     if (response.isSuccess) {
       _userData = response.data;
-      if (response.data?.token != null) {
-        _isLoggedIn = true;
-        await _storageService.saveTokens(
-          token: response.data!.token!,
-          refreshToken: response.data!.refreshToken ?? "",
-        );
+      if (response.data != null) {
+        await _storageService.saveUserData(response.data!);
+        if (response.data?.token != null) {
+          _isLoggedIn = true;
+          await _storageService.saveTokens(
+            token: response.data!.token!,
+            refreshToken: response.data!.refreshToken ?? "",
+          );
+        }
       }
       return true;
     } else {

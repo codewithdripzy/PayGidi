@@ -2,7 +2,9 @@ import 'package:app/features/auth/data/models/country_model.dart';
 import 'package:app/features/auth/presentation/screens/country_selection_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_main_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/statement_request_screen.dart';
 import 'package:app/features/wallet/presentation/screens/deposit_screen.dart';
+import 'package:app/features/wallet/presentation/screens/withdrawal_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_forgot_password_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_login_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_otp_screen.dart';
@@ -14,21 +16,61 @@ import 'package:app/features/onboarding/presentation/screens/role_screen.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:app/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:app/routes/route_transitions.dart';
+import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class PayGidiRouter {
-  static final returnRouter = GoRouter(
-    initialLocation: "/${PgRouteNames.splashPage}",
-    routes: [
-      GoRoute(
-        path: "/${PgRouteNames.splashPage}",
-        name: PgRouteNames.splashPage,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          child: const SplashScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-              RouteTransitions.fade(animation, child),
+  static GoRouter router(AuthProvider authProvider) {
+    return GoRouter(
+      initialLocation: "/${PgRouteNames.splashPage}",
+      refreshListenable: authProvider,
+      redirect: (context, state) {
+        final isLoggedIn = authProvider.isLoggedIn;
+        final isSplash = state.matchedLocation == "/${PgRouteNames.splashPage}";
+        final isOnboarding =
+            state.matchedLocation == "/${PgRouteNames.onboardingPage}";
+        final isRole = state.matchedLocation == "/${PgRouteNames.rolePage}";
+        final isSignUp =
+            state.matchedLocation == "/${PgRouteNames.individualSignUp}";
+        final isLogin =
+            state.matchedLocation == "/${PgRouteNames.individualLogin}";
+        final isOtp =
+            state.matchedLocation == "/${PgRouteNames.individualOtp}";
+        final isForgotPassword =
+            state.matchedLocation == "/${PgRouteNames.individualForgotPassword}";
+        final isCountry =
+            state.matchedLocation == "/${PgRouteNames.countrySelection}";
+
+        final isAuthPage = isOnboarding ||
+            isRole ||
+            isSignUp ||
+            isLogin ||
+            isOtp ||
+            isForgotPassword ||
+            isCountry;
+
+        if (isSplash) return null;
+
+        if (!isLoggedIn && !isAuthPage) {
+          return "/${PgRouteNames.onboardingPage}";
+        }
+
+        if (isLoggedIn && isAuthPage) {
+          return "/${PgRouteNames.individualMain}";
+        }
+
+        return null;
+      },
+      routes: [
+        GoRoute(
+          path: "/${PgRouteNames.splashPage}",
+          name: PgRouteNames.splashPage,
+          pageBuilder: (context, state) => CustomTransitionPage(
+            child: const SplashScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                RouteTransitions.fade(animation, child),
+          ),
         ),
-      ),
       GoRoute(
         path: "/${PgRouteNames.onboardingPage}",
         name: PgRouteNames.onboardingPage,
@@ -153,6 +195,25 @@ class PayGidiRouter {
               RouteTransitions.slideRight(animation, child),
         ),
       ),
+      GoRoute(
+        path: "/${PgRouteNames.withdrawal}",
+        name: PgRouteNames.withdrawal,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const WithdrawalScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              RouteTransitions.slideRight(animation, child),
+        ),
+      ),
+      GoRoute(
+        path: "/${PgRouteNames.statementRequest}",
+        name: PgRouteNames.statementRequest,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const StatementRequestScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              RouteTransitions.slideRight(animation, child),
+        ),
+      ),
     ],
-  );
+    );
+  }
 }

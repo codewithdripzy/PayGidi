@@ -13,4 +13,6 @@ class PgRouteNames {
   static const String individualMain = 'individualMain';
   static const String countrySelection = 'countrySelection';
   static const String deposit = 'deposit';
+  static const String withdrawal = 'withdrawal';
+  static const String statementRequest = 'statementRequest';
 }

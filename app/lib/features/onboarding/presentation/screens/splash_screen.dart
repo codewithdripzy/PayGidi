@@ -23,6 +23,8 @@ class _SplashScreenState extends State<SplashScreen> {
       final authProvider = context.read<AuthProvider>();
       await authProvider.checkLoginStatus();
 
+      if (!mounted) return;
+
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
         if (authProvider.isLoggedIn) {

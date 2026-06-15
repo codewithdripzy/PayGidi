@@ -1,4 +1,5 @@
 import 'package:app/core/network/api_service.dart';
+import 'package:app/core/theme/theme_provider.dart';
 import 'package:app/features/auth/data/repositories/auth_repository.dart';
 import 'package:app/features/auth/data/services/auth_storage_service.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
@@ -21,6 +22,7 @@ Future<void> main(List<String> args) async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         Provider.value(value: apiService),
         Provider.value(value: authRepository),
         Provider.value(value: authStorageService),

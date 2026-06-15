@@ -12,11 +12,15 @@ class IndividualCardsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return buildPGAnnotatedRegion(
-      brightness: Brightness.dark,
-      color: PgColors.scaffoldBackground,
+      brightness: theme.brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark,
+      color: theme.scaffoldBackgroundColor,
       child: Scaffold(
-        backgroundColor: PgColors.scaffoldBackground,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -28,7 +32,7 @@ class IndividualCardsScreen extends StatelessWidget {
                   context,
                   text: "Your Cards",
                   fontSize: 28,
-                  color: PgColors.black,
+                  color: theme.textTheme.titleLarge?.color ?? PgColors.black,
                   fontFamily: PgFonts.stackSans,
                 ),
                 heightSpacing(4),
@@ -36,7 +40,8 @@ class IndividualCardsScreen extends StatelessWidget {
                   context,
                   text: "Manage your virtual and physical cards.",
                   fontSize: 16,
-                  color: Colors.black54,
+                  color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
+                      .withValues(alpha: 0.7),
                 ),
                 heightSpacing(32),
                 _buildEmptyState(context),
@@ -80,13 +85,19 @@ class IndividualCardsScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF2A2A2A)
+              : Colors.grey.shade100,
+        ),
       ),
       child: Column(
         children: [
@@ -107,14 +118,15 @@ class IndividualCardsScreen extends StatelessWidget {
             context,
             text: "No active cards",
             fontSize: 18,
-            color: PgColors.black,
+            color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
           ),
           heightSpacing(8),
           PgTexts.text400(
             context,
             text: "You haven't created any virtual cards yet. Get one to start making secure online payments.",
             fontSize: 14,
-            color: Colors.black54,
+            color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
+                .withValues(alpha: 0.7),
             textAlign: TextAlign.center,
           ),
         ],

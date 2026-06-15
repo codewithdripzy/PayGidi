@@ -40,22 +40,38 @@ class PayGidiTheme {
     );
   }
 
-  // Dark theme definition - temp
+  // Dark theme definition
   static ThemeData darkTheme() {
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(
         seedColor: PgColors.primary,
         brightness: Brightness.dark,
-        secondary: PgColors.black,
+        surface: const Color(0xFF1A1A1A),
+        onSurface: Colors.white,
       ),
-      scaffoldBackgroundColor: PgColors.black,
+      scaffoldBackgroundColor: const Color(0xFF0F0F0F),
+      cardTheme: CardThemeData(
+        color: const Color(0xFF1A1A1A),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xFF2A2A2A)),
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFF2A2A2A),
+        thickness: 1,
+      ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: PgColors.black,
+        backgroundColor: Color(0xFF1A1A1A),
+        selectedItemColor: PgColors.primary,
+        unselectedItemColor: Colors.grey,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: PgColors.black,
+        backgroundColor: Color(0xFF0F0F0F),
         elevation: 0,
         centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.white),
         titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 20,
@@ -64,16 +80,11 @@ class PayGidiTheme {
       ),
       textTheme: const TextTheme(
         bodyLarge: TextStyle(fontSize: 16, color: Colors.white),
-        bodyMedium: TextStyle(fontSize: 14, color: Colors.white70),
+        bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
+        titleLarge: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: PgColors.primary,
-          foregroundColor: Colors.white,
-          textStyle: const TextStyle(fontSize: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-        ),
-      ),
+      useMaterial3: true,
+      fontFamily: PgFonts.fontFamily,
     );
   }
 }

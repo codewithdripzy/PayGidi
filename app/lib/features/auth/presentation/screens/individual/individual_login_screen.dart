@@ -116,21 +116,36 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                   hintText: "800 000 0000",
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
-                  prefixIcon: const Icon(Iconsax.call_copy, size: 20),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 0,
+                    minHeight: 0,
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      top: 10,
+                      bottom: 10,
+                      right: 12,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Iconsax.call_copy, size: 20),
+                        const SizedBox(width: 8),
+                        PgTexts.text600(
+                          context,
+                          text: "+234",
+                          fontSize: 16,
+                          color: PgColors.black,
+                        ),
+                      ],
+                    ),
+                  ),
                   textInputAction: TextInputAction.done,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(10),
                   ],
-                  prefix: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: PgTexts.text600(
-                      context,
-                      text: "+234",
-                      fontSize: 16,
-                      color: PgColors.black,
-                    ),
-                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Phone number is required";
@@ -191,7 +206,7 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                     PgTexts.text400(context, text: "Don't have an account? "),
                     GestureDetector(
                       onTap: () =>
-                          context.pushNamed(PgRouteNames.individualSignUp),
+                          context.pushNamed(PgRouteNames.countrySelection),
                       child: PgTexts.text600(
                         context,
                         text: "Sign Up",

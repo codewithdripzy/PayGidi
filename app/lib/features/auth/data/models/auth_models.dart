@@ -97,4 +97,17 @@ class AuthResponseData {
       requiredAction: json['requiredAction'] as String?,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'token': token,
+        'refreshToken': refreshToken,
+        'userId': userId,
+        'firstName': firstName,
+        'lastName': lastName,
+        'phone': phone,
+        'email': email,
+        'accountType': accountType,
+        'needsOnboarding': needsOnboarding,
+        'requiredAction': requiredAction,
+      };
 }
