@@ -70,7 +70,7 @@ class _IndividualCompleteAccount1ScreenState
               heightSpacing(40),
               PgTextField(
                 label: "First Name",
-                hintText: "Enter your first name",
+                hintText: "John",
                 controller: _firstNameController,
                 prefixIcon: const Icon(Iconsax.user_copy, size: 20),
                 textInputAction: TextInputAction.next,
@@ -78,7 +78,7 @@ class _IndividualCompleteAccount1ScreenState
               heightSpacing(20),
               PgTextField(
                 label: "Last Name",
-                hintText: "Enter your last name",
+                hintText: "Doe",
                 controller: _lastNameController,
                 prefixIcon: const Icon(Iconsax.user_copy, size: 20),
                 textInputAction: TextInputAction.next,
@@ -86,7 +86,7 @@ class _IndividualCompleteAccount1ScreenState
               heightSpacing(20),
               PgTextField(
                 label: "Email Address",
-                hintText: "Enter your email address",
+                hintText: "john@gmail.com",
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: const Icon(Iconsax.sms_copy, size: 20),

@@ -98,7 +98,7 @@ class _PgTextFieldState extends State<PgTextField> {
             hintText: widget.hintText,
             hintStyle: PgStyles.textStyle(
               context: context,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w400,
               color: Colors.grey.shade400,
               fontFamily: PgFonts.googleSans,
