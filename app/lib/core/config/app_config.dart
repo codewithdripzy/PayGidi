@@ -1,10 +1,15 @@
-class AppConfig {
-  static const String baseUrl = String.fromEnvironment(
-    'BASE_URL',
-    defaultValue: 'https://api.paygidi.site/api/v1',
-  );
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-  static const String apiKey = String.fromEnvironment('API_KEY');
-  
+class AppConfig {
+  static String get baseUrl => dotenv.get(
+        'BASE_URL',
+        fallback: 'https://api.paygidi.site/api/v1',
+      );
+
+  static String get apiKey => dotenv.get('API_KEY', fallback: '');
+
+  static String get googleMapsApiKey =>
+      dotenv.get('GOOGLE_MAPS_API_KEY', fallback: '');
+
   // Add other config variables here
 }

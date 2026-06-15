@@ -50,7 +50,7 @@ class _RoleScreenState extends State<RoleScreen> {
                     Row(
                       children: [
                         SvgPicture.asset(
-                          'assets/logo/app cowry icon.svg',
+                          'assets/logo/app_cowry_icon.svg',
                           width: 40,
                         ),
                         const Spacer(),

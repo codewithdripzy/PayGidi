@@ -27,8 +27,9 @@ class IndividualCompleteAccountRequest {
   final String lastName;
   final String dateOfBirth;
   final String email;
-  final String nin;
-  final String? bvn;
+  final String? nin;
+  final String address;
+  final String bvn;
   final String? referralCode;
   final String gender;
 
@@ -37,8 +38,9 @@ class IndividualCompleteAccountRequest {
     required this.lastName,
     required this.dateOfBirth,
     required this.email,
-    required this.nin,
-    this.bvn,
+    this.nin,
+    required this.address,
+    required this.bvn,
     this.referralCode,
     required this.gender,
   });
@@ -48,8 +50,9 @@ class IndividualCompleteAccountRequest {
         'lastName': lastName,
         'dateOfBirth': dateOfBirth,
         'email': email,
-        'nin': nin,
-        if (bvn != null) 'bvn': bvn,
+        if (nin != null) 'nin': nin,
+        'address': address,
+        'bvn': bvn,
         if (referralCode != null) 'referralCode': referralCode,
         'gender': gender,
       };

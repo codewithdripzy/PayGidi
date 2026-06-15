@@ -139,7 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SvgPicture.asset(
-                        'assets/logo/app cowry icon white.svg',
+                        "assets/logo/app_cowry_white.svg",
                         width: 40,
                       ),
                       const Spacer(),
@@ -220,7 +220,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 style: PgStyles.textStyle(
                                   context: context,
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: PgFonts.googleSans9,
                                 ),

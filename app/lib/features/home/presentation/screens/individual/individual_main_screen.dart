@@ -137,26 +137,21 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
-      bottomNavigationBar: Container(
-        height: 100,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
+      floatingActionButton: _buildPayButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        color: Colors.white,
+        elevation: 10,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildNavItem(0, Iconsax.home_2_copy, "Home"),
               _buildNavItem(1, Iconsax.card_copy, "Cards"),
-              _buildPayButton(),
+              const SizedBox(width: 40), // Space for FAB
               _buildNavItem(2, Iconsax.chart_2_copy, "Finance"),
               _buildNavItem(3, Iconsax.user_copy, "Me"),
             ],
