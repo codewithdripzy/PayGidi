@@ -4,11 +4,14 @@ import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/finance/presentation/components/finance_goals.dart';
+import 'package:app/features/wallet/presentation/providers/wallet_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class IndividualFinanceScreen extends StatefulWidget {
   const IndividualFinanceScreen({super.key});
@@ -22,14 +25,23 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
   bool _showBalance = true;
   int _currentCardIndex = 0;
   int _selectedThriftTabIndex = 0;
+  final _currencyFormatter =
+      NumberFormat.currency(symbol: "₦", decimalDigits: 2);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WalletProvider>().fetchBalance();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final backgroundColor = isDark
-        ? theme.scaffoldBackgroundColor
-        : PgColors.homeBackground;
+    final backgroundColor =
+        isDark ? theme.scaffoldBackgroundColor : PgColors.homeBackground;
 
     return buildPGAnnotatedRegion(
       brightness: isDark ? Brightness.light : Brightness.dark,
@@ -110,6 +122,9 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
   }
 
   Widget _buildSavingsCarousel(BuildContext context) {
+    final walletProvider = context.watch<WalletProvider>();
+    final balance = walletProvider.balance;
+
     return Column(
       children: [
         SizedBox(
@@ -125,17 +140,18 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
               _buildBalanceCard(
                 context,
                 title: "Total Savings",
-                amount: "₦1,850,000.00",
+                amount: _currencyFormatter.format(balance?.totalBalance ?? 0),
               ),
               _buildBalanceCard(
                 context,
                 title: "Personal Savings",
-                amount: "₦1,200,000.00",
+                amount:
+                    _currencyFormatter.format(balance?.personalSavings ?? 0),
               ),
               _buildBalanceCard(
                 context,
                 title: "Thrift Savings",
-                amount: "₦650,000.00",
+                amount: _currencyFormatter.format(balance?.thriftSavings ?? 0),
               ),
             ],
           ),
@@ -179,14 +195,14 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isDark ? PgColors.white : PgColors.black1,
-          // gradient: isDark
-          //     ? const LinearGradient(
-          //         colors: [PgColors.primary, PgColors.secondary],
-          //         begin: Alignment.topLeft,
-          //         end: Alignment.bottomRight,
-          //       )
-          //     : null,
+          color: isDark ? null : PgColors.black1,
+          gradient: isDark
+              ? const LinearGradient(
+                  colors: [PgColors.primary, PgColors.secondary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
@@ -202,7 +218,7 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                       context,
                       text: title,
                       fontSize: 14,
-                      color: isDark ? PgColors.black : Colors.white70,
+                      color: Colors.white70,
                     ),
                     const SizedBox(width: 8),
                     GestureDetector(
@@ -211,7 +227,7 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                         _showBalance
                             ? Iconsax.eye_copy
                             : Iconsax.eye_slash_copy,
-                        color: isDark ? PgColors.black : Colors.white70,
+                        color: Colors.white70,
                         size: 18,
                       ),
                     ),
@@ -233,7 +249,7 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
               text: _showBalance ? amount : "₦ **********",
               fontSize: 36,
               fontFamily: PgFonts.googleSans,
-              color: isDark ? PgColors.black : Colors.white,
+              color: Colors.white,
             ),
           ],
         ),
@@ -507,14 +523,7 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
     return Container(
       width: 180,
       decoration: BoxDecoration(
-        color: isDark ? null : Colors.white,
-        gradient: isDark
-            ? const LinearGradient(
-                colors: [PgColors.secondary, Color(0xFF6B0043)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
+        color: isDark ? PgColors.black1 : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.white10 : Colors.grey.shade100,

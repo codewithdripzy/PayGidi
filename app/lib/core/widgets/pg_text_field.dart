@@ -26,6 +26,7 @@ class PgTextField extends StatefulWidget {
   final double borderRadius;
   final int? maxLength;
   final int? maxLines;
+  final Function(String)? onChanged;
 
   const PgTextField({
     super.key,
@@ -49,6 +50,7 @@ class PgTextField extends StatefulWidget {
     this.borderRadius = 10,
     this.maxLength,
     this.maxLines = 1,
+    this.onChanged,
   });
 
   @override
@@ -88,6 +90,7 @@ class _PgTextFieldState extends State<PgTextField> {
           focusNode: widget.focusNode,
           textInputAction: widget.textInputAction,
           onFieldSubmitted: widget.onFieldSubmitted,
+          onChanged: widget.onChanged,
           readOnly: widget.readOnly,
           onTap: widget.onTap,
           maxLength: widget.maxLength,

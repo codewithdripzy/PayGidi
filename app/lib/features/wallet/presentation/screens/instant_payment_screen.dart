@@ -7,6 +7,8 @@ import 'package:app/core/widgets/pg_success_dialog.dart';
 import 'package:app/core/widgets/pg_text_field.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:app/features/wallet/data/models/bank_model.dart';
+import 'package:app/features/wallet/presentation/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
@@ -21,25 +23,24 @@ class InstantPaymentScreen extends StatefulWidget {
 class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
   final _accountController = TextEditingController();
   final _amountController = TextEditingController();
-  String? _selectedBank;
+  Bank? _selectedBank;
   bool _isValidatingAccount = false;
   String? _accountName;
   int _currentStep = 0;
-
-  final List<String> _banks = [
-    "Access Bank", "First Bank", "GTBank", "Kuda Bank", "Moniepoint", 
-    "OPay", "Palmpay", "UBA", "Zenith Bank",
-  ];
+  String _searchQuery = "";
 
   @override
   void initState() {
     super.initState();
     _accountController.addListener(_onAccountChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WalletProvider>().fetchBanks();
+    });
   }
 
   void _onAccountChanged() {
-    if (_accountController.text.length == 10) {
-      _autoFindBank();
+    if (_accountController.text.length == 10 && _selectedBank != null) {
+      _verifyAccount();
     } else {
       setState(() {
         _accountName = null;
@@ -47,14 +48,27 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     }
   }
 
-  Future<void> _autoFindBank() async {
+  Future<void> _verifyAccount() async {
+    if (_selectedBank == null) return;
     setState(() => _isValidatingAccount = true);
-    await Future.delayed(const Duration(seconds: 1));
+    
+    final walletProvider = context.read<WalletProvider>();
+    final response = await walletProvider.verifyAccount(
+      accountNumber: _accountController.text,
+      bankCode: _selectedBank!.code,
+    );
+
     if (mounted) {
       setState(() {
         _isValidatingAccount = false;
-        _accountName = "JOHN DOE";
-        _selectedBank ??= "OPay";
+        if (response.data != null) {
+          _accountName = response.data!['accountName'] ?? response.data!['account_name'];
+        } else {
+          _accountName = null;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.error ?? "Failed to verify account")),
+          );
+        }
       });
     }
   }
@@ -65,49 +79,73 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: PgTextField(
-                label: "Search",
-                hintText: "Search Bank",
-                prefixIcon: const Icon(Iconsax.search_normal_copy),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                itemCount: _banks.length,
-                separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: PgTexts.text500(context, text: _banks[index]),
-                  onTap: () {
-                    setState(() => _selectedBank = _banks[index]);
-                    Navigator.pop(context);
-                    if (_accountController.text.length == 10) _autoFindBank();
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: PgTextField(
+                  label: "Search",
+                  hintText: "Search Bank",
+                  prefixIcon: const Icon(Iconsax.search_normal_copy),
+                  onChanged: (val) {
+                    setModalState(() => _searchQuery = val);
                   },
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Expanded(
+                child: Consumer<WalletProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoadingBanks) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    
+                    final filteredBanks = provider.banks.where((bank) => 
+                      bank.name.toLowerCase().contains(_searchQuery.toLowerCase())
+                    ).toList();
+
+                    if (filteredBanks.isEmpty) {
+                      return Center(child: PgTexts.text400(context, text: "No banks found"));
+                    }
+
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                      itemCount: filteredBanks.length,
+                      separatorBuilder: (context, index) => const Divider(),
+                      itemBuilder: (context, index) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: PgTexts.text500(context, text: filteredBanks[index].name),
+                        onTap: () {
+                          setState(() {
+                            _selectedBank = filteredBanks[index];
+                            _accountName = null;
+                          });
+                          Navigator.pop(context);
+                          if (_accountController.text.length == 10) _verifyAccount();
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -154,7 +192,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
                 children: [
                   _buildReviewItem("Amount", "₦${_amountController.text}"),
                   const Divider(),
-                  _buildReviewItem("Bank", _selectedBank ?? ""),
+                  _buildReviewItem("Bank", _selectedBank?.name ?? ""),
                   const Divider(),
                   _buildReviewItem("Account Number", _accountController.text),
                   const Divider(),
@@ -213,12 +251,12 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
 
   Future<void> _startVerificationFlow() async {
     final auth = context.read<AuthProvider>();
-    final biometricService = BiometricService();
+    final biometricService = context.read<BiometricService>();
     bool biometricEnabled = await biometricService.isBiometricEnabled();
     
     if (biometricEnabled) {
       bool authenticated = await biometricService.authenticateLocally();
-      if (authenticated) { _executePayment(); return; }
+      if (authenticated) { _executePayment("0000"); return; } // Dummy pin if biometric authenticated
     }
 
     if (auth.userData?.hasPin ?? false) {
@@ -235,7 +273,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       description: "Enter your 4-digit transaction PIN to complete payment.",
       onVerify: (pin) {
         Navigator.pop(context);
-        _executePayment();
+        _executePayment(pin);
       },
     );
   }
@@ -260,7 +298,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       onVerify: (pin) {
         if (pin == firstPin) {
           Navigator.pop(context);
-          _executePayment();
+          _executePayment(pin);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("PINs do not match.")));
         }
@@ -268,17 +306,36 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     );
   }
 
-  void _executePayment() {
-    PgSuccessDialog.show(
-      context,
-      title: "Payment Successful",
-      message: "You have successfully sent ₦${_amountController.text} to $_accountName",
-      buttonText: "Continue",
-      onButtonPressed: () {
-        Navigator.pop(context);
-        Navigator.pop(context);
-      },
+  Future<void> _executePayment(String pin) async {
+    setState(() => _isValidatingAccount = true);
+    
+    final walletProvider = context.read<WalletProvider>();
+    final response = await walletProvider.transfer(
+      amount: double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0,
+      accountNumber: _accountController.text,
+      bankCode: _selectedBank!.code,
+      pin: pin,
     );
+
+    if (mounted) {
+      setState(() => _isValidatingAccount = false);
+      if (response.error == null) {
+        PgSuccessDialog.show(
+          context,
+          title: "Payment Successful",
+          message: "You have successfully sent ₦${_amountController.text} to $_accountName",
+          buttonText: "Continue",
+          onButtonPressed: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.error ?? "Payment failed")),
+        );
+      }
+    }
   }
 
   @override
@@ -347,7 +404,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
                             onTap: _showBankSelection,
                             child: AbsorbPointer(
                               child: PgTextField(
-                                hintText: _selectedBank ?? "Select Bank",
+                                hintText: _selectedBank?.name ?? "Select Bank",
                                 label: "Bank",
                                 prefixIcon: const Icon(Iconsax.bank_copy, size: 20, color: Colors.grey),
                                 suffixIcon: const Icon(Iconsax.arrow_down_1_copy),

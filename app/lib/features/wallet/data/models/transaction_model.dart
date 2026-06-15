@@ -21,6 +21,34 @@ class Transaction {
     required this.recipientOrSender,
   });
 
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? json['description'] ?? '',
+      date: json['date'] ?? json['createdAt'] ?? '',
+      amount: json['amount']?.toString() ?? '0',
+      isCredit: json['type'] == 'CREDIT' || json['isCredit'] == true,
+      status: json['status'] ?? 'Successful',
+      reference: json['reference'] ?? '',
+      type: json['type'] ?? '',
+      recipientOrSender: json['recipientOrSender'] ?? json['counterpartyName'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'date': date,
+      'amount': amount,
+      'isCredit': isCredit,
+      'status': status,
+      'reference': reference,
+      'type': type,
+      'recipientOrSender': recipientOrSender,
+    };
+  }
+
   static List<Transaction> dummyTransactions = [
     Transaction(
       id: "1",
