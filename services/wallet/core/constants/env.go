@@ -16,8 +16,9 @@ var (
 	DB_NAME     string
 
 	// Squad constants
-	SQUAD_API_URL    string
-	SQUAD_SECRET_KEY string
+	SQUAD_API_URL             string
+	SQUAD_SECRET_KEY          string
+	SQUAD_BENEFICIARY_ACCOUNT string
 
 	// JWT constants
 	JWT_SECRET         string
@@ -82,6 +83,10 @@ func ConfigDotenv() error {
 
 	if squadSecretKey := os.Getenv("SQUAD_SECRET_KEY"); squadSecretKey != "" {
 		SQUAD_SECRET_KEY = squadSecretKey
+	}
+
+	if squadBeneficiaryAccount := os.Getenv("SQUAD_BENEFICIARY_ACCOUNT"); squadBeneficiaryAccount != "" {
+		SQUAD_BENEFICIARY_ACCOUNT = squadBeneficiaryAccount
 	}
 
 	if jwtSecret := os.Getenv("JWT_SECRET"); jwtSecret != "" {
