@@ -29,8 +29,12 @@ Future<void> main(List<String> args) async {
         Provider.value(value: authRepository),
         Provider.value(value: authStorageService),
         Provider.value(value: biometricService),
-        ChangeNotifierProxyProvider3<AuthRepository, AuthStorageService,
-            BiometricService, AuthProvider>(
+        ChangeNotifierProxyProvider3<
+          AuthRepository,
+          AuthStorageService,
+          BiometricService,
+          AuthProvider
+        >(
           create: (context) => AuthProvider(
             context.read<AuthRepository>(),
             context.read<AuthStorageService>(),

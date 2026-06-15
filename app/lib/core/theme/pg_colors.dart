@@ -11,4 +11,10 @@ class PgColors {
   static const Color black = Color(0xff000000);
   static const Color black1 = Color(0xff111111);
   static const Color black3 = Color(0xff333333);
+
+  static const Gradient primaryGradient = LinearGradient(
+    colors: [secondary, Color(0xFF6B0043)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }

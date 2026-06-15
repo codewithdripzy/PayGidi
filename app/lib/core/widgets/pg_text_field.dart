@@ -109,7 +109,17 @@ class _PgTextFieldState extends State<PgTextField> {
               color: Colors.grey.shade400,
               fontFamily: PgFonts.googleSans,
             ),
-            prefixIcon: widget.prefixIcon,
+            prefixIcon: widget.maxLines != null && widget.maxLines! > 1
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 14),
+                        child: widget.prefixIcon,
+                      ),
+                    ],
+                  )
+                : widget.prefixIcon,
             prefixIconConstraints: widget.prefixIconConstraints,
             prefix: widget.prefix,
             suffixIcon: widget.isPassword

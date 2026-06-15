@@ -25,7 +25,7 @@ class FinanceCategories extends StatelessWidget {
           title: "Food & Drinks",
           amount: "₦120,000",
           percentage: 0.45,
-          color: Colors.orange,
+          color: PgColors.black,
         ),
         const SizedBox(height: 16),
         _buildCategoryItem(
@@ -106,11 +106,11 @@ class FinanceCategories extends StatelessWidget {
                   ],
                 ),
               ),
-              PgTexts.text700(
+              PgTexts.gradientText(
                 context,
                 text: amount,
                 fontSize: 16,
-                color: theme.textTheme.titleMedium?.color ?? PgColors.black,
+                gradient: PgColors.primaryGradient,
               ),
             ],
           ),

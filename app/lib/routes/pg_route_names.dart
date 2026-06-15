@@ -22,4 +22,5 @@ class PgRouteNames {
   static const String createThriftSaving = 'createThriftSaving';
   static const String thriftDetails = 'thriftDetails';
   static const String discoverThrifts = 'discoverThrifts';
+  static const String transactionDetails = 'transactionDetails';
 }

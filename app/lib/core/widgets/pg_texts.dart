@@ -42,6 +42,7 @@ class PgTexts {
     TextOverflow textOverflow = TextOverflow.ellipsis,
     String? fontFamily,
     double? height,
+    int? maxLines,
   }) {
     return Text(
       text,
@@ -56,6 +57,7 @@ class PgTexts {
       ),
       textScaler: TextScaler.linear(ScaleSize.textScaleFactor(context)),
       overflow: textOverflow,
+      maxLines: maxLines,
     );
   }
 
@@ -67,6 +69,7 @@ class PgTexts {
     double fontSize = 12,
     TextOverflow textOverflow = TextOverflow.ellipsis,
     String? fontFamily,
+    int? maxLines,
   }) {
     return Text(
       text,
@@ -80,6 +83,7 @@ class PgTexts {
       ),
       overflow: textOverflow,
       textScaler: TextScaler.linear(ScaleSize.textScaleFactor(context)),
+      maxLines: maxLines,
     );
   }
 
@@ -91,12 +95,14 @@ class PgTexts {
     double fontSize = 20,
     TextOverflow textOverflow = TextOverflow.ellipsis,
     String? fontFamily,
+    int? maxLines,
   }) {
     return Text(
       text,
       textScaler: TextScaler.linear(ScaleSize.textScaleFactor(context)),
       textAlign: textAlign,
       overflow: textOverflow,
+      maxLines: maxLines,
       style: PgStyles.textStyle(
         context: context,
         color: color,
@@ -116,12 +122,14 @@ class PgTexts {
     TextDecoration textDecoration = TextDecoration.none,
     TextOverflow textOverflow = TextOverflow.ellipsis,
     String? fontFamily,
+    int? maxLines,
   }) {
     return Text(
       text,
       textAlign: textAlign,
       overflow: textOverflow,
       textScaler: TextScaler.linear(ScaleSize.textScaleFactor(context)),
+      maxLines: maxLines,
       style: PgStyles.textStyle(
         context: context,
         textDecoration: textDecoration,

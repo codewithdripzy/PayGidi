@@ -6,22 +6,36 @@ import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/finance/presentation/components/finance_goals.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
-class IndividualFinanceScreen extends StatelessWidget {
+class IndividualFinanceScreen extends StatefulWidget {
   const IndividualFinanceScreen({super.key});
+
+  @override
+  State<IndividualFinanceScreen> createState() =>
+      _IndividualFinanceScreenState();
+}
+
+class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
+  bool _showBalance = true;
+  int _currentCardIndex = 0;
+  int _selectedThriftTabIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? theme.scaffoldBackgroundColor
+        : PgColors.homeBackground;
+
     return buildPGAnnotatedRegion(
-      brightness: theme.brightness == Brightness.dark
-          ? Brightness.light
-          : Brightness.dark,
-      color: theme.scaffoldBackgroundColor,
+      brightness: isDark ? Brightness.light : Brightness.dark,
+      color: backgroundColor,
       child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: backgroundColor,
         body: SafeArea(
           child: SingleChildScrollView(
             child: Column(
@@ -40,7 +54,9 @@ class IndividualFinanceScreen extends StatelessWidget {
                             context,
                             text: "Finance",
                             fontSize: 28,
-                            color: theme.textTheme.titleLarge?.color ?? PgColors.black,
+                            color:
+                                theme.textTheme.titleLarge?.color ??
+                                PgColors.black,
                             fontFamily: PgFonts.stackSans,
                           ),
                           PgTexts.text400(
@@ -52,27 +68,38 @@ class IndividualFinanceScreen extends StatelessWidget {
                         ],
                       ),
                       PgScaleButton(
-                        onTap: () => context.pushNamed(PgRouteNames.createSaving),
+                        onTap: () =>
+                            context.pushNamed(PgRouteNames.createSaving),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: const BoxDecoration(
                             color: PgColors.primary,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.add, color: Colors.white, size: 24),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 24,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 32),
-                _buildSavingsSummary(context),
+                _buildSavingsCarousel(context),
                 const SizedBox(height: 32),
-                const FinanceGoals(), // Reusing existing goals component for Personal Savings
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child:
+                      const FinanceGoals(), // Reusing existing goals component for Personal Savings
+                ),
                 const SizedBox(height: 32),
-                _buildJoinedThrifts(context),
-                const SizedBox(height: 32),
-                _buildPublicThrifts(context),
+                _buildThriftTabs(context),
+                const SizedBox(height: 24),
+                _selectedThriftTabIndex == 0
+                    ? _buildJoinedThrifts(context)
+                    : _buildPublicThrifts(context),
                 const SizedBox(height: 32),
               ],
             ),
@@ -82,94 +109,218 @@ class IndividualFinanceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSavingsSummary(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [PgColors.primary, PgColors.secondary],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: PgColors.primary.withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PgTexts.text400(
-              context,
-              text: "Total Savings",
-              fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.8),
-            ),
-            const SizedBox(height: 8),
-            PgTexts.text700(
-              context,
-              text: "₦1,850,000.00",
-              fontSize: 32,
-              color: Colors.white,
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                _buildMiniStat(context, "Personal", "₦1,200,000"),
-                const SizedBox(width: 32),
-                _buildMiniStat(context, "Thrifts", "₦650,000"),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMiniStat(BuildContext context, String label, String value) {
+  Widget _buildSavingsCarousel(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        PgTexts.text400(
-          context,
-          text: label,
-          fontSize: 12,
-          color: Colors.white.withValues(alpha: 0.6),
+        SizedBox(
+          height: 150, // Shorter height
+          child: PageView(
+            onPageChanged: (index) {
+              setState(() {
+                _currentCardIndex = index;
+              });
+            },
+            controller: PageController(viewportFraction: 0.9),
+            children: [
+              _buildBalanceCard(
+                context,
+                title: "Total Savings",
+                amount: "₦1,850,000.00",
+              ),
+              _buildBalanceCard(
+                context,
+                title: "Personal Savings",
+                amount: "₦1,200,000.00",
+              ),
+              _buildBalanceCard(
+                context,
+                title: "Thrift Savings",
+                amount: "₦650,000.00",
+              ),
+            ],
+          ),
         ),
-        PgTexts.text600(
-          context,
-          text: value,
-          fontSize: 14,
-          color: Colors.white,
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            3,
+            (index) => _buildIndicator(index == _currentCardIndex),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildJoinedThrifts(BuildContext context) {
+  Widget _buildIndicator(bool isActive) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      height: 6,
+      width: isActive ? 20 : 6,
+      decoration: BoxDecoration(
+        color: isActive ? PgColors.secondary : Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
+  }
+
+  Widget _buildBalanceCard(
+    BuildContext context, {
+    required String title,
+    required String amount,
+  }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24), // Standard padding
+        decoration: BoxDecoration(
+          color: isDark ? null : PgColors.black1,
+          gradient: isDark
+              ? const LinearGradient(
+                  colors: [
+                    PgColors.secondary,
+                    Color(0xFF6B0043),
+                  ], // Magenta gradient, no orange
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment
+              .center, // Center content vertically to reduce feeling of too much padding
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    PgTexts.text500(
+                      context,
+                      text: title,
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => setState(() => _showBalance = !_showBalance),
+                      child: Icon(
+                        _showBalance
+                            ? Iconsax.eye_copy
+                            : Iconsax.eye_slash_copy,
+                        color: Colors.white70,
+                        size: 18,
+                      ),
+                    ),
+                  ],
+                ),
+                SvgPicture.asset(
+                  "assets/logo/app_cowry_white.svg",
+                  width: 24,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            PgTexts.text700(
+              context,
+              text: _showBalance ? amount : "₦ **********",
+              fontSize: 32,
+              fontFamily: PgFonts.googleSans,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThriftTabs(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          _buildTabItem(context, "My Thrifts", 0),
+          const SizedBox(width: 24),
+          _buildTabItem(context, "Public Thrifts", 1),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabItem(BuildContext context, String title, int index) {
+    final isSelected = _selectedThriftTabIndex == index;
+    final theme = Theme.of(context);
+
+    return PgScaleButton(
+      onTap: () => setState(() => _selectedThriftTabIndex = index),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PgTexts.text600(
+            context,
+            text: title,
+            fontSize: 14,
+            color: isSelected
+                ? (theme.textTheme.titleLarge?.color ?? PgColors.black)
+                : Colors.grey,
+          ),
+          const SizedBox(height: 4),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 3,
+            width: isSelected ? 32 : 0,
+            decoration: BoxDecoration(
+              gradient: isSelected
+                  ? const LinearGradient(
+                      colors: [PgColors.primary, PgColors.secondary],
+                    )
+                  : null,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildJoinedThrifts(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: PgTexts.text700(
-            context,
-            text: "My Thrifts (Ajo)",
-            fontSize: 18,
-            color: theme.textTheme.titleLarge?.color ?? PgColors.black,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              PgTexts.text700(
+                context,
+                text: "My Collections",
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+              PgTexts.gradientText(
+                context,
+                text: "See All",
+                fontSize: 14,
+                gradient: PgColors.primaryGradient,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         SizedBox(
-          height: 160,
+          height: 210,
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -180,6 +331,7 @@ class IndividualFinanceScreen extends StatelessWidget {
                 contribution: "₦100,000/mo",
                 members: 8,
                 isPublic: false,
+                image: "assets/onboarding_images/page1.jpeg",
               ),
               const SizedBox(width: 16),
               _buildThriftCard(
@@ -188,6 +340,7 @@ class IndividualFinanceScreen extends StatelessWidget {
                 contribution: "₦20,000/mo",
                 members: 15,
                 isPublic: true,
+                image: "assets/onboarding_images/page2.jpeg",
               ),
             ],
           ),
@@ -202,117 +355,178 @@ class IndividualFinanceScreen extends StatelessWidget {
     required String contribution,
     required int members,
     required bool isPublic,
+    String? image,
   }) {
     final theme = Theme.of(context);
-    return Container(
-      width: 240,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color ?? (theme.brightness == Brightness.dark ? const Color(0xFF1E1E1E) : Colors.white),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: theme.brightness == Brightness.dark ? Colors.white10 : Colors.grey.shade100,
-        ),
+    final isDark = theme.brightness == Brightness.dark;
+
+    return PgScaleButton(
+      onTap: () => context.pushNamed(
+        PgRouteNames.thriftDetails,
+        extra: {'thriftName': name},
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+      child: Container(
+        width: 260,
+        decoration: BoxDecoration(
+          color: isDark ? null : PgColors.black1,
+          gradient: isDark
+              ? const LinearGradient(
+                  colors: [PgColors.secondary, Color(0xFF6B0043)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (image != null)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                height: 100,
+                width: double.infinity,
                 decoration: BoxDecoration(
-                  color: PgColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: PgTexts.text600(
-                  context,
-                  text: isPublic ? "Public" : "Private",
-                  fontSize: 10,
-                  color: PgColors.primary,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
+                  image: DecorationImage(
+                    image: AssetImage(image),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-              Icon(Iconsax.share_copy, size: 18, color: Colors.grey.shade400),
-            ],
-          ),
-          const Spacer(),
-          PgTexts.text700(
-            context,
-            text: name,
-            fontSize: 16,
-            color: theme.textTheme.titleMedium?.color ?? PgColors.black,
-          ),
-          const SizedBox(height: 4),
-          PgTexts.text600(
-            context,
-            text: contribution,
-            fontSize: 14,
-            color: PgColors.primary,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Iconsax.people_copy, size: 14, color: Colors.grey.shade400),
-              const SizedBox(width: 4),
-              PgTexts.text400(
-                context,
-                text: "$members members",
-                fontSize: 12,
-                color: Colors.grey,
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: PgTexts.text600(
+                          context,
+                          text: isPublic ? "Public" : "Private",
+                          fontSize: 10,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Icon(Iconsax.share_copy,
+                          size: 18, color: Colors.white54),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  PgTexts.text700(
+                    context,
+                    text: name,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      PgTexts.gradientText(
+                        context,
+                        text: contribution,
+                        fontSize: 14,
+                        gradient: PgColors.primaryGradient,
+                      ),
+                      Row(
+                        children: [
+                          const Icon(
+                            Iconsax.people_copy,
+                            size: 14,
+                            color: Colors.white54,
+                          ),
+                          const SizedBox(width: 4),
+                          PgTexts.text400(
+                            context,
+                            text: "$members members",
+                            fontSize: 12,
+                            color: Colors.white60,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildPublicThrifts(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               PgTexts.text700(
                 context,
-                text: "Discover Public Thrifts",
-                fontSize: 18,
-                color: theme.textTheme.titleLarge?.color ?? PgColors.black,
+                text: "Recommendations",
+                fontSize: 14,
+                color: Colors.grey,
               ),
-              TextButton(
-                onPressed: () {},
-                child: PgTexts.text600(
-                  context,
-                  text: "See All",
-                  fontSize: 14,
-                  color: PgColors.primary,
-                ),
+              PgTexts.gradientText(
+                context,
+                text: "See All",
+                fontSize: 14,
+                gradient: PgColors.primaryGradient,
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          _buildPublicThriftItem(
-            context,
-            name: "Entrepreneurs Hub",
-            description: "High volume monthly contribution for business growth.",
-            contribution: "₦500,000/mo",
-            members: 42,
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 220,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            children: [
+              _buildPublicThriftItem(
+                context,
+                name: "Entrepreneurs Hub",
+                description: "High volume monthly contribution.",
+                contribution: "₦500k/mo",
+                members: 42,
+                image: "assets/onboarding_images/page3.jpeg",
+              ),
+              const SizedBox(width: 16),
+              _buildPublicThriftItem(
+                context,
+                name: "Student Savings",
+                description: "Small daily contributions.",
+                contribution: "₦500/day",
+                members: 128,
+                image: "assets/onboarding_images/page1.jpeg",
+              ),
+              const SizedBox(width: 16),
+              _buildPublicThriftItem(
+                context,
+                name: "Agro Investors",
+                description: "Saving for the next harvest.",
+                contribution: "₦50k/mo",
+                members: 64,
+                image: "assets/onboarding_images/page2.jpeg",
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          _buildPublicThriftItem(
-            context,
-            name: "Student Savings",
-            description: "Small daily contributions for students.",
-            contribution: "₦500/day",
-            members: 128,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -322,80 +536,109 @@ class IndividualFinanceScreen extends StatelessWidget {
     required String description,
     required String contribution,
     required int members,
+    String? image,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: 180,
       decoration: BoxDecoration(
-        color: theme.cardTheme.color ?? (theme.brightness == Brightness.dark ? const Color(0xFF1E1E1E) : Colors.white),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: theme.brightness == Brightness.dark ? Colors.white10 : Colors.grey.shade100,
-        ),
+        color: isDark ? null : PgColors.black1,
+        gradient: isDark
+            ? const LinearGradient(
+                colors: [PgColors.secondary, Color(0xFF6B0043)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: PgColors.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Iconsax.status_up_copy, color: PgColors.primary, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                PgTexts.text700(
-                  context,
-                  text: name,
-                  fontSize: 16,
-                  color: theme.textTheme.titleMedium?.color ?? PgColors.black,
-                ),
-                PgTexts.text400(
-                  context,
-                  text: description,
-                  fontSize: 12,
-                  color: Colors.grey,
-                  textOverflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    PgTexts.text600(
-                      context,
-                      text: contribution,
-                      fontSize: 12,
-                      color: PgColors.primary,
-                    ),
-                    const SizedBox(width: 12),
-                    PgTexts.text400(
-                      context,
-                      text: "$members members",
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          PgScaleButton(
-            onTap: () {},
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          if (image != null)
+            Container(
+              height: 100,
+              width: double.infinity,
               decoration: BoxDecoration(
-                color: PgColors.primary,
-                borderRadius: BorderRadius.circular(100),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                image: DecorationImage(
+                  image: AssetImage(image),
+                  fit: BoxFit.cover,
+                ),
               ),
-              child: PgTexts.text600(
-                context,
-                text: "Join",
-                fontSize: 12,
-                color: Colors.white,
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Iconsax.status_up_copy,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  PgTexts.text700(
+                    context,
+                    text: name,
+                    fontSize: 14,
+                    color: Colors.white,
+                    textOverflow: TextOverflow.ellipsis,
+                  ),
+                  PgTexts.text400(
+                    context,
+                    text: description,
+                    fontSize: 11,
+                    color: Colors.white60,
+                    maxLines: 2,
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      PgTexts.gradientText(
+                        context,
+                        text: contribution,
+                        fontSize: 11,
+                        gradient: PgColors.primaryGradient,
+                      ),
+                      PgScaleButton(
+                        onTap: () {},
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: PgTexts.text600(
+                            context,
+                            text: "Join",
+                            fontSize: 10,
+                            color: PgColors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),

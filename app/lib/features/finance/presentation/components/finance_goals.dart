@@ -1,4 +1,5 @@
 import 'package:app/core/theme/pg_colors.dart';
+import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:flutter/material.dart';
 
@@ -14,26 +15,24 @@ class FinanceGoals extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            PgTexts.text700(
+            PgTexts.text500(
               context,
               text: "Savings Goals",
-              fontSize: 18,
-              color: theme.textTheme.titleLarge?.color ?? PgColors.black,
+              fontSize: 14,
+              color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
+                  .withValues(alpha: 0.5),
             ),
-            TextButton(
-              onPressed: () {},
-              child: PgTexts.text600(
-                context,
-                text: "See All",
-                fontSize: 14,
-                color: PgColors.primary,
-              ),
+            PgTexts.gradientText(
+              context,
+              text: "See All",
+              fontSize: 14,
+              gradient: PgColors.primaryGradient,
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        heightSpacing(8),
         SizedBox(
-          height: 180,
+          height: 220,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
@@ -70,82 +69,85 @@ class FinanceGoals extends StatelessWidget {
     required String image,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
-      width: 200,
-      padding: const EdgeInsets.all(16),
+      width: 220,
       decoration: BoxDecoration(
-        color: theme.cardTheme.color ?? (theme.brightness == Brightness.dark ? const Color(0xFF1E1E1E) : Colors.white),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: theme.brightness == Brightness.dark ? Colors.white10 : Colors.grey.shade100,
-        ),
+        color: isDark ? null : PgColors.black1,
+        gradient: isDark
+            ? const LinearGradient(
+                colors: [PgColors.secondary, Color(0xFF6B0043)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  image: DecorationImage(
-                    image: AssetImage(image),
-                    fit: BoxFit.cover,
-                  ),
-                ),
+          Container(
+            height: 100,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: PgTexts.text600(
+              image: DecorationImage(
+                image: AssetImage(image),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PgTexts.text500(
                   context,
                   text: title,
-                  fontSize: 16,
-                  color: theme.textTheme.titleMedium?.color ?? PgColors.black,
+                  fontSize: 14,
+                  color: Colors.white70,
                 ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          PgTexts.text400(
-            context,
-            text: "Saved",
-            fontSize: 12,
-            color: Colors.grey,
-          ),
-          PgTexts.text700(
-            context,
-            text: saved,
-            fontSize: 18,
-            color: PgColors.primary,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              PgTexts.text400(
-                context,
-                text: "Target: $target",
-                fontSize: 10,
-                color: Colors.grey,
-              ),
-              PgTexts.text600(
-                context,
-                text: "${(percentage * 100).toInt()}%",
-                fontSize: 10,
-                color: theme.textTheme.titleMedium?.color ?? PgColors.black,
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: percentage,
-              backgroundColor: PgColors.primary.withValues(alpha: 0.1),
-              valueColor: const AlwaysStoppedAnimation<Color>(PgColors.primary),
-              minHeight: 4,
+                const SizedBox(height: 4),
+                PgTexts.text700(
+                  context,
+                  text: saved,
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    PgTexts.text400(
+                      context,
+                      text: "Target: $target",
+                      fontSize: 10,
+                      color: Colors.white60,
+                    ),
+                    PgTexts.text600(
+                      context,
+                      text: "${(percentage * 100).toInt()}%",
+                      fontSize: 10,
+                      color: Colors.white70,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: LinearProgressIndicator(
+                    value: percentage,
+                    backgroundColor: Colors.white.withValues(alpha: 0.1),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.white,
+                    ),
+                    minHeight: 4,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

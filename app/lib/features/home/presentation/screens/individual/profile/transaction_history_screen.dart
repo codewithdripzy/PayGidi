@@ -1,10 +1,14 @@
+import 'dart:math' as math;
+import 'package:app/core/theme/assets.dart';
 import 'package:app/core/theme/pg_colors.dart';
-// import 'package:app/core/theme/pg_styles.dart';
+import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/wallet/data/models/transaction_model.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
@@ -32,7 +36,7 @@ class TransactionHistoryScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     PgScaleButton(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => context.pop(),
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
@@ -92,8 +96,7 @@ class TransactionHistoryScreen extends StatelessWidget {
 
   Widget _buildTransactionList(BuildContext context) {
     final theme = Theme.of(context);
-    // Placeholder for actual transaction data
-    final List<dynamic> transactions = [];
+    final transactions = Transaction.dummyTransactions;
 
     if (transactions.isEmpty) {
       return Center(
@@ -133,10 +136,83 @@ class TransactionHistoryScreen extends StatelessWidget {
 
     return ListView.separated(
       itemCount: transactions.length,
-      separatorBuilder: (context, index) => heightSpacing(12),
-      itemBuilder: (context, index) {
-        return const SizedBox(); // Actual transaction item would go here
-      },
+      separatorBuilder: (context, index) => Divider(
+        height: 1,
+        thickness: 1,
+        color: theme.brightness == Brightness.dark
+            ? Colors.white10
+            : Colors.grey.shade100,
+      ),
+      itemBuilder: (context, index) =>
+          _buildTransactionItem(context, transactions[index]),
+    );
+  }
+
+  Widget _buildTransactionItem(BuildContext context, Transaction transaction) {
+    final theme = Theme.of(context);
+    final statusColor =
+        transaction.isCredit ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+
+    return PgScaleButton(
+      onTap: () => context.pushNamed(
+        PgRouteNames.transactionDetails,
+        extra: transaction,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Transform.rotate(
+                angle: transaction.isCredit ? 0 : math.pi / 2,
+                child: SvgPicture.asset(
+                  PgAssets.customIcon(iconName: 'arrow_trend'),
+                  colorFilter: ColorFilter.mode(
+                    statusColor,
+                    BlendMode.srcIn,
+                  ),
+                  width: 22,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  PgTexts.text500(
+                    context,
+                    text: transaction.title,
+                    fontSize: 15,
+                    color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
+                    fontFamily: PgFonts.googleSans,
+                  ),
+                  const SizedBox(height: 4),
+                  PgTexts.text400(
+                    context,
+                    text: transaction.date,
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontFamily: PgFonts.googleSans,
+                  ),
+                ],
+              ),
+            ),
+            PgTexts.text500(
+              context,
+              text: transaction.amount,
+              fontSize: 16,
+              color: statusColor,
+              fontFamily: PgFonts.googleSans,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

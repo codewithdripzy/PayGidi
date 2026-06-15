@@ -120,9 +120,7 @@ class _CreateThriftSavingScreenState extends State<CreateThriftSavingScreen> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(100),
-                      gradient: const LinearGradient(
-                        colors: [PgColors.primary, PgColors.secondary],
-                      ),
+                      color: PgColors.black,
                     ),
                     child: PgTexts.text600(
                       context,
@@ -155,11 +153,11 @@ class _CreateThriftSavingScreenState extends State<CreateThriftSavingScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? PgColors.primary.withValues(alpha: 0.1)
+              ? PgColors.black.withValues(alpha: 0.1)
               : theme.cardTheme.color ?? (theme.brightness == Brightness.dark ? const Color(0xFF1E1E1E) : Colors.white),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? PgColors.primary : (theme.brightness == Brightness.dark ? Colors.white10 : Colors.grey.shade100),
+            color: isSelected ? PgColors.black : (theme.brightness == Brightness.dark ? Colors.white10 : Colors.grey.shade100),
             width: 1.5,
           ),
         ),
@@ -167,7 +165,7 @@ class _CreateThriftSavingScreenState extends State<CreateThriftSavingScreen> {
           children: [
             Icon(
               icon,
-              color: isSelected ? PgColors.primary : Colors.grey,
+              color: isSelected ? PgColors.black : Colors.grey,
               size: 24,
             ),
             const SizedBox(height: 8),
@@ -175,7 +173,7 @@ class _CreateThriftSavingScreenState extends State<CreateThriftSavingScreen> {
               context,
               text: title,
               fontSize: 14,
-              color: isSelected ? PgColors.primary : Colors.grey,
+              color: isSelected ? PgColors.black : Colors.grey,
             ),
           ],
         ),
