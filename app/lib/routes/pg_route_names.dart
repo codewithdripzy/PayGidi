@@ -15,4 +15,6 @@ class PgRouteNames {
   static const String deposit = 'deposit';
   static const String withdrawal = 'withdrawal';
   static const String statementRequest = 'statementRequest';
+  static const String instantPayment = 'instantPayment';
+  static const String paymentLink = 'paymentLink';
 }

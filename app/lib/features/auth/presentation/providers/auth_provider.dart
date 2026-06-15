@@ -1,3 +1,4 @@
+import 'package:app/core/services/biometric_service.dart';
 import 'package:app/features/auth/data/models/auth_models.dart';
 import 'package:app/features/auth/data/repositories/auth_repository.dart';
 import 'package:app/features/auth/data/services/auth_storage_service.dart';
@@ -6,8 +7,10 @@ import 'package:flutter/material.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository;
   final AuthStorageService _storageService;
+  final BiometricService _biometricService;
 
-  AuthProvider(this._repository, this._storageService);
+  AuthProvider(
+      this._repository, this._storageService, this._biometricService);
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -84,6 +87,9 @@ class AuthProvider extends ChangeNotifier {
       _userData = response.data;
       if (response.data != null) {
         await _storageService.saveUserData(response.data!);
+        if (response.data?.phone != null) {
+          await _biometricService.saveLastPhone(response.data!.phone!);
+        }
         if (response.data?.token != null) {
           _isLoggedIn = true;
           await _storageService.saveTokens(
@@ -95,6 +101,50 @@ class AuthProvider extends ChangeNotifier {
       return true;
     } else {
       _errorMessage = response.error ?? 'Verification failed';
+      return false;
+    }
+  }
+
+  Future<bool> loginWithBiometric() async {
+    final isEnabled = await _biometricService.isBiometricEnabled();
+    if (!isEnabled) {
+      _errorMessage = "Biometrics not enabled";
+      return false;
+    }
+
+    final authenticated = await _biometricService.authenticateLocally();
+    if (!authenticated) return false;
+
+    setLoading(true);
+    final biometricId = await _biometricService.getBiometricId();
+    final phone = await _biometricService.getLastPhone();
+
+    if (biometricId == null || phone == null) {
+      setLoading(false);
+      _errorMessage = "Biometric data missing. Please login with OTP.";
+      return false;
+    }
+
+    final response = await _repository.authenticateBiometric(
+      BiometricAuthRequest(biometricID: biometricId, phone: phone),
+    );
+    setLoading(false);
+
+    if (response.isSuccess) {
+      _userData = response.data;
+      if (response.data != null) {
+        await _storageService.saveUserData(response.data!);
+        if (response.data?.token != null) {
+          _isLoggedIn = true;
+          await _storageService.saveTokens(
+            token: response.data!.token!,
+            refreshToken: response.data!.refreshToken ?? "",
+          );
+        }
+      }
+      return true;
+    } else {
+      _errorMessage = response.error ?? 'Biometric authentication failed';
       return false;
     }
   }

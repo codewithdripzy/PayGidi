@@ -43,6 +43,12 @@ class PayGidiTheme {
           fontWeight: FontWeight.bold,
         ),
       ),
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(fontSize: 16, color: PgColors.black),
+        bodyMedium: TextStyle(fontSize: 14, color: PgColors.black),
+        titleLarge: TextStyle(
+            fontSize: 18, color: PgColors.black, fontWeight: FontWeight.bold),
+      ),
       useMaterial3: true,
       fontFamily: PgFonts.fontFamily,
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -80,7 +86,7 @@ class PayGidiTheme {
         thickness: 1,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFF0F0F0F),
+        backgroundColor: Color(0xFF1A1A1A),
         selectedItemColor: PgColors.primary,
         unselectedItemColor: Colors.white38,
       ),
@@ -98,8 +104,8 @@ class PayGidiTheme {
       textTheme: const TextTheme(
         bodyLarge: TextStyle(fontSize: 16, color: Colors.white),
         bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
-        titleLarge:
-            TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+        titleLarge: TextStyle(
+            fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
       ),
       useMaterial3: true,
       fontFamily: PgFonts.fontFamily,

@@ -111,3 +111,25 @@ class AuthResponseData {
         'requiredAction': requiredAction,
       };
 }
+
+class BiometricRegisterRequest {
+  final String biometricID;
+
+  BiometricRegisterRequest({required this.biometricID});
+
+  Map<String, dynamic> toJson() => {
+        'biometricID': biometricID,
+      };
+}
+
+class BiometricAuthRequest {
+  final String biometricID;
+  final String phone;
+
+  BiometricAuthRequest({required this.biometricID, required this.phone});
+
+  Map<String, dynamic> toJson() => {
+        'biometricID': biometricID,
+        'phone': phone,
+      };
+}

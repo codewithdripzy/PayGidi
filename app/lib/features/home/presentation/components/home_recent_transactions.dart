@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:app/core/theme/assets.dart';
 import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/theme/pg_fonts.dart';
@@ -13,6 +14,30 @@ class HomeRecentTransactions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final transactions = [
+      _buildTransaction(
+        context,
+        title: "Payment - Arike Pre-Order",
+        date: "May 14th, 2026 • 10:30 PM",
+        amount: "-₦50,000",
+        isCredit: false,
+      ),
+      _buildTransaction(
+        context,
+        title: "Deposit - Opay",
+        date: "May 14th, 2026 • 10:30 PM",
+        amount: "+₦200,000",
+        isCredit: true,
+      ),
+      _buildTransaction(
+        context,
+        title: "Deposit - Opay",
+        date: "May 14th, 2026 • 10:30 PM",
+        amount: "+₦200,000",
+        isCredit: true,
+      ),
+    ];
+
     return Column(
       children: [
         Row(
@@ -35,8 +60,11 @@ class HomeRecentTransactions extends StatelessWidget {
                     color: PgColors.secondary,
                     fontFamily: PgFonts.googleSans,
                   ),
+                  const SizedBox(width: 4),
                   SvgPicture.asset(
                     PgAssets.customIcon(iconName: "arrow_right"),
+                    colorFilter: const ColorFilter.mode(PgColors.secondary, BlendMode.srcIn),
+                    width: 14,
                   ),
                 ],
               ),
@@ -44,33 +72,16 @@ class HomeRecentTransactions extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _buildTransaction(
-          context,
-          title: "Payment - Arike Pre-Order",
-          date: "May 14th, 2026 • 10:30 PM",
-          amount: "-₦50,000",
-          isCredit: false,
-        ),
-        _buildTransaction(
-          context,
-          title: "Deposit - Opay",
-          date: "May 14th, 2026 • 10:30 PM",
-          amount: "+₦200,000",
-          isCredit: true,
-        ),
-        _buildTransaction(
-          context,
-          title: "Deposit - Opay",
-          date: "May 14th, 2026 • 10:30 PM",
-          amount: "+₦200,000",
-          isCredit: true,
-        ),
-        _buildTransaction(
-          context,
-          title: "Deposit - Opay",
-          date: "May 14th, 2026 • 10:30 PM",
-          amount: "+₦200,000",
-          isCredit: true,
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: transactions.length,
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            thickness: 1,
+            color: theme.brightness == Brightness.dark ? Colors.white10 : Colors.grey.shade100,
+          ),
+          itemBuilder: (context, index) => transactions[index],
         ),
       ],
     );
@@ -84,23 +95,28 @@ class HomeRecentTransactions extends StatelessWidget {
     required bool isCredit,
   }) {
     final theme = Theme.of(context);
+    final statusColor = isCredit ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: theme.cardTheme.color ?? Colors.grey.shade100,
+              color: statusColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: SvgPicture.asset(
-              PgAssets.customIcon(iconName: 'arrow_trend'),
-              colorFilter: ColorFilter.mode(
-                isCredit ? Colors.green : Colors.red,
-                BlendMode.srcIn,
+            child: Transform.rotate(
+              angle: isCredit ? 0 : math.pi / 2,
+              child: SvgPicture.asset(
+                PgAssets.customIcon(iconName: 'arrow_trend'),
+                colorFilter: ColorFilter.mode(
+                  statusColor,
+                  BlendMode.srcIn,
+                ),
+                width: 22,
               ),
-              width: 20,
             ),
           ),
           const SizedBox(width: 16),
@@ -108,13 +124,14 @@ class HomeRecentTransactions extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PgTexts.text600(
+                PgTexts.text500(
                   context,
                   text: title,
-                  fontSize: 14,
+                  fontSize: 15,
                   color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
                   fontFamily: PgFonts.googleSans,
                 ),
+                const SizedBox(height: 4),
                 PgTexts.text400(
                   context,
                   text: date,
@@ -125,11 +142,11 @@ class HomeRecentTransactions extends StatelessWidget {
               ],
             ),
           ),
-          PgTexts.text700(
+          PgTexts.text500(
             context,
             text: amount,
-            fontSize: 14,
-            color: isCredit ? Colors.green : Colors.red,
+            fontSize: 16,
+            color: statusColor,
             fontFamily: PgFonts.googleSans,
           ),
         ],
@@ -137,3 +154,4 @@ class HomeRecentTransactions extends StatelessWidget {
     );
   }
 }
+

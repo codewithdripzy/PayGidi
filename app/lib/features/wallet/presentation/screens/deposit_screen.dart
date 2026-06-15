@@ -54,7 +54,7 @@ class DepositScreen extends StatelessWidget {
                 color: PgColors.black,
                 fontFamily: PgFonts.stackSans,
               ),
-              heightSpacing(12),
+              heightSpacing(4),
               PgTexts.text400(
                 context,
                 text: "Transfer money to your PayGidi account using the details below.",
@@ -132,13 +132,9 @@ class DepositScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        border: Border.all(
+          color: Colors.grey.shade100,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

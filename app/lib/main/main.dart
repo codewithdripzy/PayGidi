@@ -1,4 +1,5 @@
 import 'package:app/core/network/api_service.dart';
+import 'package:app/core/services/biometric_service.dart';
 import 'package:app/core/theme/theme_provider.dart';
 import 'package:app/features/auth/data/repositories/auth_repository.dart';
 import 'package:app/features/auth/data/services/auth_storage_service.dart';
@@ -18,6 +19,7 @@ Future<void> main(List<String> args) async {
   final apiService = ApiService();
   final authStorageService = AuthStorageService();
   final authRepository = AuthRepository(apiService);
+  final biometricService = BiometricService();
 
   runApp(
     MultiProvider(
@@ -26,8 +28,16 @@ Future<void> main(List<String> args) async {
         Provider.value(value: apiService),
         Provider.value(value: authRepository),
         Provider.value(value: authStorageService),
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(authRepository, authStorageService),
+        Provider.value(value: biometricService),
+        ChangeNotifierProxyProvider3<AuthRepository, AuthStorageService,
+            BiometricService, AuthProvider>(
+          create: (context) => AuthProvider(
+            context.read<AuthRepository>(),
+            context.read<AuthStorageService>(),
+            context.read<BiometricService>(),
+          ),
+          update: (context, repo, storage, biometric, previous) =>
+              previous ?? AuthProvider(repo, storage, biometric),
         ),
       ],
       child: const PgApp(),

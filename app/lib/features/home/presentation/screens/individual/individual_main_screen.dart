@@ -3,6 +3,7 @@ import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/finance/presentation/screens/individual_finance_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_cards_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_me_screen.dart';
@@ -23,7 +24,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
   final List<Widget> _screens = [
     const IndividualHomeScreen(),
     const IndividualCardsScreen(),
-    const Center(child: Text("Finance")),
+    const IndividualFinanceScreen(),
     const IndividualMeScreen(),
   ];
 
@@ -70,7 +71,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
                 _buildPaymentOption(
                   icon: Iconsax.link_1_copy,
                   title: "Payment Link",
-                  subtitle: "Create a link to receive payments",
+                  subtitle: "Create link to make payments to merchants",
                   onTap: () {
                     Navigator.pop(context);
                     // Handle Payment Link
@@ -95,18 +96,8 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
     return PgScaleButton(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.brightness == Brightness.dark
-              ? const Color(0xFF222222)
-              : const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFE5E7EB),
-          ),
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: const BoxDecoration(),
         child: Row(
           children: [
             Container(
@@ -138,7 +129,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
           ],
         ),
       ),
@@ -160,7 +151,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: BottomAppBar(
           shape: const CircularNotchedRectangle(),
-          notchMargin: 10,
+          notchMargin: 7,
           color: theme.bottomNavigationBarTheme.backgroundColor,
           elevation: theme.brightness == Brightness.dark ? 0 : 10,
           child: Padding(
@@ -184,9 +175,10 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _selectedIndex == index;
     final theme = Theme.of(context);
-    final unselectedColor = theme.brightness == Brightness.dark
-        ? Colors.white38
-        : Colors.grey.shade400;
+    final unselectedColor = theme.bottomNavigationBarTheme.unselectedItemColor ??
+        (theme.brightness == Brightness.dark
+            ? Colors.white38
+            : Colors.grey.shade400);
 
     return PgScaleButton(
       onTap: () => _onItemTapped(index),
@@ -214,7 +206,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
     return PgScaleButton(
       onTap: _showPaymentSelection,
       child: Container(
-        margin: const EdgeInsets.only(top: 15),
+        margin: const EdgeInsets.only(top: 35),
         height: 60,
         width: 60,
         decoration: BoxDecoration(

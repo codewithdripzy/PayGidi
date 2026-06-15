@@ -16,11 +16,9 @@ class StatementRequestScreen extends StatefulWidget {
 
 class _StatementRequestScreenState extends State<StatementRequestScreen> {
   DateTimeRange? _selectedDateRange;
-  final _emailController = TextEditingController();
 
   @override
   void dispose() {
-    _emailController.dispose();
     super.dispose();
   }
 
@@ -105,37 +103,6 @@ class _StatementRequestScreenState extends State<StatementRequestScreen> {
                 ),
                 heightSpacing(32),
                 _buildDatePicker(context),
-                heightSpacing(24),
-                PgTexts.text500(
-                  context,
-                  text: "Send to Email",
-                  fontSize: 14,
-                  color:
-                      (theme.textTheme.bodyMedium?.color ?? PgColors.black).withValues(alpha: 0.5),
-                ),
-                heightSpacing(12),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: theme.cardTheme.color,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: theme.brightness == Brightness.dark
-                          ? const Color(0xFF2A2A2A)
-                          : Colors.grey.shade100,
-                    ),
-                  ),
-                  child: TextField(
-                    controller: _emailController,
-                    style: theme.textTheme.bodyLarge,
-                    decoration: const InputDecoration(
-                      hintText: "Enter email address",
-                      border: InputBorder.none,
-                      hintStyle: TextStyle(color: Colors.black26),
-                    ),
-                  ),
-                ),
                 const Spacer(),
                 PgScaleButton(
                   onTap: _selectedDateRange == null

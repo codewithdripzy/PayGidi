@@ -14,7 +14,7 @@ class HomeBanner extends StatelessWidget {
       "assets/images/squad_ad_image.png",
       // PgAssets.customIcon(iconName: 'squad_ad'),
       width: double.infinity,
-      height: objectHeight(size: 114, context: context),
+      height: objectHeight(size: 140, context: context),
       fit: BoxFit.cover,
     );
   }

@@ -75,7 +75,7 @@ class PgTexts {
         context: context,
         color: color,
         fontSize: fontSize,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
         fontFamily: fontFamily,
       ),
       overflow: textOverflow,
