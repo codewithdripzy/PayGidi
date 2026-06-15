@@ -15,9 +15,7 @@ class HomeQuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final actionBg = theme.brightness == Brightness.dark
-        ? const Color(0xFF1A1A1A)
-        : Colors.grey.shade200;
+    final actionBg = theme.cardTheme.color;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -37,21 +35,21 @@ class HomeQuickActions extends StatelessWidget {
           context,
           "Deposit",
           PgAssets.customIcon(iconName: 'deposit'),
-          actionBg,
+          actionBg ?? Colors.grey.shade200,
           onTap: () => context.pushNamed(PgRouteNames.deposit),
         ),
         _buildAction(
           context,
           "Statement",
           PgAssets.customIcon(iconName: 'invoice'),
-          actionBg,
+          actionBg ?? Colors.grey.shade200,
           onTap: () => context.pushNamed(PgRouteNames.statementRequest),
         ),
         _buildAction(
           context,
           "Withdraw",
           PgAssets.customIcon(iconName: 'withdraw'),
-          actionBg,
+          actionBg ?? Colors.grey.shade200,
           onTap: () => context.pushNamed(PgRouteNames.withdrawal),
         ),
       ],

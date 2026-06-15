@@ -91,9 +91,7 @@ class HomeRecentTransactions extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF1A1A1A)
-                  : Colors.grey.shade100,
+              color: theme.cardTheme.color ?? Colors.grey.shade100,
               shape: BoxShape.circle,
             ),
             child: SvgPicture.asset(

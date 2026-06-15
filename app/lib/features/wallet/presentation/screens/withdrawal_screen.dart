@@ -199,7 +199,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             Switch.adaptive(
               value: _isTapToPayActive,
               onChanged: (value) => setState(() => _isTapToPayActive = value),
-              activeColor: PgColors.primary,
+              activeThumbColor: PgColors.primary,
             ),
           ],
         ),

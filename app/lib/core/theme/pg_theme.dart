@@ -11,18 +11,34 @@ class PayGidiTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: PgColors.primary,
         brightness: Brightness.light,
+        surface: Colors.white,
       ),
       primaryColor: PgColors.primary,
       scaffoldBackgroundColor: PgColors.scaffoldBackground,
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: Colors.grey.shade100),
+        ),
+      ),
+      dividerTheme: DividerThemeData(
+        color: Colors.grey.shade100,
+        thickness: 1,
+      ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: PgColors.black,
+        backgroundColor: Colors.white,
+        selectedItemColor: PgColors.primary,
+        unselectedItemColor: Colors.grey,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: PgColors.scaffoldBackground,
         elevation: 0,
         centerTitle: true,
+        iconTheme: IconThemeData(color: PgColors.black),
         titleTextStyle: TextStyle(
-          color: Colors.white,
+          color: PgColors.black,
           fontSize: 14,
           fontWeight: FontWeight.bold,
         ),
@@ -34,7 +50,8 @@ class PayGidiTheme {
           backgroundColor: PgColors.primary,
           foregroundColor: Colors.white,
           textStyle: const TextStyle(fontSize: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
         ),
       ),
     );
@@ -63,9 +80,9 @@ class PayGidiTheme {
         thickness: 1,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFF1A1A1A),
+        backgroundColor: Color(0xFF0F0F0F),
         selectedItemColor: PgColors.primary,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: Colors.white38,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF0F0F0F),
@@ -81,7 +98,8 @@ class PayGidiTheme {
       textTheme: const TextTheme(
         bodyLarge: TextStyle(fontSize: 16, color: Colors.white),
         bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
-        titleLarge: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+        titleLarge:
+            TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
       ),
       useMaterial3: true,
       fontFamily: PgFonts.fontFamily,

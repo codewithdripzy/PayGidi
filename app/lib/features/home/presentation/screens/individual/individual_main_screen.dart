@@ -148,37 +148,33 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: _screens[_selectedIndex],
-      floatingActionButton: _buildPayButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 10,
-        color: theme.bottomNavigationBarTheme.backgroundColor,
-        elevation: 0,
-        padding: EdgeInsets.zero,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF2A2A2A)
-                    : Colors.grey.shade100,
-              ),
+    return buildPGAnnotatedRegion(
+      brightness: theme.brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark,
+      color: theme.scaffoldBackgroundColor,
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: _screens[_selectedIndex],
+        floatingActionButton: _buildPayButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: BottomAppBar(
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 10,
+          color: theme.bottomNavigationBarTheme.backgroundColor,
+          elevation: theme.brightness == Brightness.dark ? 0 : 10,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildNavItem(0, Iconsax.home_2_copy, "Home"),
+                _buildNavItem(1, Iconsax.card_copy, "Cards"),
+                const SizedBox(width: 7), // Space for FAB
+                _buildNavItem(2, Iconsax.chart_2_copy, "Finance"),
+                _buildNavItem(3, Iconsax.user_copy, "Me"),
+              ],
             ),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildNavItem(0, Iconsax.home_2_copy, "Home"),
-              _buildNavItem(1, Iconsax.card_copy, "Cards"),
-              const SizedBox(width: 10), // Space for FAB
-              _buildNavItem(2, Iconsax.chart_2_copy, "Finance"),
-              _buildNavItem(3, Iconsax.user_copy, "Me"),
-            ],
           ),
         ),
       ),
@@ -187,6 +183,11 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
 
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _selectedIndex == index;
+    final theme = Theme.of(context);
+    final unselectedColor = theme.brightness == Brightness.dark
+        ? Colors.white38
+        : Colors.grey.shade400;
+
     return PgScaleButton(
       onTap: () => _onItemTapped(index),
       child: Column(
@@ -194,7 +195,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
         children: [
           Icon(
             icon,
-            color: isSelected ? PgColors.primary : Colors.grey.shade400,
+            color: isSelected ? PgColors.primary : unselectedColor,
             size: 24,
           ),
           heightSpacing(4),
@@ -202,7 +203,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
             context,
             text: label,
             fontSize: 12,
-            color: isSelected ? PgColors.primary : Colors.grey.shade400,
+            color: isSelected ? PgColors.primary : unselectedColor,
           ),
         ],
       ),
@@ -213,7 +214,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
     return PgScaleButton(
       onTap: _showPaymentSelection,
       child: Container(
-        margin: const EdgeInsets.only(top: 30),
+        margin: const EdgeInsets.only(top: 15),
         height: 60,
         width: 60,
         decoration: BoxDecoration(
