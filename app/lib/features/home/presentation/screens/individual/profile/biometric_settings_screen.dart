@@ -49,9 +49,11 @@ class _BiometricSettingsScreenState extends State<BiometricSettingsScreen> {
       final authenticated = await biometricService.authenticateLocally();
 
       if (authenticated) {
+        if (!mounted) return;
         setState(() => _isLoading = true);
         final biometricId =
             await biometricService.generateAndStoreBiometricId();
+        if (!mounted) return;
         final authRepo = context.read<AuthRepository>();
 
         final response = await authRepo.registerBiometric(
@@ -214,7 +216,8 @@ class _BiometricSettingsScreenState extends State<BiometricSettingsScreen> {
           Switch.adaptive(
             value: _isBiometricEnabled,
             onChanged: _toggleBiometric,
-            activeColor: PgColors.primary,
+            activeTrackColor: PgColors.primary.withValues(alpha: 0.5),
+            activeThumbColor: PgColors.primary,
           ),
         ],
       ),

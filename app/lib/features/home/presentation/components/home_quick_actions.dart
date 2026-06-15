@@ -46,7 +46,7 @@ class HomeQuickActions extends StatelessWidget {
                   subtitle: "Send money instantly to anyone",
                   onTap: () {
                     Navigator.pop(context);
-                    // Handle Instant Payment
+                    context.pushNamed(PgRouteNames.instantPayment);
                   },
                 ),
                 heightSpacing(16),
@@ -57,7 +57,7 @@ class HomeQuickActions extends StatelessWidget {
                   subtitle: "Create link to make payments to merchants",
                   onTap: () {
                     Navigator.pop(context);
-                    // Handle Payment Link
+                    context.pushNamed(PgRouteNames.paymentLink);
                   },
                 ),
                 heightSpacing(16),

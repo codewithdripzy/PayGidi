@@ -7,8 +7,10 @@ import 'package:app/features/finance/presentation/screens/individual_finance_scr
 import 'package:app/features/home/presentation/screens/individual/individual_cards_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_me_screen.dart';
+import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class IndividualMainScreen extends StatefulWidget {
@@ -64,7 +66,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
                   subtitle: "Send money instantly to anyone",
                   onTap: () {
                     Navigator.pop(context);
-                    // Handle Instant Payment
+                    context.pushNamed(PgRouteNames.instantPayment);
                   },
                 ),
                 heightSpacing(16),
@@ -74,7 +76,7 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
                   subtitle: "Create link to make payments to merchants",
                   onTap: () {
                     Navigator.pop(context);
-                    // Handle Payment Link
+                    context.pushNamed(PgRouteNames.paymentLink);
                   },
                 ),
                 heightSpacing(16),
