@@ -234,7 +234,7 @@ func VerifyEmail(c *gin.Context) {
 		utils.SendUserNotification(
 			data.ID,
 			"Two-Factor Authentication OTP",
-			"An OTP has been generated for your login verification.",
+			fmt.Sprintf("Your OTP code is %s. It expires in 5 minutes.", otp),
 			"sms",
 			data.Phone,
 			"otp",

@@ -53,7 +53,7 @@ class _HomeBalanceCardState extends State<HomeBalanceCard> {
                 ],
               ),
               SvgPicture.asset(
-                "assets/logo/app cowry icon white.svg",
+                "assets/logo/app_cowry_white.svg",
                 width: 24,
                 colorFilter: const ColorFilter.mode(
                   Colors.white,

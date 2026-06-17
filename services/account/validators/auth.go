@@ -13,10 +13,12 @@ type VerifyAuthOtpDto struct {
 type IndividualCompleteAccountDto struct {
 	FirstName    string `json:"firstName" validate:"required,min=2,max=30"`
 	LastName     string `json:"lastName" validate:"required,min=2,max=30"`
+	MiddleName   string `json:"middleName" validate:"omitempty"`
 	DateOfBirth  string `json:"dateOfBirth" validate:"required,datetime=2006-01-02"`
 	Email        string `json:"email" validate:"required,email"`
-	NIN          string `json:"nin" validate:"required,len=10"`
-	BVN          string `json:"bvn" validate:"omitempty,len=11"`
+	NIN          string `json:"nin" validate:"omitempty,len=11"`
+	BVN          string `json:"bvn" validate:"required,len=11"`
+	Address      string `json:"address" validate:"required,min=5"`
 	ReferralCode string `json:"referralCode" validate:"omitempty,len=6"`
 	Gender       string `json:"gender" validate:"required,oneof=1 2"`
 }
@@ -43,7 +45,7 @@ type RequestOTPDto struct {
 }
 
 type VerifyNINDto struct {
-	NIN string `json:"nin" validate:"required,min=10"`
+	NIN string `json:"nin" validate:"required,len=11"`
 }
 
 type VerifyBVNImageDto struct {

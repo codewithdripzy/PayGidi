@@ -30,6 +30,7 @@ message CreateWalletRequest {
   string userId = 10;
   string accountType = 11;
   string businessName = 12;
+  string address = 13;
 }
 
 message CreateWalletResponse {
@@ -41,6 +42,7 @@ message CreateWalletResponse {
   string lastname = 6;
   string accountNo = 7;
   string currentTier = 8;
+  string customerIdentifier = 9;
 }
 
 message InitiatePaymentRequest {

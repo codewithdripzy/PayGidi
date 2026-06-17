@@ -13,6 +13,7 @@ type CreateWalletDto struct {
 	UserID      string `json:"userId" validate:"required"`
 	AccountType string `json:"accountType" validate:"omitempty,oneof=individual business"`
 	BusinessName string `json:"businessName" validate:"required_if=AccountType business"`
+	Address      string `json:"address" validate:"required"`
 }
 
 type SendMoneyDto struct {

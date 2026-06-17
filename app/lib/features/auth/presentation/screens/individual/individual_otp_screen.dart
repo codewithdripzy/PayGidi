@@ -8,6 +8,7 @@ import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -68,8 +69,8 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
 
     if (success) {
       final needsOnboarding = authProvider.userData?.needsOnboarding ?? false;
-      if (widget.isLogin && !needsOnboarding) {
-        context.goNamed(PgRouteNames.individualHome);
+      if (!needsOnboarding) {
+        context.goNamed(PgRouteNames.individualMain);
       } else {
         context.pushNamed(PgRouteNames.individualCompleteAccount1);
       }
@@ -94,12 +95,29 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              heightSpacing(24),
-              PgScaleButton(
-                child: const Icon(Icons.arrow_back_outlined),
-                onTap: () => context.pop(),
+              heightSpacing(15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  PgScaleButton(
+                    onTap: () => context.pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: const Icon(Icons.arrow_back_outlined, size: 20),
+                    ),
+                  ),
+                  SvgPicture.asset(
+                    "assets/logo/app_cowry_icon.svg",
+                    height: 32,
+                  ),
+                ],
               ),
-              heightSpacing(18),
+              heightSpacing(24),
               PgTexts.text700(
                 context,
                 text: "Verification",
@@ -107,7 +125,7 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
                 color: PgColors.black,
                 fontFamily: PgFonts.stackSans,
               ),
-              heightSpacing(12),
+              heightSpacing(3),
               PgTexts.text400(
                 context,
                 text: "We've sent a 5-digit code to ${widget.phone}.",
@@ -122,12 +140,14 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
                   (index) => _buildOtpBox(context, index),
                 ),
               ),
-              heightSpacing(32),
+              heightSpacing(24),
               Center(
-                child: Column(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  spacing: 3.0,
                   children: [
                     PgTexts.text400(context, text: "Didn't receive the code?"),
-                    heightSpacing(8),
+                    // heightSpacing(8),
                     PgScaleButton(
                       onTap: () {
                         // Resend OTP logic could be added here
@@ -148,11 +168,11 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
                   return PgScaleButton(
                     onTap: auth.isLoading ? () {} : _verify,
                     child: Container(
-                      height: objectHeight(size: 56, context: context),
+                      height: objectHeight(size: 60, context: context),
                       width: double.infinity,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(100),
                         gradient: LinearGradient(
                           colors: auth.isLoading
                               ? [
@@ -161,6 +181,14 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
                                 ]
                               : [PgColors.primary, PgColors.secondary],
                         ),
+                        boxShadow: [
+                          if (!auth.isLoading)
+                            BoxShadow(
+                              color: PgColors.primary.withValues(alpha: 0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                        ],
                       ),
                       child: auth.isLoading
                           ? const SizedBox(
@@ -173,15 +201,15 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
                             )
                           : PgTexts.text600(
                               context,
-                              text: "Verify Now",
+                              text: "Verify Account",
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: 15,
                             ),
                     ),
                   );
                 },
               ),
-              heightSpacing(40),
+              heightSpacing(24),
             ],
           ),
         ),
@@ -191,7 +219,6 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
 
   Widget _buildOtpBox(BuildContext context, int index) {
     return SizedBox(
-      height: 60,
       width: 60,
       child: TextFormField(
         controller: _controllers[index],
@@ -213,6 +240,7 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
           LengthLimitingTextInputFormatter(1),
           FilteringTextInputFormatter.digitsOnly,
         ],
+        cursorHeight: 24,
         style: PgStyles.textStyle(
           context: context,
           fontSize: 24,
@@ -222,6 +250,7 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
         decoration: InputDecoration(
           fillColor: Colors.white,
           filled: true,
+          contentPadding: EdgeInsets.symmetric(vertical: 10.0),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade200),

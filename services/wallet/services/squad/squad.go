@@ -37,6 +37,10 @@ func refreshSquadClient() {
 // CreateVirtualAccount creates a static virtual account for holding user funds.
 func CreateVirtualAccount(ctx context.Context, payload payloads.CreateSquadVirtualAccountPayload) (bool, *string, *responses.SquadVirtualAccountResponseData) {
 	refreshSquadClient()
+	if payload.BeneficiaryAccount == "" {
+		payload.BeneficiaryAccount = constants.SQUAD_BENEFICIARY_ACCOUNT
+	}
+	log.Printf("[Squad][CreateVirtualAccount] using beneficiary account: %s", payload.BeneficiaryAccount)
 	var response responses.SquadResponse[responses.SquadVirtualAccountResponseData]
 
 	_, err := httpclient.PostJSON(client, ctx, "/virtual-account", payload, &response)
@@ -52,6 +56,10 @@ func CreateVirtualAccount(ctx context.Context, payload payloads.CreateSquadVirtu
 // CreateBusinessVirtualAccount creates a static virtual account for businesses.
 func CreateBusinessVirtualAccount(ctx context.Context, payload payloads.CreateSquadBusinessVirtualAccountPayload) (bool, *string, *responses.SquadVirtualAccountResponseData) {
 	refreshSquadClient()
+	if payload.BeneficiaryAccount == "" {
+		payload.BeneficiaryAccount = constants.SQUAD_BENEFICIARY_ACCOUNT
+	}
+	log.Printf("[Squad][CreateBusinessVirtualAccount] using beneficiary account: %s", payload.BeneficiaryAccount)
 	var response responses.SquadResponse[responses.SquadVirtualAccountResponseData]
 
 	_, err := httpclient.PostJSON(client, ctx, "/virtual-account/business", payload, &response)

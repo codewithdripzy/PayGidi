@@ -1,6 +1,8 @@
 package notification
 
 import (
+	"log"
+
 	"github.com/PayGidi/NotificationService/dto"
 	"github.com/PayGidi/NotificationService/models"
 	"github.com/PayGidi/NotificationService/utils"
@@ -31,6 +33,8 @@ func NewNotificationService(db *gorm.DB) *NotificationService {
 }
 
 func (s *NotificationService) CreateNotification(payload *dto.CreateNotificationDTO) (*models.Notification, error) {
+	log.Printf("[NotificationService] CreateNotification request: UserID=%s, Channel=%s, Recipient=%s", payload.UserID, payload.Channel, payload.Recipient)
+
 	notification := &models.Notification{
 		UserID:    payload.UserID,
 		Title:     payload.Title,
@@ -43,7 +47,31 @@ func (s *NotificationService) CreateNotification(payload *dto.CreateNotification
 	}
 
 	if err := s.DB.Create(notification).Error; err != nil {
+		log.Printf("[NotificationService] failed to store notification: %v", err)
 		return nil, err
+	}
+
+	// Trigger real-time dispatch for specific channels
+	if notification.Channel == "email" || notification.Channel == "sms" {
+		go func(n *models.Notification) {
+			var err error
+			log.Printf("[NotificationService] dispatching %s to %s", n.Channel, n.Recipient)
+
+			switch n.Channel {
+			case "email":
+				err = utils.SendEmail(n.Recipient, n.Title, n.Message, n.Type)
+			case "sms":
+				err = utils.SendSMS(n.Recipient, n.Message)
+			}
+
+			if err != nil {
+				log.Printf("[NotificationService] failed to dispatch %s: %v", n.Channel, err)
+				s.DB.Model(n).Update("status", "failed")
+			} else {
+				log.Printf("[NotificationService] %s dispatched successfully", n.Channel)
+				s.DB.Model(n).Update("status", "sent")
+			}
+		}(notification)
 	}
 
 	return notification, nil

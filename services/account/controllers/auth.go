@@ -191,7 +191,7 @@ func Auth(c *gin.Context) {
 	utils.SendUserNotification(
 		data.ID,
 		"Login Verification OTP",
-		"An OTP has been generated for your login.",
+		fmt.Sprintf("Your OTP code is %s. It expires in 10 minutes.", otp),
 		"sms",
 		data.Phone,
 		"otp",

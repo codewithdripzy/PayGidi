@@ -20,10 +20,17 @@ class IndividualHomeScreen extends StatelessWidget {
       color: PgColors.scaffoldBackground,
       child: Scaffold(
         backgroundColor: PgColors.scaffoldBackground,
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
+        body: RefreshIndicator(
+          onRefresh: () async {
+            // Add refresh logic here
+            await Future.delayed(const Duration(seconds: 2));
+          },
+          color: PgColors.primary,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
               const HomeHeader(),
               const SizedBox(height: 32),
               const HomeBalanceCard(),
@@ -37,6 +44,7 @@ class IndividualHomeScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

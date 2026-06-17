@@ -167,7 +167,7 @@ func RequestOTP(c *gin.Context) {
 		utils.SendUserNotification(
 			data.ID,
 			"OTP Requested",
-			"A new OTP has been requested for your account.",
+			fmt.Sprintf("Your OTP code is %s. It expires in 10 minutes.", code),
 			"sms",
 			data.Phone,
 			"otp",
@@ -264,7 +264,7 @@ func RequestOTP(c *gin.Context) {
 		utils.SendUserNotification(
 			data.ID,
 			"OTP Requested",
-			"A new OTP has been requested for your account.",
+			fmt.Sprintf("Your OTP code is %s. It expires in 10 minutes.", code),
 			"email",
 			data.Email,
 			"otp",

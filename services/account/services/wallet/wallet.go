@@ -122,6 +122,7 @@ func (s *WalletService) CreateWalletForUser(ctx context.Context, req *walletpb.C
 	}
 
 	ctx = metadata.NewOutgoingContext(ctx, md)
+	fmt.Printf("[Account-WalletClient] calling client.CreateWallet on %s\n", constants.WALLET_SERVICE_ADDR)
 	return s.client.CreateWallet(ctx, req)
 }
 

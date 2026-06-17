@@ -30,6 +30,7 @@ message CreateWalletRequest {
   string userId = 10;
   string accountType = 11;
   string businessName = 12;
+  string address = 13;
 }
 
 message CreateWalletResponse {

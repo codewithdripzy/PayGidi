@@ -3,12 +3,15 @@ package payloads
 type CreateSquadVirtualAccountPayload struct {
 	FirstName          string `json:"first_name"`
 	LastName           string `json:"last_name"`
+	MiddleName         string `json:"middle_name,omitempty"`
 	MobileNum          string `json:"mobile_num"`
 	Dob                string `json:"dob"` // mm/dd/yyyy
 	Bvn                string `json:"bvn"`
 	CustomerIdentifier string `json:"customer_identifier"`
 	Gender             string `json:"gender"`
 	Email              string `json:"email"`
+	Address            string `json:"address"`
+	BeneficiaryAccount string `json:"beneficiary_account"`
 }
 
 type SquadAccountLookupPayload struct {

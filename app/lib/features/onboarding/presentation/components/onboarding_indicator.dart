@@ -20,16 +20,16 @@ class OnboardingIndicator extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            width: currentIndex == index ? 40 : 25,
+            width: currentIndex == index ? 28 : 20,
             height: 5,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: currentIndex != index ? PgColors.black3 : null,
               gradient: currentIndex == index
                   ? const LinearGradient(
                       colors: [PgColors.primary, PgColors.secondary],
                     )
                   : null,
+              color: currentIndex == index ? null : const Color(0xFF454545),
             ),
           ),
         ),

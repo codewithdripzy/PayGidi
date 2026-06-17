@@ -1,6 +1,5 @@
 import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/theme/pg_fonts.dart';
-import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_snackbar.dart';
@@ -30,11 +29,18 @@ class DepositScreen extends StatelessWidget {
       color: PgColors.scaffoldBackground,
       child: Scaffold(
         backgroundColor: PgColors.scaffoldBackground,
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        body: RefreshIndicator(
+          onRefresh: () async {
+            // Add refresh logic here
+            await Future.delayed(const Duration(seconds: 2));
+          },
+          color: PgColors.primary,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               heightSpacing(24),
               PgScaleButton(
                 child: const Icon(Icons.arrow_back_outlined),
@@ -110,8 +116,9 @@ class DepositScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildAccountDetailCard(
     BuildContext context, {
@@ -161,7 +168,7 @@ class DepositScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: PgColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                   child: const Icon(
                     Iconsax.copy_copy,

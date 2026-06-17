@@ -10,6 +10,7 @@ import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
@@ -73,11 +74,28 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 heightSpacing(24),
-                PgScaleButton(
-                  child: const Icon(Icons.arrow_back_outlined),
-                  onTap: () => context.pop(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    PgScaleButton(
+                      onTap: () => context.pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: const Icon(Icons.arrow_back_outlined, size: 20),
+                      ),
+                    ),
+                    SvgPicture.asset(
+                      "assets/logo/app_cowry_icon.svg",
+                      height: 32,
+                    ),
+                  ],
                 ),
-                heightSpacing(18),
+                heightSpacing(24),
                 PgTexts.text700(
                   context,
                   text: "Welcome Back!",
@@ -85,7 +103,7 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                   color: PgColors.black,
                   fontFamily: PgFonts.stackSans,
                 ),
-                heightSpacing(12),
+                heightSpacing(2),
                 PgTexts.text400(
                   context,
                   text: "Login securely to your PayGidi account.",
@@ -133,11 +151,11 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                               await _submit();
                             },
                       child: Container(
-                        height: objectHeight(size: 56, context: context),
+                        height: objectHeight(size: 60, context: context),
                         width: double.infinity,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(100),
                           gradient: LinearGradient(
                             colors: auth.isLoading
                                 ? [
@@ -160,13 +178,13 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                                 context,
                                 text: "Continue",
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 16,
                               ),
                       ),
                     );
                   },
                 ),
-                heightSpacing(24),
+                heightSpacing(20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

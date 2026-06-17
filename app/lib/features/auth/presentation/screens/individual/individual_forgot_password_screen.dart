@@ -64,7 +64,7 @@ class IndividualForgotPasswordScreen extends StatelessWidget {
                   width: double.infinity,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(100),
                     gradient: const LinearGradient(
                       colors: [PgColors.primary, PgColors.secondary],
                     ),

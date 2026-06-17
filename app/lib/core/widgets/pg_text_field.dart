@@ -13,6 +13,7 @@ class PgTextField extends StatefulWidget {
   final TextInputType keyboardType;
   final Widget? suffixIcon;
   final Widget? prefixIcon;
+  final BoxConstraints? prefixIconConstraints;
   final String? Function(String?)? validator;
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
@@ -22,6 +23,7 @@ class PgTextField extends StatefulWidget {
   final bool isPassword;
   final List<TextInputFormatter>? inputFormatters;
   final Widget? prefix;
+  final double borderRadius;
   final Function(String)? onChanged;
 
   const PgTextField({
@@ -33,6 +35,7 @@ class PgTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.suffixIcon,
     this.prefixIcon,
+    this.prefixIconConstraints,
     this.validator,
     this.focusNode,
     this.textInputAction,
@@ -42,6 +45,7 @@ class PgTextField extends StatefulWidget {
     this.isPassword = false,
     this.inputFormatters,
     this.prefix,
+    this.borderRadius = 10,
     this.onChanged,
   });
 
@@ -67,13 +71,13 @@ class _PgTextFieldState extends State<PgTextField> {
           widget.label,
           style: PgStyles.textStyle(
             context: context,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
             color: PgColors.black,
             fontFamily: PgFonts.googleSans,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
         TextFormField(
           controller: widget.controller,
           obscureText: _obscureText,
@@ -97,12 +101,13 @@ class _PgTextFieldState extends State<PgTextField> {
             hintText: widget.hintText,
             hintStyle: PgStyles.textStyle(
               context: context,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w400,
               color: Colors.grey.shade400,
               fontFamily: PgFonts.googleSans,
             ),
             prefixIcon: widget.prefixIcon,
+            prefixIconConstraints: widget.prefixIconConstraints,
             prefix: widget.prefix,
             suffixIcon: widget.isPassword
                 ? IconButton(
@@ -120,24 +125,24 @@ class _PgTextFieldState extends State<PgTextField> {
                 : widget.suffixIcon,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
-              vertical: 18,
+              vertical: 14,
             ),
             fillColor: Colors.white,
             filled: true,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
               borderSide: BorderSide(color: Colors.grey.shade200),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
               borderSide: BorderSide(color: Colors.grey.shade200),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
               borderSide: const BorderSide(color: PgColors.primary, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
               borderSide: const BorderSide(color: Colors.red, width: 1),
             ),
           ),

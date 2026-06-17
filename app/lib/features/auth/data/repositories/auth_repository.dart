@@ -3,6 +3,7 @@ import 'package:app/core/network/api_response.dart';
 import 'package:app/core/network/api_service.dart';
 import 'package:app/features/auth/data/models/auth_models.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/rendering.dart';
 
 class AuthRepository {
   final ApiService _apiService;
@@ -13,6 +14,7 @@ class AuthRepository {
     AuthRequest request,
   ) async {
     try {
+      // debugPrint("$request");
       final response = await _apiService.post('/auth', data: request.toJson());
       return ApiResponse.fromJson(
         response.data,
