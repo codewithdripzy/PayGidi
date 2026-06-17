@@ -21,6 +21,56 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  List<AutocompletePrediction> _autocompletePredictions = [];
+  List<AutocompletePrediction> get autocompletePredictions =>
+      _autocompletePredictions;
+
+  AutocompletePrediction? _selectedAddress;
+  AutocompletePrediction? get selectedAddress => _selectedAddress;
+
+  String _streetAddress = "";
+  String get streetAddress => _streetAddress;
+
+  Future<bool> searchAddress(String query) async {
+    if (query.isEmpty) {
+      _autocompletePredictions = [];
+      notifyListeners();
+      return false;
+    }
+
+    final response = await _repository.getAddressSuggestions(query);
+
+    if (response.isSuccess && response.data != null) {
+      _autocompletePredictions =
+          (response.data!.predictions?.where(
+            (p) =>
+                p.types.contains('street_address') ||
+                p.types.contains('premise') ||
+                p.types.contains('subpremise'),
+          ))?.toList() ??
+          [];
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  void selectAddress(int index) {
+    if (index >= 0 && index < _autocompletePredictions.length) {
+      _selectedAddress = _autocompletePredictions[index];
+      _streetAddress = _selectedAddress!.structuredFormatting?.mainText ?? "";
+      _autocompletePredictions = [];
+      notifyListeners();
+    }
+  }
+
+  void clearSelectedAddress() {
+    _selectedAddress = null;
+    _streetAddress = "";
+    _autocompletePredictions = [];
+    notifyListeners();
+  }
+
   void setLoading(bool value) {
     _isLoading = value;
     _errorMessage = null;
@@ -33,10 +83,7 @@ class AuthProvider extends ChangeNotifier {
   }) async {
     setLoading(true);
     final response = await _repository.initiateAuth(
-      AuthRequest(
-        phone: phone,
-        // accountType: isLogin ? null : 'individual',
-      ),
+      AuthRequest(phone: phone, accountType: isLogin ? null : 'individual'),
     );
     setLoading(false);
 
@@ -51,6 +98,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> verifyOtp({required String phone, required String code}) async {
     setLoading(true);
+
     final response = await _repository.verifyOTP(
       VerifyOtpRequest(phone: phone, code: code),
     );

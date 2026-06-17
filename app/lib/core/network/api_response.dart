@@ -4,12 +4,7 @@ class ApiResponse<T> {
   final String? code;
   final String? error;
 
-  ApiResponse({
-    this.message,
-    this.data,
-    this.code,
-    this.error,
-  });
+  ApiResponse({this.message, this.data, this.code, this.error});
 
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,

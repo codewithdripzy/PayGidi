@@ -8,7 +8,9 @@
             "program": "lib/main/main.dart",
             "args": [
                 "--dart-define",
-                "BASE_URL=https://api.paygidi.site/api/v1"
+                "BASE_URL=https://api.paygidi.site/api/v1",
+                "--dart-define",
+                "MAPS_API_KEY=AIzaSyCjnM-1BcjuolDW8LCoFpE0YfN8TtmNm6I"
             ]
         },
         {
@@ -19,7 +21,9 @@
             "flutterMode": "profile",
             "args": [
                 "--dart-define",
-                "BASE_URL=https://api.paygidi.site/api/v1"
+                "BASE_URL=https://api.paygidi.site/api/v1",
+                "--dart-define",
+                "MAPS_API_KEY=PASTE_YOUR_API_KEY_HERE"
             ]
         },
         {
@@ -30,7 +34,9 @@
             "flutterMode": "release",
             "args": [
                 "--dart-define",
-                "BASE_URL=https://api.paygidi.site/api/v1"
+                "BASE_URL=https://api.paygidi.site/api/v1",
+                "--dart-define",
+                "MAPS_API_KEY=PASTE_YOUR_API_KEY_HERE"
             ]
         }
     ]

@@ -22,6 +22,7 @@ class PgTextField extends StatefulWidget {
   final bool isPassword;
   final List<TextInputFormatter>? inputFormatters;
   final Widget? prefix;
+  final Function(String)? onChanged;
 
   const PgTextField({
     super.key,
@@ -41,6 +42,7 @@ class PgTextField extends StatefulWidget {
     this.isPassword = false,
     this.inputFormatters,
     this.prefix,
+    this.onChanged,
   });
 
   @override
@@ -82,6 +84,7 @@ class _PgTextFieldState extends State<PgTextField> {
           onFieldSubmitted: widget.onFieldSubmitted,
           readOnly: widget.readOnly,
           onTap: widget.onTap,
+          onChanged: widget.onChanged,
           style: PgStyles.textStyle(
             context: context,
             fontSize: 16,

@@ -4,7 +4,5 @@ class AppConfig {
     defaultValue: 'https://api.paygidi.site/api/v1',
   );
 
-  static const String apiKey = String.fromEnvironment('API_KEY');
-  
-  // Add other config variables here
+  static const String mapsApiKey = String.fromEnvironment('MAPS_API_KEY');
 }
