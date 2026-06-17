@@ -62,9 +62,6 @@ class AuthRepository {
       final response = await _apiService.post(
         '/auth/complete',
         data: request.toJson(),
-        options: token != null
-            ? Options(headers: {'Authorization': 'Bearer $token'})
-            : null,
       );
       return ApiResponse.fromJson(
         response.data,

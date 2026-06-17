@@ -16,6 +16,7 @@ import (
 	"github.com/PayGidi/WalletService/utils"
 	"github.com/patrickmn/go-cache"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
@@ -46,6 +47,15 @@ func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 		return nil, status.Error(codes.InvalidArgument, "firstname, lastname, bvn and dateOfBirth are required")
 	}
 
+	userID := req.UserId
+	// Try to get numerical UserID from metadata if available (passed by Account Service)
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		if ids := md.Get("x-user-id"); len(ids) > 0 {
+			userID = ids[0]
+			log.Printf("[WalletServer] Found x-user-id in metadata: %s", userID)
+		}
+	}
+
 	result := s.walletController.CreateWallet(ctx, dto.CreateWalletDto{
 		Firstname:    req.Firstname,
 		Middlename:   req.Middlename,
@@ -56,7 +66,7 @@ func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 		Phone:        req.Phone,
 		Email:        req.Email,
 		Gender:       req.Gender,
-		UserID:       req.UserId,
+		UserID:       userID,
 		AccountType:  req.AccountType,
 		BusinessName: req.BusinessName,
 		Address:      req.Address,

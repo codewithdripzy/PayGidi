@@ -1,30 +1,25 @@
 package middlewares
 
 import (
+	"context"
+	"log"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
+	"github.com/PayGidi/AIService/core/constants"
 	"github.com/PayGidi/AIService/models"
-	"github.com/PayGidi/AIService/utils"
+	pb "github.com/PayGidi/AIService/proto/connection/accountpb"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-// Authenticate is a middleware that checks if the user is authenticated
+// Authenticate is a middleware that checks if the user is authenticated by calling Account Service via gRPC
 func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		db, exists := c.Get("db")
-		if !exists {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-				"message": "Database not initialized",
-			})
-			c.Abort()
-			return
-		}
-		gormDB := db.(*gorm.DB)
-
-		// Extract the token from the Authorization header
+		// Extract the token from the Authorization header or Cookie
 		var tokenString string
 		authHeader := c.GetHeader("Authorization")
 
@@ -52,9 +47,29 @@ func Authenticate() gin.HandlerFunc {
 			tokenString = cookie
 		}
 
-		// Validate the token
-		claims, err := utils.VerifyJWT(tokenString)
+		// Dial Account Service
+		conn, err := grpc.Dial(constants.ACCOUNT_SERVICE_ADDR, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
+			log.Printf("Failed to connect to Account Service: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Authentication service unavailable",
+			})
+			c.Abort()
+			return
+		}
+		defer conn.Close()
+
+		client := pb.NewAuthServiceClient(conn)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		resp, err := client.ValidateToken(ctx, &pb.ValidateTokenRequest{
+			Token: tokenString,
+		})
+
+		if err != nil {
+			log.Printf("Error validating token via gRPC: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"success": false,
 				"message": "Invalid or expired token",
@@ -63,31 +78,33 @@ func Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		// Get user ID from claims
-		userID, ok := claims["user_id"].(float64)
-		if !ok {
+		if !resp.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"success": false,
-				"message": "Invalid token claims",
+				"message": resp.Error,
 			})
 			c.Abort()
 			return
 		}
 
-		// Get the user info from db
-		var user models.User
-		if err := gormDB.Where("id = ?", uint(userID)).First(&user).Error; err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"success": false,
-				"message": "User not found",
-			})
-			c.Abort()
-			return
+		// Parse userID to uint for AI's internal use
+		userIDUint64, _ := strconv.ParseUint(resp.UserId, 10, 32)
+		userID := uint(userIDUint64)
+
+		// Map to AI's User model
+		user := models.User{
+			ID:        userID,
+			Email:     resp.Email,
+			Firstname: resp.UserData.GetPersonData().GetFirstName(),
+			Lastname:  resp.UserData.GetPersonData().GetLastName(),
+			Phone:     resp.UserData.GetPhone(),
+			Verified:  resp.UserData.GetEmailVerified(),
 		}
 
-		// Set user info in context
+		// Set info in context
 		c.Set("user", user)
-		c.Set("userID", uint(userID))
+		c.Set("userID", userID)
+		c.Set("customerId", resp.UserId)
 
 		c.Next()
 	}

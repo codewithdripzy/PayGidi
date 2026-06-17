@@ -4,13 +4,12 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/PayGidi/TransactionService/core/constants"
-	payGidiErrors "github.com/PayGidi/TransactionService/core/interfaces/errors"
-	"github.com/PayGidi/TransactionService/models"
-	pb "github.com/PayGidi/TransactionService/proto/connection/pb"
+	"github.com/PayGidi/NotificationService/core/constants"
+	pb "github.com/PayGidi/NotificationService/proto/connection/accountpb"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -23,7 +22,6 @@ func Authenticate() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":  payGidiErrors.UNAUTHORIZED,
 				"error": "Authorization header is missing",
 			})
 			c.Abort()
@@ -33,7 +31,6 @@ func Authenticate() gin.HandlerFunc {
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == authHeader {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":  payGidiErrors.UNAUTHORIZED,
 				"error": "Bearer token is missing",
 			})
 			c.Abort()
@@ -41,11 +38,10 @@ func Authenticate() gin.HandlerFunc {
 		}
 
 		// Dial Account Service
-		conn, err := grpc.NewClient(constants.ACCOUNT_SERVICE_ADDR, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		conn, err := grpc.Dial(constants.ACCOUNT_SERVICE_ADDR, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			log.Printf("Failed to connect to Account Service: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
 				"error": "Authentication service unavailable",
 			})
 			c.Abort()
@@ -64,7 +60,6 @@ func Authenticate() gin.HandlerFunc {
 		if err != nil {
 			log.Printf("Error validating token via gRPC: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":  payGidiErrors.UNAUTHORIZED,
 				"error": "Invalid or expired token",
 			})
 			c.Abort()
@@ -73,36 +68,22 @@ func Authenticate() gin.HandlerFunc {
 
 		if !resp.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":  payGidiErrors.UNAUTHORIZED,
 				"error": resp.Error,
 			})
 			c.Abort()
 			return
 		}
 
-		// Map pb.UserData to models.User
-		user := models.User{
-			UID:      resp.UserId,
-			Email:    resp.Email,
-			Username: resp.UserData.GetUsername(),
-			Phone:    resp.UserData.GetPhone(),
-			Status:   resp.UserData.GetStatus(),
-		}
+		// Parse userID to uint
+		userIDUint64, _ := strconv.ParseUint(resp.UserId, 10, 32)
+		userID := uint(userIDUint64)
 
-		// If person data exists, map it
-		if resp.UserData.GetPersonData() != nil {
-			user.Person = models.Person{
-				FirstName: resp.UserData.GetPersonData().GetFirstName(),
-				LastName:  resp.UserData.GetPersonData().GetLastName(),
-			}
-		}
-
-		// Set user info in context
-		c.Set("user", user)
-		c.Set("userID", resp.UserId)
+		// Set info in context
+		c.Set("userID", userID)
 		c.Set("customerId", resp.UserId)
+		c.Set("email", resp.Email)
+		c.Set("userData", resp.UserData)
 
-		// Call the next handler in the chain
 		c.Next()
 	}
 }

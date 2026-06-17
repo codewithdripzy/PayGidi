@@ -180,12 +180,12 @@ type SquadResponse[T any] struct {
 type SquadVirtualAccountResponseData struct {
 	FirstName            string `json:"first_name"`
 	LastName             string `json:"last_name"`
-	BankAccountNumber    string `json:"bank_account_number"`
+	BankCode             string `json:"bank_code"`
 	VirtualAccountNumber string `json:"virtual_account_number"`
-	BankName             string `json:"bank_name"`
+	BeneficiaryAccount   string `json:"beneficiary_account"`
 	CustomerIdentifier   string `json:"customer_identifier"`
-	MobileNum            string `json:"mobile_num"`
-	Email                string `json:"email"`
+	CreatedAt            string `json:"created_at"`
+	UpdatedAt            string `json:"updated_at"`
 }
 
 type SquadInitiatePaymentResponseData struct {

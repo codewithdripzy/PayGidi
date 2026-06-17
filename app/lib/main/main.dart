@@ -19,8 +19,8 @@ Future<void> main(List<String> args) async {
   await dotenv.load(fileName: ".env");
 
   // Initialize core services
-  final apiService = ApiService();
   final authStorageService = AuthStorageService();
+  final apiService = ApiService(authStorageService);
   final authRepository = AuthRepository(apiService);
   final walletRepository = WalletRepository(apiService);
   final transactionRepository = TransactionRepository(apiService);
@@ -36,18 +36,34 @@ Future<void> main(List<String> args) async {
         Provider.value(value: transactionRepository),
         Provider.value(value: authStorageService),
         Provider.value(value: biometricService),
-        ChangeNotifierProxyProvider3<AuthRepository, AuthStorageService,
-            BiometricService, AuthProvider>(
-          create: (context) => AuthProvider(
-            context.read<AuthRepository>(),
-            context.read<AuthStorageService>(),
-            context.read<BiometricService>(),
-          ),
-          update: (context, repo, storage, biometric, previous) =>
-              previous ?? AuthProvider(repo, storage, biometric),
+        ChangeNotifierProxyProvider3<
+          AuthRepository,
+          AuthStorageService,
+          BiometricService,
+          AuthProvider
+        >(
+          create: (context) {
+            final authProvider = AuthProvider(
+              context.read<AuthRepository>(),
+              context.read<AuthStorageService>(),
+              context.read<BiometricService>(),
+            );
+            // Set up global 401 logout
+            context.read<ApiService>().onUnauthorized = authProvider.logout;
+            return authProvider;
+          },
+          update: (context, repo, storage, biometric, previous) {
+            if (previous != null) return previous;
+            final authProvider = AuthProvider(repo, storage, biometric);
+            context.read<ApiService>().onUnauthorized = authProvider.logout;
+            return authProvider;
+          },
         ),
-        ChangeNotifierProxyProvider2<WalletRepository, TransactionRepository,
-            WalletProvider>(
+        ChangeNotifierProxyProvider2<
+          WalletRepository,
+          TransactionRepository,
+          WalletProvider
+        >(
           create: (context) => WalletProvider(
             context.read<WalletRepository>(),
             context.read<TransactionRepository>(),

@@ -17,7 +17,7 @@ class ApiResponse<T> {
   ) {
     return ApiResponse<T>(
       message: json['message'] as String?,
-      code: json['code'] as String?,
+      code: json['code']?.toString(),
       error: json['error'] as String?,
       data: json['data'] != null && fromJsonT != null
           ? fromJsonT(json['data'])

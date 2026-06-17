@@ -213,9 +213,9 @@ func CompleteAccount(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Account completed successfully",
 		"data": gin.H{
-			"type":      u.AccountType,
-			"firstName": firstName,
-			"lastName":  lastName,
+			"type":               u.AccountType,
+			"firstName":          firstName,
+			"lastName":           lastName,
 			"email":              email,
 			"accountNo":          resp.AccountNo,
 			"customerIdentifier": resp.CustomerIdentifier,

@@ -31,6 +31,7 @@ var (
 
 	NOTIFICATION_SERVICE_ADDR string = "localhost:50052"
 	WALLET_SERVICE_ADDR       string = "localhost:50053"
+	ACCOUNT_SERVICE_ADDR      string = "localhost:50051"
 )
 
 func ConfigDotenv() error {
@@ -111,6 +112,10 @@ func ConfigDotenv() error {
 
 	if walletAddress := os.Getenv("WALLET_SERVICE_ADDR"); walletAddress != "" {
 		WALLET_SERVICE_ADDR = walletAddress
+	}
+
+	if accountAddress := os.Getenv("ACCOUNT_SERVICE_ADDR"); accountAddress != "" {
+		ACCOUNT_SERVICE_ADDR = accountAddress
 	}
 
 	return nil

@@ -23,7 +23,7 @@ func SetupRoutes(app *gin.Engine) {
 	api.Use(middlewares.VerifyVersion)
 
 	// transactions
-	api.GET("/transactions/:customerIdentifier", middlewares.Authenticate(), controllers.GetCustomerTransactions)
+	api.GET("/transactions", middlewares.Authenticate(), controllers.GetCustomerTransactions)
 
 	api.GET("/health", controllers.HealthCheck)
 }
