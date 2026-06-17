@@ -25,11 +25,11 @@ class IndividualCompleteAccountRequest {
   final String dateOfBirth;
   final String email;
   final String? nin;
+  final String address;
   final String? bvn;
   final String? referralCode;
   final String gender;
-  final String? address;
-  final String? accountNumber;
+  final String? country;
 
   IndividualCompleteAccountRequest({
     required this.firstName,
@@ -41,22 +41,21 @@ class IndividualCompleteAccountRequest {
     required this.bvn,
     this.referralCode,
     required this.gender,
-    this.accountNumber,
+    this.country,
   });
 
   Map<String, dynamic> toJson() => {
-    'firstName': firstName,
-    'lastName': lastName,
-    'dateOfBirth': dateOfBirth,
-    'email': email,
-    if (nin != null) 'nin': nin,
-    'address': address,
-    if (bvn != null) 'bvn': bvn,
-    if (referralCode != null) 'referralCode': referralCode,
-    'gender': gender,
-    if (address != null) 'address': address,
-    if (accountNumber != null) 'accountNumber': accountNumber,
-  };
+        'firstName': firstName,
+        'lastName': lastName,
+        'dateOfBirth': dateOfBirth,
+        'email': email,
+        if (nin != null) 'nin': nin,
+        'address': address,
+        'bvn': bvn,
+        if (referralCode != null) 'referralCode': referralCode,
+        'gender': gender,
+        if (country != null) 'country': country,
+      };
 }
 
 class AuthResponseData {
@@ -70,6 +69,7 @@ class AuthResponseData {
   final String? accountType;
   final bool? needsOnboarding;
   final String? requiredAction;
+  final bool hasPin;
 
   AuthResponseData({
     this.token,
@@ -82,6 +82,7 @@ class AuthResponseData {
     this.accountType,
     this.needsOnboarding,
     this.requiredAction,
+    this.hasPin = false,
   });
 
   factory AuthResponseData.fromJson(Map<String, dynamic> json) {
@@ -96,8 +97,45 @@ class AuthResponseData {
       accountType: json['accountType'] as String?,
       needsOnboarding: json['needsOnboarding'] as bool?,
       requiredAction: json['requiredAction'] as String?,
+      hasPin: json['hasPin'] as bool? ?? false,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'token': token,
+        'refreshToken': refreshToken,
+        'userId': userId,
+        'firstName': firstName,
+        'lastName': lastName,
+        'phone': phone,
+        'email': email,
+        'accountType': accountType,
+        'needsOnboarding': needsOnboarding,
+        'requiredAction': requiredAction,
+        'hasPin': hasPin,
+      };
+}
+
+class BiometricRegisterRequest {
+  final String biometricID;
+
+  BiometricRegisterRequest({required this.biometricID});
+
+  Map<String, dynamic> toJson() => {
+        'biometricID': biometricID,
+      };
+}
+
+class BiometricAuthRequest {
+  final String biometricID;
+  final String phone;
+
+  BiometricAuthRequest({required this.biometricID, required this.phone});
+
+  Map<String, dynamic> toJson() => {
+        'biometricID': biometricID,
+        'phone': phone,
+      };
 }
 
 class AutocompletePrediction {

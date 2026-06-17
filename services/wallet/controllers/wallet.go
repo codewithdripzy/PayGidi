@@ -33,7 +33,7 @@ type CreateWalletResult struct {
 	Success bool
 	Code    string
 	Message string
-	Data    *responses.CreateClientResponseData
+	Data    interface{}
 }
 
 func (wc *WalletController) CreateWallet(ctx context.Context, request dto.CreateWalletDto) *CreateWalletResult {
@@ -125,7 +125,7 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 	newAccount := models.Account{
 		UserID:                uint(userIDInt),
 		Provider:              "squad",
-		ProviderAccountNumber: response.BankAccountNumber,
+		ProviderAccountNumber: response.VirtualAccountNumber,
 		AccountReference:      response.CustomerIdentifier,
 		CustomerIdentifier:    response.CustomerIdentifier,
 		AccountNumber:         accountAlias, // Formatted alias
@@ -134,7 +134,10 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 		Status:                "active",
 	}
 
+	log.Printf("[WalletController] saving new account to DB: %+v", newAccount)
+
 	if err := wc.db.Create(&newAccount).Error; err != nil {
+		log.Printf("[WalletController] failed to save account: %v", err)
 		return &CreateWalletResult{
 			Success: false,
 			Code:    strconv.Itoa(int(payGidiErrors.INTERNAL_SERVER_ERROR)),
@@ -142,19 +145,11 @@ func (wc *WalletController) CreateWallet(ctx context.Context, request dto.Create
 		}
 	}
 
-	// Map Squad response to existing CreateClientResponseData for backward compatibility
-	mappedResponse := &responses.CreateClientResponseData{
-		Firstname:          response.FirstName,
-		Lastname:           response.LastName,
-		AccountNo:          newAccount.AccountNumber,
-		CustomerIdentifier: response.CustomerIdentifier,
-	}
-
 	return &CreateWalletResult{
 		Success: true,
 		Code:    strconv.Itoa(int(payGidiErrors.SUCCESS)),
-		Message: "wallet account created successfully",
-		Data:    mappedResponse,
+		Message: "Success",
+		Data:    response,
 	}
 }
 

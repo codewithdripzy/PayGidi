@@ -50,6 +50,12 @@ func CreateVirtualAccount(ctx context.Context, payload payloads.CreateSquadVirtu
 		return false, &errMsg, nil
 	}
 
+	if !response.Success {
+		log.Printf("[Squad][CreateVirtualAccount] provider error: %s", response.Message)
+		return false, &response.Message, nil
+	}
+
+	log.Printf("[Squad][CreateVirtualAccount] account created: %s for customer %s", response.Data.VirtualAccountNumber, response.Data.CustomerIdentifier)
 	return true, nil, &response.Data
 }
 
@@ -74,6 +80,7 @@ func CreateBusinessVirtualAccount(ctx context.Context, payload payloads.CreateSq
 		return false, &response.Message, nil
 	}
 
+	log.Printf("[Squad][CreateBusinessVirtualAccount] business account created: %s for customer %s", response.Data.VirtualAccountNumber, response.Data.CustomerIdentifier)
 	return true, nil, &response.Data
 }
 

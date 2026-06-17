@@ -19,6 +19,7 @@ type IndividualCompleteAccountDto struct {
 	NIN          string `json:"nin" validate:"omitempty,len=11"`
 	BVN          string `json:"bvn" validate:"required,len=11"`
 	Address      string `json:"address" validate:"required,min=5"`
+	Country      string `json:"country" validate:"required,min=2"`
 	ReferralCode string `json:"referralCode" validate:"omitempty,len=6"`
 	Gender       string `json:"gender" validate:"required,oneof=1 2"`
 }

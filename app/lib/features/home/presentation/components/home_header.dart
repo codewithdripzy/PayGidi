@@ -2,8 +2,10 @@ import 'package:app/core/theme/assets.dart';
 import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
+import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/notifications_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -17,12 +19,17 @@ class HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final theme = Theme.of(context);
 
+    debugPrint("user data: ${authProvider.userData}");
     return Row(
       children: [
         SvgPicture.asset(
           PgAssets.customIcon(iconName: "agidi"),
           height: objectHeight(size: 50, context: context),
+          colorFilter: theme.brightness == Brightness.dark
+              ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+              : null,
         ),
         const SizedBox(width: 12),
         Column(
@@ -38,28 +45,40 @@ class HomeHeader extends StatelessWidget {
               context,
               text: authProvider.userData?.firstName ?? "Guest User",
               fontSize: 16,
-              color: PgColors.black,
+              color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
               fontFamily: PgFonts.googleSans,
             ),
           ],
         ),
         const Spacer(),
-        Stack(
-          children: [
-            const Icon(Iconsax.notification_copy, size: 28),
-            Positioned(
-              right: 2,
-              top: 2,
-              child: Container(
-                height: 10,
-                width: 10,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
+        PgScaleButton(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NotificationsScreen(),
+            ),
+          ),
+          child: Stack(
+            children: [
+              Icon(
+                Iconsax.notification_copy,
+                size: 28,
+                color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
+              ),
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Container(
+                  height: 10,
+                  width: 10,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

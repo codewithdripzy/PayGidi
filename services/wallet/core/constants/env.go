@@ -2,6 +2,7 @@ package constants
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -80,14 +81,22 @@ func ConfigDotenv() error {
 	if squadApiUrl := os.Getenv("SQUAD_API_URL"); squadApiUrl != "" {
 		SQUAD_API_URL = squadApiUrl
 	}
+	log.Printf("[ConfigDotenv] Loaded SQUAD_API_URL: %s", SQUAD_API_URL)
 
 	if squadSecretKey := os.Getenv("SQUAD_SECRET_KEY"); squadSecretKey != "" {
 		SQUAD_SECRET_KEY = squadSecretKey
+	}
+	// Redact secret key in logs for security
+	if SQUAD_SECRET_KEY != "" {
+		log.Printf("[ConfigDotenv] Loaded SQUAD_SECRET_KEY: [REDACTED]")
+	} else {
+		log.Printf("[ConfigDotenv] SQUAD_SECRET_KEY is empty")
 	}
 
 	if squadBeneficiaryAccount := os.Getenv("SQUAD_BENEFICIARY_ACCOUNT"); squadBeneficiaryAccount != "" {
 		SQUAD_BENEFICIARY_ACCOUNT = squadBeneficiaryAccount
 	}
+	log.Printf("[ConfigDotenv] Loaded SQUAD_BENEFICIARY_ACCOUNT: %s", SQUAD_BENEFICIARY_ACCOUNT)
 
 	if jwtSecret := os.Getenv("JWT_SECRET"); jwtSecret != "" {
 		JWT_SECRET = jwtSecret

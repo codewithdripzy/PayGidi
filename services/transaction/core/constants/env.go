@@ -26,6 +26,8 @@ var (
 	APP_ENV   string = "development" // Default to development mode
 	GRPC_PORT string = "50055"
 	HTTP_PORT string = "8081"
+
+	ACCOUNT_SERVICE_ADDR string = "localhost:50051"
 )
 
 func ConfigDotenv() error {
@@ -90,6 +92,10 @@ func ConfigDotenv() error {
 
 	if httpPort := os.Getenv("HTTP_PORT"); httpPort != "" {
 		HTTP_PORT = httpPort
+	}
+
+	if accountServiceAddr := os.Getenv("ACCOUNT_SERVICE_ADDR"); accountServiceAddr != "" {
+		ACCOUNT_SERVICE_ADDR = accountServiceAddr
 	}
 
 	return nil

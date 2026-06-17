@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 
 class PgScaleButton extends StatefulWidget {
   final Widget child;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final double scaleDown;
 
   const PgScaleButton({
     super.key,
     required this.child,
-    required this.onTap,
+    this.onTap,
     this.scaleDown = 0.92,
   });
 
@@ -42,6 +42,7 @@ class _PgScaleButtonState extends State<PgScaleButton>
   }
 
   void _onTapDown(TapDownDetails details) {
+    if (widget.onTap == null) return;
     _controller.forward();
     HapticFeedback.lightImpact();
   }

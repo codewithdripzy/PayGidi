@@ -20,11 +20,21 @@ class _HomeBalanceCardState extends State<HomeBalanceCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: PgColors.black1,
+        color: isDark ? null : PgColors.black1,
+        gradient: isDark
+            ? const LinearGradient(
+                colors: [PgColors.primary, PgColors.secondary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(

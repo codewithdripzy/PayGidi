@@ -16,6 +16,7 @@ var (
 	APP_ENV     = "development"
 	APP_PORT    = "8080"
 	GRPC_PORT   = "50052"
+	ACCOUNT_SERVICE_ADDR = "localhost:50051"
 )
 
 func ConfigDotenv() error {
@@ -50,6 +51,9 @@ func ConfigDotenv() error {
 	}
 	if value := os.Getenv("GRPC_PORT"); value != "" {
 		GRPC_PORT = value
+	}
+	if value := os.Getenv("ACCOUNT_SERVICE_ADDR"); value != "" {
+		ACCOUNT_SERVICE_ADDR = value
 	}
 
 	return nil

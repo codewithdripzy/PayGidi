@@ -3,7 +3,6 @@ import 'package:app/core/network/api_response.dart';
 import 'package:app/core/network/api_service.dart';
 import 'package:app/features/auth/data/models/auth_models.dart';
 import 'package:dio/dio.dart';
-// import 'package:flutter/rendering.dart';
 
 class AuthRepository {
   final ApiService _apiService;
@@ -64,9 +63,51 @@ class AuthRepository {
       final response = await _apiService.post(
         '/auth/complete',
         data: request.toJson(),
-        options: token != null
-            ? Options(headers: {'Authorization': 'Bearer $token'})
-            : null,
+      );
+      return ApiResponse.fromJson(
+        response.data,
+        (json) => AuthResponseData.fromJson(json as Map<String, dynamic>),
+      );
+    } on DioException catch (e) {
+      return ApiResponse.fromJson(
+        (e.response?.data is Map)
+            ? e.response?.data
+            : {'error': e.response?.data.toString()},
+        null,
+      );
+    } catch (e) {
+      return ApiResponse(error: 'An unexpected error occurred');
+    }
+  }
+
+  Future<ApiResponse<void>> registerBiometric(
+    BiometricRegisterRequest request,
+  ) async {
+    try {
+      await _apiService.post(
+        '/auth/biometric/register',
+        data: request.toJson(),
+      );
+      return ApiResponse(data: null);
+    } on DioException catch (e) {
+      return ApiResponse.fromJson(
+        (e.response?.data is Map)
+            ? e.response?.data
+            : {'error': e.response?.data.toString()},
+        null,
+      );
+    } catch (e) {
+      return ApiResponse(error: 'An unexpected error occurred');
+    }
+  }
+
+  Future<ApiResponse<AuthResponseData>> authenticateBiometric(
+    BiometricAuthRequest request,
+  ) async {
+    try {
+      final response = await _apiService.post(
+        '/auth/biometric/login',
+        data: request.toJson(),
       );
       return ApiResponse.fromJson(
         response.data,

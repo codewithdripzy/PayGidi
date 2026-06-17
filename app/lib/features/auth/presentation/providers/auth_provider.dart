@@ -1,3 +1,4 @@
+import 'package:app/core/services/biometric_service.dart';
 import 'package:app/features/auth/data/models/auth_models.dart';
 import 'package:app/features/auth/data/repositories/auth_repository.dart';
 import 'package:app/features/auth/data/services/auth_storage_service.dart';
@@ -6,8 +7,10 @@ import 'package:flutter/material.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository;
   final AuthStorageService _storageService;
+  final BiometricService _biometricService;
 
-  AuthProvider(this._repository, this._storageService);
+  AuthProvider(
+      this._repository, this._storageService, this._biometricService);
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -21,53 +24,16 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  List<AutocompletePrediction> _autocompletePredictions = [];
-  List<AutocompletePrediction> get autocompletePredictions =>
-      _autocompletePredictions;
-
-  AutocompletePrediction? _selectedAddress;
-  AutocompletePrediction? get selectedAddress => _selectedAddress;
-
-  String _streetAddress = "";
-  String get streetAddress => _streetAddress;
-
-  Future<bool> searchAddress(String query) async {
-    if (query.isEmpty) {
-      _autocompletePredictions = [];
-      notifyListeners();
-      return false;
+  Future<void> checkLoginStatus() async {
+    final token = await _storageService.getToken();
+    final userData = await _storageService.getUserData();
+    if (token != null && userData != null) {
+      _isLoggedIn = true;
+      _userData = userData;
+    } else {
+      _isLoggedIn = false;
+      _userData = null;
     }
-
-    final response = await _repository.getAddressSuggestions(query);
-
-    if (response.isSuccess && response.data != null) {
-      _autocompletePredictions =
-          (response.data!.predictions?.where(
-            (p) =>
-                p.types.contains('street_address') ||
-                p.types.contains('premise') ||
-                p.types.contains('subpremise'),
-          ))?.toList() ??
-          [];
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  void selectAddress(int index) {
-    if (index >= 0 && index < _autocompletePredictions.length) {
-      _selectedAddress = _autocompletePredictions[index];
-      _streetAddress = _selectedAddress!.structuredFormatting?.mainText ?? "";
-      _autocompletePredictions = [];
-      notifyListeners();
-    }
-  }
-
-  void clearSelectedAddress() {
-    _selectedAddress = null;
-    _streetAddress = "";
-    _autocompletePredictions = [];
     notifyListeners();
   }
 
@@ -95,6 +61,9 @@ class AuthProvider extends ChangeNotifier {
         "Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}",
       );
       _userData = response.data;
+      if (response.data != null) {
+        await _storageService.saveUserData(response.data!);
+      }
       return true;
     } else {
       debugPrint("Error: ${response.error}");
@@ -118,16 +87,66 @@ class AuthProvider extends ChangeNotifier {
         "Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}, Token: ${response.data?.token != null}",
       );
       _userData = response.data;
-      if (response.data?.token != null) {
-        _isLoggedIn = true;
-        await _storageService.saveTokens(
-          token: response.data!.token!,
-          refreshToken: response.data!.refreshToken ?? "",
-        );
+      if (response.data != null) {
+        await _storageService.saveUserData(response.data!);
+        if (response.data?.phone != null) {
+          await _biometricService.saveLastPhone(response.data!.phone!);
+        }
+        if (response.data?.token != null) {
+          _isLoggedIn = true;
+          await _storageService.saveTokens(
+            token: response.data!.token!,
+            refreshToken: response.data!.refreshToken ?? "",
+          );
+        }
       }
       return true;
     } else {
       _errorMessage = response.error ?? 'Verification failed';
+      return false;
+    }
+  }
+
+  Future<bool> loginWithBiometric() async {
+    final isEnabled = await _biometricService.isBiometricEnabled();
+    if (!isEnabled) {
+      _errorMessage = "Biometrics not enabled";
+      return false;
+    }
+
+    final authenticated = await _biometricService.authenticateLocally();
+    if (!authenticated) return false;
+
+    setLoading(true);
+    final biometricId = await _biometricService.getBiometricId();
+    final phone = await _biometricService.getLastPhone();
+
+    if (biometricId == null || phone == null) {
+      setLoading(false);
+      _errorMessage = "Biometric data missing. Please login with OTP.";
+      return false;
+    }
+
+    final response = await _repository.authenticateBiometric(
+      BiometricAuthRequest(biometricID: biometricId, phone: phone),
+    );
+    setLoading(false);
+
+    if (response.isSuccess) {
+      _userData = response.data;
+      if (response.data != null) {
+        await _storageService.saveUserData(response.data!);
+        if (response.data?.token != null) {
+          _isLoggedIn = true;
+          await _storageService.saveTokens(
+            token: response.data!.token!,
+            refreshToken: response.data!.refreshToken ?? "",
+          );
+        }
+      }
+      return true;
+    } else {
+      _errorMessage = response.error ?? 'Biometric authentication failed';
       return false;
     }
   }
@@ -144,12 +163,15 @@ class AuthProvider extends ChangeNotifier {
 
     if (response.isSuccess) {
       _userData = response.data;
-      if (response.data?.token != null) {
-        _isLoggedIn = true;
-        await _storageService.saveTokens(
-          token: response.data!.token!,
-          refreshToken: response.data!.refreshToken ?? "",
-        );
+      if (response.data != null) {
+        await _storageService.saveUserData(response.data!);
+        if (response.data?.token != null) {
+          _isLoggedIn = true;
+          await _storageService.saveTokens(
+            token: response.data!.token!,
+            refreshToken: response.data!.refreshToken ?? "",
+          );
+        }
       }
       return true;
     } else {

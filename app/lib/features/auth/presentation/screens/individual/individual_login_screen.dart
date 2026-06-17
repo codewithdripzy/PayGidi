@@ -2,17 +2,16 @@ import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
+import 'package:app/core/widgets/pg_phone_field.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_snackbar.dart';
-import 'package:app/core/widgets/pg_text_field.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/auth/data/models/country_model.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
 
 /// [IndividualLoginScreen] handles the authentication of existing individual users.
@@ -27,6 +26,7 @@ class IndividualLoginScreen extends StatefulWidget {
 class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
   final _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  Country _selectedCountry = Country.countries.first;
 
   @override
   void dispose() {
@@ -37,8 +37,11 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
+      final dialCode = _selectedCountry.dialCode.replaceAll('+', '');
+      final fullPhone = "$dialCode${_phoneController.text}";
+      
       final success = await authProvider.initiateIndividualAuth(
-        phone: "234${_phoneController.text}",
+        phone: fullPhone,
         isLogin: true,
       );
 
@@ -47,7 +50,11 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
       if (success) {
         context.pushNamed(
           PgRouteNames.individualOtp,
-          extra: {'isLogin': true, 'phone': "234${_phoneController.text}"},
+          extra: {
+            'isLogin': true,
+            'phone': fullPhone,
+            'country': _selectedCountry,
+          },
         );
       } else {
         PgSnackBar.show(
@@ -111,32 +118,22 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                   color: Colors.black54,
                 ),
                 heightSpacing(48),
-                PgTextField(
+                PgPhoneField(
                   label: "Phone Number",
                   hintText: "800 000 0000",
                   controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  prefixIcon: const Icon(Iconsax.call_copy, size: 20),
-                  textInputAction: TextInputAction.done,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(10),
-                  ],
-                  prefix: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: PgTexts.text600(
-                      context,
-                      text: "+234",
-                      fontSize: 16,
-                      color: PgColors.black,
-                    ),
-                  ),
+                  initialCountry: _selectedCountry,
+                  onCountryChanged: (country) {
+                    setState(() {
+                      _selectedCountry = country;
+                    });
+                  },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Phone number is required";
                     }
-                    if (value.length != 10) {
-                      return "Phone number must be 10 digits";
+                    if (value.length < 7) {
+                      return "Enter a valid phone number";
                     }
                     return null;
                   },
@@ -191,7 +188,7 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
                     PgTexts.text400(context, text: "Don't have an account? "),
                     GestureDetector(
                       onTap: () =>
-                          context.pushNamed(PgRouteNames.individualSignUp),
+                          context.pushNamed(PgRouteNames.countrySelection),
                       child: PgTexts.text600(
                         context,
                         text: "Sign Up",

@@ -1,0 +1,488 @@
+import 'package:app/core/services/biometric_service.dart';
+import 'package:app/core/theme/pg_colors.dart';
+import 'package:app/core/widgets/pg_annotated_region.dart';
+import 'package:app/core/widgets/pg_pin_sheet.dart';
+import 'package:app/core/widgets/pg_scale_button.dart';
+import 'package:app/core/widgets/pg_success_dialog.dart';
+import 'package:app/core/widgets/pg_text_field.dart';
+import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:app/features/wallet/data/models/bank_model.dart';
+import 'package:app/features/wallet/presentation/providers/wallet_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart';
+
+class InstantPaymentScreen extends StatefulWidget {
+  const InstantPaymentScreen({super.key});
+
+  @override
+  State<InstantPaymentScreen> createState() => _InstantPaymentScreenState();
+}
+
+class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
+  final _accountController = TextEditingController();
+  final _amountController = TextEditingController();
+  Bank? _selectedBank;
+  bool _isValidatingAccount = false;
+  String? _accountName;
+  int _currentStep = 0;
+  String _searchQuery = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _accountController.addListener(_onAccountChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WalletProvider>().fetchBanks();
+    });
+  }
+
+  void _onAccountChanged() {
+    if (_accountController.text.length == 10 && _selectedBank != null) {
+      _verifyAccount();
+    } else {
+      setState(() {
+        _accountName = null;
+      });
+    }
+  }
+
+  Future<void> _verifyAccount() async {
+    if (_selectedBank == null) return;
+    setState(() => _isValidatingAccount = true);
+    
+    final walletProvider = context.read<WalletProvider>();
+    final response = await walletProvider.verifyAccount(
+      accountNumber: _accountController.text,
+      bankCode: _selectedBank!.code,
+    );
+
+    if (mounted) {
+      setState(() {
+        _isValidatingAccount = false;
+        if (response.data != null) {
+          _accountName = response.data!['accountName'] ?? response.data!['account_name'];
+        } else {
+          _accountName = null;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.error ?? "Failed to verify account")),
+          );
+        }
+      });
+    }
+  }
+
+  void _showBankSelection() {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: PgTextField(
+                  label: "Search",
+                  hintText: "Search Bank",
+                  prefixIcon: const Icon(Iconsax.search_normal_copy),
+                  onChanged: (val) {
+                    setModalState(() => _searchQuery = val);
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Consumer<WalletProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoadingBanks) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    
+                    final filteredBanks = provider.banks.where((bank) => 
+                      bank.name.toLowerCase().contains(_searchQuery.toLowerCase())
+                    ).toList();
+
+                    if (filteredBanks.isEmpty) {
+                      return Center(child: PgTexts.text400(context, text: "No banks found"));
+                    }
+
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                      itemCount: filteredBanks.length,
+                      separatorBuilder: (context, index) => const Divider(),
+                      itemBuilder: (context, index) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: PgTexts.text500(context, text: filteredBanks[index].name),
+                        onTap: () {
+                          setState(() {
+                            _selectedBank = filteredBanks[index];
+                            _accountName = null;
+                          });
+                          Navigator.pop(context);
+                          if (_accountController.text.length == 10) _verifyAccount();
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showReviewBottomSheet() {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Center(
+              child: PgTexts.text700(context, text: "Review Payment", fontSize: 22),
+            ),
+            const SizedBox(height: 32),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: theme.cardTheme.color,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: theme.dividerTheme.color ?? Colors.grey.shade100),
+              ),
+              child: Column(
+                children: [
+                  _buildReviewItem("Amount", "₦${_amountController.text}"),
+                  const Divider(),
+                  _buildReviewItem("Bank", _selectedBank?.name ?? ""),
+                  const Divider(),
+                  _buildReviewItem("Account Number", _accountController.text),
+                  const Divider(),
+                  _buildReviewItem("Account Name", _accountName ?? ""),
+                  const Divider(),
+                  _buildReviewItem("Fee", "₦0.00"),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PgTexts.text500(context, text: "Total Payable", color: Colors.grey),
+                PgTexts.text700(context, text: "₦${_amountController.text}", fontSize: 20),
+              ],
+            ),
+            const SizedBox(height: 40),
+            PgScaleButton(
+              onTap: () {
+                Navigator.pop(context);
+                _startVerificationFlow();
+              },
+              child: Container(
+                height: 60,
+                width: double.infinity,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  gradient: const LinearGradient(
+                    colors: [PgColors.primary, PgColors.secondary],
+                  ),
+                ),
+                child: PgTexts.text600(context, text: "Confirm & Pay", color: Colors.white, fontSize: 16),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReviewItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          PgTexts.text400(context, text: label, color: Colors.grey, fontSize: 14),
+          PgTexts.text600(context, text: value, fontSize: 14),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _startVerificationFlow() async {
+    final auth = context.read<AuthProvider>();
+    final biometricService = context.read<BiometricService>();
+    bool biometricEnabled = await biometricService.isBiometricEnabled();
+    
+    if (biometricEnabled) {
+      bool authenticated = await biometricService.authenticateLocally();
+      if (authenticated) { _executePayment("0000"); return; } // Dummy pin if biometric authenticated
+    }
+
+    if (auth.userData?.hasPin ?? false) {
+      _showPinVerification();
+    } else {
+      _showCreatePinFlow();
+    }
+  }
+
+  void _showPinVerification() {
+    PgPinSheet.show(
+      context,
+      title: "Enter PIN",
+      description: "Enter your 4-digit transaction PIN to complete payment.",
+      onVerify: (pin) {
+        Navigator.pop(context);
+        _executePayment(pin);
+      },
+    );
+  }
+
+  void _showCreatePinFlow() {
+    PgPinSheet.show(
+      context,
+      title: "Create PIN",
+      description: "You haven't set a transaction PIN. Create one now to continue.",
+      onVerify: (pin) {
+        Navigator.pop(context);
+        _showConfirmPinFlow(pin);
+      },
+    );
+  }
+
+  void _showConfirmPinFlow(String firstPin) {
+    PgPinSheet.show(
+      context,
+      title: "Confirm PIN",
+      description: "Re-enter your 4-digit PIN to confirm.",
+      onVerify: (pin) {
+        if (pin == firstPin) {
+          Navigator.pop(context);
+          _executePayment(pin);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("PINs do not match.")));
+        }
+      },
+    );
+  }
+
+  Future<void> _executePayment(String pin) async {
+    setState(() => _isValidatingAccount = true);
+    
+    final walletProvider = context.read<WalletProvider>();
+    final response = await walletProvider.transfer(
+      amount: double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0,
+      accountNumber: _accountController.text,
+      bankCode: _selectedBank!.code,
+      pin: pin,
+    );
+
+    if (mounted) {
+      setState(() => _isValidatingAccount = false);
+      if (response.error == null) {
+        PgSuccessDialog.show(
+          context,
+          title: "Payment Successful",
+          message: "You have successfully sent ₦${_amountController.text} to $_accountName",
+          buttonText: "Continue",
+          onButtonPressed: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.error ?? "Payment failed")),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark ? theme.scaffoldBackgroundColor : PgColors.homeBackground;
+
+    return buildPGAnnotatedRegion(
+      brightness: isDark ? Brightness.light : Brightness.dark,
+      color: backgroundColor,
+      child: Scaffold(
+        backgroundColor: backgroundColor,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                heightSpacing(24),
+                PgScaleButton(
+                  onTap: () {
+                    if (_currentStep > 0) {
+                      setState(() => _currentStep = 0);
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: theme.cardTheme.color,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: theme.dividerTheme.color ?? Colors.grey.shade100),
+                    ),
+                    child: Icon(Icons.arrow_back_outlined, size: 20, color: theme.textTheme.bodyLarge?.color),
+                  ),
+                ),
+                heightSpacing(24),
+                PgTexts.text700(context, text: "Instant Payment", fontSize: 28),
+                heightSpacing(4),
+                PgTexts.text400(
+                  context, 
+                  text: _currentStep == 0 
+                    ? "Enter recipient details to send money." 
+                    : "How much would you like to send to $_accountName?", 
+                  fontSize: 16, 
+                  color: Colors.grey
+                ),
+                heightSpacing(32),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        if (_currentStep == 0) ...[
+                          PgTextField(
+                            controller: _accountController,
+                            hintText: "Account Number",
+                            label: "Account Number",
+                            keyboardType: TextInputType.number,
+                            maxLength: 10,
+                            prefixIcon: const Icon(Iconsax.card_copy, size: 20, color: Colors.grey),
+                            suffixIcon: _isValidatingAccount ? const SizedBox(width: 20, height: 20, child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2))) : null,
+                          ),
+                          const SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: _showBankSelection,
+                            child: AbsorbPointer(
+                              child: PgTextField(
+                                hintText: _selectedBank?.name ?? "Select Bank",
+                                label: "Bank",
+                                prefixIcon: const Icon(Iconsax.bank_copy, size: 20, color: Colors.grey),
+                                suffixIcon: const Icon(Iconsax.arrow_down_1_copy),
+                              ),
+                            ),
+                          ),
+                          if (_accountName != null) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.check_circle, color: Colors.green, size: 18),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: PgTexts.text600(context, text: _accountName!, color: Colors.green, fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ] else ...[
+                          PgTextField(
+                            controller: _amountController,
+                            hintText: "0.00",
+                            label: "Amount",
+                            keyboardType: TextInputType.number,
+                            prefixIcon: const Icon(Iconsax.money_2_copy, size: 20, color: Colors.grey),
+                            prefix: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 4.0),
+                              child: Text("₦", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+                PgScaleButton(
+                  onTap: () {
+                    if (_currentStep == 0) {
+                      if (_accountController.text.length == 10 && _selectedBank != null && _accountName != null) {
+                        setState(() => _currentStep = 1);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please enter valid account details.")));
+                      }
+                    } else {
+                      if (_amountController.text.isNotEmpty) {
+                        _showReviewBottomSheet();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please enter an amount.")));
+                      }
+                    }
+                  },
+                  child: Container(
+                    height: 60,
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      gradient: const LinearGradient(
+                        colors: [PgColors.primary, PgColors.secondary],
+                      ),
+                    ),
+                    child: PgTexts.text600(context, text: _currentStep == 0 ? "Continue" : "Proceed to Review", color: Colors.white, fontSize: 16),
+                  ),
+                ),
+                heightSpacing(30),
+              ],
+            ),
+          ),
+      ),
+    );
+  }
+}

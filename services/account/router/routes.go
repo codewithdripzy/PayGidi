@@ -51,6 +51,7 @@ func SetupRoutes(app *gin.Engine) {
 	account.Use(middlewares.Authenticate())
 	{
 		account.GET("", controllers.GetAccountDetails)
+		account.DELETE("", controllers.DeleteAccount)
 		account.POST("/pin", middlewares.ValidateDTO(&validators.SetPinDto{}), controllers.SetPin)
 		account.PUT("/pin", middlewares.ValidateDTO(&validators.UpdatePinDto{}), controllers.UpdatePin)
 	}

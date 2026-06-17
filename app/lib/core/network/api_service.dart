@@ -1,10 +1,16 @@
+import 'dart:ui';
+import 'package:flutter/foundation.dart';
+
 import 'package:app/core/config/app_config.dart';
+import 'package:app/features/auth/data/services/auth_storage_service.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
   late final Dio _dio;
+  VoidCallback? onUnauthorized;
+  final AuthStorageService _storageService;
 
-  ApiService() {
+  ApiService(this._storageService) {
     _dio = Dio(
       BaseOptions(
         baseUrl: AppConfig.baseUrl,
@@ -19,16 +25,24 @@ class ApiService {
 
     // Add interceptors for logging and auth
     _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          // TODO: Add JWT token from storage if available
-          // options.headers['Authorization'] = 'Bearer $token';
+      QueuedInterceptorsWrapper(
+        onRequest: (options, handler) async {
+          debugPrint("--- ApiService: Requesting token from storage ---");
+          final token = await _storageService.getToken();
+          if (token != null) {
+            debugPrint("--- ApiService: Token found: ${token.substring(0, 10)}... ---");
+            options.headers['Authorization'] = 'Bearer $token';
+          } else {
+            debugPrint("--- ApiService: No token found in storage ---");
+          }
+          debugPrint("--- ApiService: Headers: ${options.headers} ---");
           return handler.next(options);
         },
         onError: (DioException e, handler) {
+          debugPrint("--- ApiService: Error Response: ${e.response?.statusCode} - ${e.response?.data} ---");
           // Handle global errors like 401 Unauthorized
           if (e.response?.statusCode == 401) {
-            // TODO: Handle logout or refresh token
+            onUnauthorized?.call();
           }
           return handler.next(e);
         },

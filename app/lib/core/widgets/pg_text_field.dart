@@ -24,6 +24,8 @@ class PgTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final Widget? prefix;
   final double borderRadius;
+  final int? maxLength;
+  final int? maxLines;
   final Function(String)? onChanged;
 
   const PgTextField({
@@ -46,6 +48,8 @@ class PgTextField extends StatefulWidget {
     this.inputFormatters,
     this.prefix,
     this.borderRadius = 10,
+    this.maxLength,
+    this.maxLines = 1,
     this.onChanged,
   });
 
@@ -86,9 +90,11 @@ class _PgTextFieldState extends State<PgTextField> {
           focusNode: widget.focusNode,
           textInputAction: widget.textInputAction,
           onFieldSubmitted: widget.onFieldSubmitted,
+          onChanged: widget.onChanged,
           readOnly: widget.readOnly,
           onTap: widget.onTap,
-          onChanged: widget.onChanged,
+          maxLength: widget.maxLength,
+          maxLines: widget.maxLines,
           style: PgStyles.textStyle(
             context: context,
             fontSize: 16,
@@ -106,7 +112,17 @@ class _PgTextFieldState extends State<PgTextField> {
               color: Colors.grey.shade400,
               fontFamily: PgFonts.googleSans,
             ),
-            prefixIcon: widget.prefixIcon,
+            prefixIcon: widget.maxLines != null && widget.maxLines! > 1
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 14),
+                        child: widget.prefixIcon,
+                      ),
+                    ],
+                  )
+                : widget.prefixIcon,
             prefixIconConstraints: widget.prefixIconConstraints,
             prefix: widget.prefix,
             suffixIcon: widget.isPassword

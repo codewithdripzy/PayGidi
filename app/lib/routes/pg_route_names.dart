@@ -11,5 +11,16 @@ class PgRouteNames {
   static const String individualCompleteAccount2 = 'individualCompleteAccount2';
   static const String individualHome = 'individualHome';
   static const String individualMain = 'individualMain';
+  static const String countrySelection = 'countrySelection';
   static const String deposit = 'deposit';
+  static const String withdrawal = 'withdrawal';
+  static const String statementRequest = 'statementRequest';
+  static const String instantPayment = 'instantPayment';
+  static const String paymentLink = 'paymentLink';
+  static const String createSaving = 'createSaving';
+  static const String createPersonalSaving = 'createPersonalSaving';
+  static const String createThriftSaving = 'createThriftSaving';
+  static const String thriftDetails = 'thriftDetails';
+  static const String discoverThrifts = 'discoverThrifts';
+  static const String transactionDetails = 'transactionDetails';
 }

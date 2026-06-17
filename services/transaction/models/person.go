@@ -18,5 +18,5 @@ type Person struct {
 }
 
 func (Person) TableName() string {
-	return "persons"
+	return "account_persons"
 }
