@@ -16,7 +16,7 @@ var (
 	APP_ENV     = "development"
 	APP_PORT    = "8080"
 	GRPC_PORT   = "50052"
-	ACCOUNT_SERVICE_ADDR = "localhost:50051"
+	ACCOUNT_SERVICE_ADDR = "account-service:50051"
 )
 
 func ConfigDotenv() error {
