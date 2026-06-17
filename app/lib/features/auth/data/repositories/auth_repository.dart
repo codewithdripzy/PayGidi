@@ -3,7 +3,7 @@ import 'package:app/core/network/api_response.dart';
 import 'package:app/core/network/api_service.dart';
 import 'package:app/features/auth/data/models/auth_models.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/rendering.dart';
+// import 'package:flutter/rendering.dart';
 
 class AuthRepository {
   final ApiService _apiService;
@@ -90,7 +90,7 @@ class AuthRepository {
     try {
       final response = await _apiService.get(
         'https://maps.googleapis.com/maps/api/place/autocomplete/json',
-        queryParameters: {'input': query, 'key': AppConfig.mapsApiKey},
+        queryParameters: {'input': query, 'key': AppConfig.googleMapsApiKey},
       );
       return ApiResponse<MyPlacesAutocompleteResponse>(
         // code: (response.statusCode ?? 0).toString(),
