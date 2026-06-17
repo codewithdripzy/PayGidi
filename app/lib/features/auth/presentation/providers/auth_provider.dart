@@ -50,17 +50,16 @@ class AuthProvider extends ChangeNotifier {
   }) async {
     setLoading(true);
     final response = await _repository.initiateAuth(
-      AuthRequest(
-        phone: phone,
-        accountType: accountType,
-      ),
+      AuthRequest(phone: phone, accountType: isLogin ? null : 'individual'),
     );
     setLoading(false);
 
     debugPrint("--- Initiate Auth Response ---");
     debugPrint("Success: ${response.isSuccess}");
     if (response.isSuccess) {
-      debugPrint("Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}");
+      debugPrint(
+        "Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}",
+      );
       _userData = response.data;
       if (response.data != null) {
         await _storageService.saveUserData(response.data!);
@@ -75,6 +74,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> verifyOtp({required String phone, required String code}) async {
     setLoading(true);
+
     final response = await _repository.verifyOTP(
       VerifyOtpRequest(phone: phone, code: code),
     );
@@ -83,7 +83,9 @@ class AuthProvider extends ChangeNotifier {
     debugPrint("--- Verify OTP Response ---");
     debugPrint("Success: ${response.isSuccess}");
     if (response.isSuccess) {
-      debugPrint("Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}, Token: ${response.data?.token != null}");
+      debugPrint(
+        "Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}, Token: ${response.data?.token != null}",
+      );
       _userData = response.data;
       if (response.data != null) {
         await _storageService.saveUserData(response.data!);

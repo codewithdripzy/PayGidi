@@ -46,6 +46,7 @@ class _IndividualCompleteAccount2ScreenState
   final _ninController = TextEditingController();
   final _dobController = TextEditingController();
   final _addressController = TextEditingController();
+  final _accountNumberController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _selectedGender;
   DateTime? _birthDate;
@@ -56,6 +57,7 @@ class _IndividualCompleteAccount2ScreenState
     _ninController.dispose();
     _dobController.dispose();
     _addressController.dispose();
+    _accountNumberController.dispose();
     super.dispose();
   }
 
@@ -89,6 +91,7 @@ class _IndividualCompleteAccount2ScreenState
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
+      final authProvider = context.read<AuthProvider>();
       if (_birthDate == null) {
         PgSnackBar.show(
           context,
@@ -107,14 +110,21 @@ class _IndividualCompleteAccount2ScreenState
         return;
       }
 
-      final authProvider = context.read<AuthProvider>();
+      if (authProvider.streetAddress.isEmpty) {
+        PgSnackBar.show(
+          context,
+          message: "Please select your address from the suggestions",
+          isError: true,
+        );
+        return;
+      }
+
       final request = IndividualCompleteAccountRequest(
         firstName: widget.firstName,
         lastName: widget.lastName,
         email: widget.email,
         dateOfBirth: _dobController.text,
         nin: _ninController.text.isNotEmpty ? _ninController.text : null,
-        address: _addressController.text,
         bvn: _bvnController.text,
         gender: _selectedGender == "Male"
             ? "1"
@@ -232,6 +242,109 @@ class _IndividualCompleteAccount2ScreenState
                         return "NIN must be 11 digits";
                       }
                       return null;
+                    },
+                  ),
+                  heightSpacing(20),
+                  PgTextField(
+                    label: "Account Number",
+                    hintText: "Enter your 10-digit account number",
+                    controller: _accountNumberController,
+                    keyboardType: TextInputType.number,
+                    prefixIcon: const Icon(Iconsax.wallet_copy, size: 20),
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Account number is required";
+                      }
+                      if (value.length < 10) {
+                        return "Account number must be exactly 10 digits";
+                      }
+                      return null;
+                    },
+                  ),
+                  heightSpacing(20),
+                  Consumer<AuthProvider>(
+                    builder: (context, auth, child) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          PgTextField(
+                            label: "Home Address",
+                            hintText: "Enter your home address",
+                            controller: _addressController,
+                            prefixIcon: const Icon(
+                              Iconsax.location_copy,
+                              size: 20,
+                            ),
+                            onChanged: (val) => auth.searchAddress(val),
+                          ),
+                          if (auth.autocompletePredictions.isNotEmpty)
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: auth.autocompletePredictions.length,
+                              itemBuilder: (context, index) {
+                                final prediction =
+                                    auth.autocompletePredictions[index];
+                                if (prediction.structuredFormatting == null) {
+                                  return const SizedBox.shrink();
+                                }
+                                return InkWell(
+                                  onTap: () {
+                                    auth.selectAddress(index);
+                                    _addressController.text =
+                                        auth.streetAddress;
+                                    FocusScope.of(context).unfocus();
+                                  },
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: Color(0xffD6D6D6),
+                                        ),
+                                      ),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          PgTexts.text500(
+                                            context,
+                                            text:
+                                                prediction
+                                                    .structuredFormatting
+                                                    ?.mainText ??
+                                                "",
+                                            fontSize: 16,
+                                          ),
+                                          PgTexts.text400(
+                                            context,
+                                            text:
+                                                prediction
+                                                    .structuredFormatting
+                                                    ?.secondaryText ??
+                                                "",
+                                            fontSize: 14,
+                                            color: Colors.black54,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                        ],
+                      );
                     },
                   ),
                   heightSpacing(20),
