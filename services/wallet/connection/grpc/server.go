@@ -9,6 +9,7 @@ import (
 
 	"github.com/PayGidi/WalletService/controllers"
 	"github.com/PayGidi/WalletService/core/interfaces/payloads"
+	"github.com/PayGidi/WalletService/core/interfaces/responses"
 	"github.com/PayGidi/WalletService/dto"
 	"github.com/PayGidi/WalletService/models"
 	"github.com/PayGidi/WalletService/proto/connection/pb"
@@ -86,17 +87,23 @@ func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 		}, nil
 	}
 
-	log.Printf("[WalletServer] Wallet created successfully for UserID: %s, AccountNo: %s", req.UserId, result.Data.AccountNo)
+	data, ok := result.Data.(*responses.SquadVirtualAccountResponseData)
+	if !ok {
+		log.Printf("[WalletServer] Error: failed to cast result.Data to SquadVirtualAccountResponseData")
+		return nil, status.Error(codes.Internal, "failed to process wallet data")
+	}
+
+	log.Printf("[WalletServer] Wallet created successfully for UserID: %s, VirtualAccountNo: %s", req.UserId, data.VirtualAccountNumber)
 	return &pb.CreateWalletResponse{
-		Success:     true,
-		Code:        result.Code,
-		Message:     result.Message,
-		Firstname:   result.Data.Firstname,
-		Middlename:  result.Data.Middlename,
-		Lastname:    result.Data.Lastname,
-		AccountNo:          result.Data.AccountNo,
-		CurrentTier:        result.Data.CurrenTier,
-		CustomerIdentifier: result.Data.CustomerIdentifier,
+		Success:            true,
+		Code:               result.Code,
+		Message:            result.Message,
+		Firstname:          data.FirstName,
+		Middlename:         req.Middlename,
+		Lastname:           data.LastName,
+		AccountNo:          data.VirtualAccountNumber,
+		CurrentTier:        "1", // Default tier for new accounts
+		CustomerIdentifier: data.CustomerIdentifier,
 	}, nil
 }
 
