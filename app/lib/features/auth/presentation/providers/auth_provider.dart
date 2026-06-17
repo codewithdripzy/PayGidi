@@ -93,11 +93,14 @@ class AuthProvider extends ChangeNotifier {
           await _biometricService.saveLastPhone(response.data!.phone!);
         }
         if (response.data?.token != null) {
+          debugPrint("--- AuthProvider: New token received: ${response.data!.token} ---");
           _isLoggedIn = true;
           await _storageService.saveTokens(
             token: response.data!.token!,
             refreshToken: response.data!.refreshToken ?? "",
           );
+        } else {
+          debugPrint("--- AuthProvider: No new token received in response ---");
         }
       }
       return true;
@@ -137,11 +140,14 @@ class AuthProvider extends ChangeNotifier {
       if (response.data != null) {
         await _storageService.saveUserData(response.data!);
         if (response.data?.token != null) {
+          debugPrint("--- AuthProvider: New token received: ${response.data!.token} ---");
           _isLoggedIn = true;
           await _storageService.saveTokens(
             token: response.data!.token!,
             refreshToken: response.data!.refreshToken ?? "",
           );
+        } else {
+          debugPrint("--- AuthProvider: No new token received in response ---");
         }
       }
       return true;
@@ -166,11 +172,14 @@ class AuthProvider extends ChangeNotifier {
       if (response.data != null) {
         await _storageService.saveUserData(response.data!);
         if (response.data?.token != null) {
+          debugPrint("--- AuthProvider: New token received: ${response.data!.token} ---");
           _isLoggedIn = true;
           await _storageService.saveTokens(
             token: response.data!.token!,
             refreshToken: response.data!.refreshToken ?? "",
           );
+        } else {
+          debugPrint("--- AuthProvider: No new token received in response ---");
         }
       }
       return true;

@@ -29,9 +29,9 @@ var (
 	GRPC_PORT string = "50054"
 	HTTP_PORT string = "8083"
 
-	NOTIFICATION_SERVICE_ADDR string = "localhost:50052"
-	WALLET_SERVICE_ADDR       string = "localhost:50053"
-	ACCOUNT_SERVICE_ADDR      string = "localhost:50051"
+	NOTIFICATION_SERVICE_ADDR string = "notification-service:50052"
+	WALLET_SERVICE_ADDR       string = "wallet-service:50053"
+	ACCOUNT_SERVICE_ADDR      string = "account-service:50051"
 )
 
 func ConfigDotenv() error {

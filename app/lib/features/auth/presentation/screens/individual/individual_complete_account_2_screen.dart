@@ -6,7 +6,7 @@ import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_snackbar.dart';
 import 'package:app/core/widgets/pg_text_field.dart';
-import 'package:app/core/widgets/pg_success_dialog.dart';
+import 'package:app/core/widgets/pg_success_sheet.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/data/models/auth_models.dart';
 import 'package:app/features/auth/data/models/country_model.dart';
@@ -46,7 +46,6 @@ class _IndividualCompleteAccount2ScreenState
   final _ninController = TextEditingController();
   final _dobController = TextEditingController();
   final _addressController = TextEditingController();
-  final _accountNumberController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _selectedGender;
   DateTime? _birthDate;
@@ -57,7 +56,6 @@ class _IndividualCompleteAccount2ScreenState
     _ninController.dispose();
     _dobController.dispose();
     _addressController.dispose();
-    _accountNumberController.dispose();
     super.dispose();
   }
 
@@ -110,26 +108,16 @@ class _IndividualCompleteAccount2ScreenState
         return;
       }
 
-      if (authProvider.streetAddress.isEmpty) {
-        PgSnackBar.show(
-          context,
-          message: "Please select your address from the suggestions",
-          isError: true,
-        );
-        return;
-      }
-
       final request = IndividualCompleteAccountRequest(
         firstName: widget.firstName,
         lastName: widget.lastName,
         email: widget.email,
         dateOfBirth: _dobController.text,
         nin: _ninController.text.isNotEmpty ? _ninController.text : null,
+        address: _addressController.text,
         bvn: _bvnController.text,
-        gender: _selectedGender == "Male"
-            ? "1"
-            : "2", // Based on backend 1=Male, 2=Female
-        country: widget.country?.name,
+        gender: _selectedGender == "Male" ? "1" : "2",
+        country: widget.country?.code ?? "NG",
       );
 
       final success = await authProvider.completeIndividualAccount(request);
@@ -137,7 +125,7 @@ class _IndividualCompleteAccount2ScreenState
       if (!mounted) return;
 
       if (success) {
-        _showSuccessDialog();
+        _showSuccessSheet();
       } else {
         PgSnackBar.show(
           context,
@@ -148,13 +136,13 @@ class _IndividualCompleteAccount2ScreenState
     }
   }
 
-  void _showSuccessDialog() {
-    PgSuccessDialog.show(
+  void _showSuccessSheet() {
+    PgSuccessSheet.show(
       context,
       title: "Success!",
       message:
           "Your account has been created successfully. Welcome to PayGidi!",
-      buttonText: "Go to Home",
+      buttonText: "Continue",
       onButtonPressed: () => context.goNamed(PgRouteNames.individualMain),
     );
   }
@@ -246,109 +234,6 @@ class _IndividualCompleteAccount2ScreenState
                   ),
                   heightSpacing(20),
                   PgTextField(
-                    label: "Account Number",
-                    hintText: "Enter your 10-digit account number",
-                    controller: _accountNumberController,
-                    keyboardType: TextInputType.number,
-                    prefixIcon: const Icon(Iconsax.wallet_copy, size: 20),
-                    textInputAction: TextInputAction.next,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(10),
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Account number is required";
-                      }
-                      if (value.length < 10) {
-                        return "Account number must be exactly 10 digits";
-                      }
-                      return null;
-                    },
-                  ),
-                  heightSpacing(20),
-                  Consumer<AuthProvider>(
-                    builder: (context, auth, child) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          PgTextField(
-                            label: "Home Address",
-                            hintText: "Enter your home address",
-                            controller: _addressController,
-                            prefixIcon: const Icon(
-                              Iconsax.location_copy,
-                              size: 20,
-                            ),
-                            onChanged: (val) => auth.searchAddress(val),
-                          ),
-                          if (auth.autocompletePredictions.isNotEmpty)
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: auth.autocompletePredictions.length,
-                              itemBuilder: (context, index) {
-                                final prediction =
-                                    auth.autocompletePredictions[index];
-                                if (prediction.structuredFormatting == null) {
-                                  return const SizedBox.shrink();
-                                }
-                                return InkWell(
-                                  onTap: () {
-                                    auth.selectAddress(index);
-                                    _addressController.text =
-                                        auth.streetAddress;
-                                    FocusScope.of(context).unfocus();
-                                  },
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: Color(0xffD6D6D6),
-                                        ),
-                                      ),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                    ),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          PgTexts.text500(
-                                            context,
-                                            text:
-                                                prediction
-                                                    .structuredFormatting
-                                                    ?.mainText ??
-                                                "",
-                                            fontSize: 16,
-                                          ),
-                                          PgTexts.text400(
-                                            context,
-                                            text:
-                                                prediction
-                                                    .structuredFormatting
-                                                    ?.secondaryText ??
-                                                "",
-                                            fontSize: 14,
-                                            color: Colors.black54,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                        ],
-                      );
-                    },
-                  ),
-                  heightSpacing(20),
-                  PgTextField(
                     label: "Date of Birth",
                     hintText: "Select your date of birth",
                     controller: _dobController,
@@ -371,7 +256,8 @@ class _IndividualCompleteAccount2ScreenState
                     onSuggestionClick: (Place place) {
                       _addressController.text = place.formattedAddress ?? "";
                     },
-                    componentCountry: widget.country?.code.toLowerCase() ?? 'ng',
+                    componentCountry:
+                        widget.country?.code.toLowerCase() ?? 'ng',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Address is required";

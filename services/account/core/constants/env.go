@@ -14,8 +14,8 @@ var (
 	DB_PASSWORD string
 	DB_NAME     string
 
-	WALLET_SERVICE_ADDR       string = "localhost:50053"
-	NOTIFICATION_SERVICE_ADDR string = "localhost:50052"
+	WALLET_SERVICE_ADDR       string = "wallet-service:50053"
+	NOTIFICATION_SERVICE_ADDR string = "notification-service:50052"
 
 	// JWT constants
 	JWT_SECRET             string

@@ -27,7 +27,7 @@ var (
 	GRPC_PORT string = "50055"
 	HTTP_PORT string = "8081"
 
-	ACCOUNT_SERVICE_ADDR string = "localhost:50051"
+	ACCOUNT_SERVICE_ADDR string = "account-service:50051"
 )
 
 func ConfigDotenv() error {

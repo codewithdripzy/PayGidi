@@ -5,9 +5,9 @@ class AuthRequest {
   AuthRequest({required this.phone, this.accountType});
 
   Map<String, dynamic> toJson() => {
-        'phone': phone,
-        if (accountType != null) 'accountType': accountType,
-      };
+    'phone': phone,
+    if (accountType != null) 'accountType': accountType,
+  };
 }
 
 class VerifyOtpRequest {
@@ -16,10 +16,7 @@ class VerifyOtpRequest {
 
   VerifyOtpRequest({required this.phone, required this.code});
 
-  Map<String, dynamic> toJson() => {
-        'phone': phone,
-        'otp': code,
-      };
+  Map<String, dynamic> toJson() => {'phone': phone, 'otp': code};
 }
 
 class IndividualCompleteAccountRequest {
@@ -48,17 +45,17 @@ class IndividualCompleteAccountRequest {
   });
 
   Map<String, dynamic> toJson() => {
-        'firstName': firstName,
-        'lastName': lastName,
-        'dateOfBirth': dateOfBirth,
-        'email': email,
-        if (nin != null) 'nin': nin,
-        'address': address,
-        'bvn': bvn,
-        if (referralCode != null) 'referralCode': referralCode,
-        'gender': gender,
-        if (country != null) 'country': country,
-      };
+    'firstName': firstName,
+    'lastName': lastName,
+    'dateOfBirth': dateOfBirth,
+    'email': email,
+    if (nin != null) 'nin': nin,
+    'address': address,
+    'bvn': bvn,
+    if (referralCode != null) 'referralCode': referralCode,
+    'gender': gender,
+    if (country != null) 'country': country,
+  };
 }
 
 class AuthResponseData {
@@ -105,18 +102,18 @@ class AuthResponseData {
   }
 
   Map<String, dynamic> toJson() => {
-        'token': token,
-        'refreshToken': refreshToken,
-        'userId': userId,
-        'firstName': firstName,
-        'lastName': lastName,
-        'phone': phone,
-        'email': email,
-        'accountType': accountType,
-        'needsOnboarding': needsOnboarding,
-        'requiredAction': requiredAction,
-        'hasPin': hasPin,
-      };
+    'token': token,
+    'refreshToken': refreshToken,
+    'userId': userId,
+    'firstName': firstName,
+    'lastName': lastName,
+    'phone': phone,
+    'email': email,
+    'accountType': accountType,
+    'needsOnboarding': needsOnboarding,
+    'requiredAction': requiredAction,
+    'hasPin': hasPin,
+  };
 }
 
 class BiometricRegisterRequest {
@@ -124,9 +121,7 @@ class BiometricRegisterRequest {
 
   BiometricRegisterRequest({required this.biometricID});
 
-  Map<String, dynamic> toJson() => {
-        'biometricID': biometricID,
-      };
+  Map<String, dynamic> toJson() => {'biometricID': biometricID};
 }
 
 class BiometricAuthRequest {
@@ -135,8 +130,5 @@ class BiometricAuthRequest {
 
   BiometricAuthRequest({required this.biometricID, required this.phone});
 
-  Map<String, dynamic> toJson() => {
-        'biometricID': biometricID,
-        'phone': phone,
-      };
+  Map<String, dynamic> toJson() => {'biometricID': biometricID, 'phone': phone};
 }

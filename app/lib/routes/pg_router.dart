@@ -37,6 +37,8 @@ class PayGidiRouter {
       refreshListenable: authProvider,
       redirect: (context, state) {
         final isLoggedIn = authProvider.isLoggedIn;
+        final needsOnboarding = authProvider.userData?.needsOnboarding ?? false;
+        
         final isSplash = state.matchedLocation == "/${PgRouteNames.splashPage}";
         final isOnboarding =
             state.matchedLocation == "/${PgRouteNames.onboardingPage}";
@@ -51,6 +53,10 @@ class PayGidiRouter {
             state.matchedLocation == "/${PgRouteNames.individualForgotPassword}";
         final isCountry =
             state.matchedLocation == "/${PgRouteNames.countrySelection}";
+        final isComplete1 =
+            state.matchedLocation == "/${PgRouteNames.individualCompleteAccount1}";
+        final isComplete2 =
+            state.matchedLocation == "/${PgRouteNames.individualCompleteAccount2}";
 
         final isAuthPage = isOnboarding ||
             isRole ||
@@ -59,15 +65,25 @@ class PayGidiRouter {
             isOtp ||
             isForgotPassword ||
             isCountry;
+            
+        final isCompleteAccountPage = isComplete1 || isComplete2;
 
         if (isSplash) return null;
 
-        if (!isLoggedIn && !isAuthPage) {
+        if (!isLoggedIn && !isAuthPage && !isCompleteAccountPage) {
           return "/${PgRouteNames.onboardingPage}";
         }
 
-        if (isLoggedIn && isAuthPage) {
-          return "/${PgRouteNames.individualMain}";
+        if (isLoggedIn) {
+          if (needsOnboarding) {
+            if (!isCompleteAccountPage && !isOtp) {
+              return "/${PgRouteNames.individualCompleteAccount1}";
+            }
+            return null;
+          }
+          if (isAuthPage) {
+            return "/${PgRouteNames.individualMain}";
+          }
         }
 
         return null;
