@@ -28,20 +28,26 @@ class ApiService {
       QueuedInterceptorsWrapper(
         onRequest: (options, handler) async {
           debugPrint("--- ApiService: Requesting token from storage ---");
-          final token = await _storageService.getToken();
-          if (token != null) {
-            debugPrint("--- ApiService: Token found: ${token.substring(0, 10)}... ---");
-            options.headers['Authorization'] = 'Bearer $token';
+          if (!options.headers.containsKey('Authorization')) {
+            final token = await _storageService.getToken();
+            if (token != null) {
+              debugPrint("--- ApiService: Token found in storage: $token ---");
+              options.headers['Authorization'] = 'Bearer $token';
+            } else {
+              debugPrint("--- ApiService: No token found in storage ---");
+            }
           } else {
-            debugPrint("--- ApiService: No token found in storage ---");
+            debugPrint("--- ApiService: Authorization header already present: ${options.headers['Authorization']} ---");
           }
           debugPrint("--- ApiService: Headers: ${options.headers} ---");
           return handler.next(options);
         },
         onError: (DioException e, handler) {
-          debugPrint("--- ApiService: Error Response: ${e.response?.statusCode} - ${e.response?.data} ---");
-          // Handle global errors like 401 Unauthorized
+          debugPrint("--- ApiService: ERROR [${e.response?.statusCode}] at ${e.requestOptions.path} ---");
+          debugPrint("--- ApiService: Response Data: ${e.response?.data} ---");
+          
           if (e.response?.statusCode == 401) {
+            debugPrint("--- ApiService: Unauthorized! Triggering logout callback ---");
             onUnauthorized?.call();
           }
           return handler.next(e);
