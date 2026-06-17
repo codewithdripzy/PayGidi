@@ -5,6 +5,7 @@ import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_snackbar.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/auth/data/models/country_model.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
@@ -18,11 +19,13 @@ import 'package:provider/provider.dart';
 class IndividualOtpScreen extends StatefulWidget {
   final bool isLogin;
   final String phone;
+  final Country? country;
 
   const IndividualOtpScreen({
     super.key,
     this.isLogin = false,
     required this.phone,
+    this.country,
   });
 
   @override
@@ -72,7 +75,10 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
       if (!needsOnboarding) {
         context.goNamed(PgRouteNames.individualMain);
       } else {
-        context.pushNamed(PgRouteNames.individualCompleteAccount1);
+        context.pushNamed(
+          PgRouteNames.individualCompleteAccount1,
+          extra: {'country': widget.country},
+        );
       }
     } else {
       PgSnackBar.show(

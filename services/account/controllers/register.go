@@ -73,6 +73,7 @@ func CompleteAccount(c *gin.Context) {
 	var lastName string
 	var middleName string
 	var address string
+	var country string
 	var dob string
 	var nin string
 	var bvn string
@@ -85,6 +86,7 @@ func CompleteAccount(c *gin.Context) {
 		lastName = data.OwnerInfo.LastName
 		middleName = data.OwnerInfo.MiddleName
 		address = data.OwnerInfo.Address
+		country = data.OwnerInfo.Country
 		dob = data.OwnerInfo.DateOfBirth
 		nin = data.OwnerInfo.NIN
 		bvn = data.OwnerInfo.BVN
@@ -110,6 +112,7 @@ func CompleteAccount(c *gin.Context) {
 		lastName = data.LastName
 		middleName = data.MiddleName
 		address = data.Address
+		country = data.Country
 		dob = data.DateOfBirth
 		nin = data.NIN
 		bvn = data.BVN
@@ -123,6 +126,7 @@ func CompleteAccount(c *gin.Context) {
 		LastName:    lastName,
 		MiddleName:  middleName,
 		Address:     address,
+		Country:     country,
 		DateOfBirth: dob,
 		Gender:      gender,
 	}

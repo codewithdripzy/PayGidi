@@ -141,8 +141,13 @@ class PayGidiRouter {
             final extra = state.extra as Map<String, dynamic>?;
             final isLogin = extra?['isLogin'] ?? false;
             final phone = extra?['phone'] ?? "";
+            final country = extra?['country'] as Country?;
             return CustomTransitionPage(
-              child: IndividualOtpScreen(isLogin: isLogin, phone: phone),
+              child: IndividualOtpScreen(
+                isLogin: isLogin,
+                phone: phone,
+                country: country,
+              ),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) =>
                       RouteTransitions.slideRight(animation, child),
@@ -152,23 +157,29 @@ class PayGidiRouter {
         GoRoute(
           path: "/${PgRouteNames.individualCompleteAccount1}",
           name: PgRouteNames.individualCompleteAccount1,
-          pageBuilder: (context, state) => CustomTransitionPage(
-            child: const IndividualCompleteAccount1Screen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) =>
-                    RouteTransitions.slideRight(animation, child),
-          ),
+          pageBuilder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            final country = extra?['country'] as Country?;
+            return CustomTransitionPage(
+              child: IndividualCompleteAccount1Screen(country: country),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      RouteTransitions.slideRight(animation, child),
+            );
+          },
         ),
         GoRoute(
           path: "/${PgRouteNames.individualCompleteAccount2}",
           name: PgRouteNames.individualCompleteAccount2,
           pageBuilder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
+            final country = extra?['country'] as Country?;
             return CustomTransitionPage(
               child: IndividualCompleteAccount2Screen(
                 firstName: extra?['firstName'] ?? "",
                 lastName: extra?['lastName'] ?? "",
                 email: extra?['email'] ?? "",
+                country: country,
               ),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) =>

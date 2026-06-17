@@ -32,6 +32,7 @@ class IndividualCompleteAccountRequest {
   final String bvn;
   final String? referralCode;
   final String gender;
+  final String? country;
 
   IndividualCompleteAccountRequest({
     required this.firstName,
@@ -43,6 +44,7 @@ class IndividualCompleteAccountRequest {
     required this.bvn,
     this.referralCode,
     required this.gender,
+    this.country,
   });
 
   Map<String, dynamic> toJson() => {
@@ -55,6 +57,7 @@ class IndividualCompleteAccountRequest {
         'bvn': bvn,
         if (referralCode != null) 'referralCode': referralCode,
         'gender': gender,
+        if (country != null) 'country': country,
       };
 }
 

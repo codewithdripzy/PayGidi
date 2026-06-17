@@ -9,6 +9,7 @@ import 'package:app/core/widgets/pg_text_field.dart';
 import 'package:app/core/widgets/pg_success_dialog.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/data/models/auth_models.dart';
+import 'package:app/features/auth/data/models/country_model.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
@@ -24,12 +25,14 @@ class IndividualCompleteAccount2Screen extends StatefulWidget {
   final String firstName;
   final String lastName;
   final String email;
+  final Country? country;
 
   const IndividualCompleteAccount2Screen({
     super.key,
     required this.firstName,
     required this.lastName,
     required this.email,
+    this.country,
   });
 
   @override
@@ -116,6 +119,7 @@ class _IndividualCompleteAccount2ScreenState
         gender: _selectedGender == "Male"
             ? "1"
             : "2", // Based on backend 1=Male, 2=Female
+        country: widget.country?.name,
       );
 
       final success = await authProvider.completeIndividualAccount(request);
@@ -254,7 +258,7 @@ class _IndividualCompleteAccount2ScreenState
                     onSuggestionClick: (Place place) {
                       _addressController.text = place.formattedAddress ?? "";
                     },
-                    componentCountry: 'ng',
+                    componentCountry: widget.country?.code.toLowerCase() ?? 'ng',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Address is required";

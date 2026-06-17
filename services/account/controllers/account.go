@@ -152,3 +152,105 @@ func UpdatePin(c *gin.Context) {
 		"message": "PIN updated successfully",
 	})
 }
+
+// DeleteAccount godoc
+// @Summary Delete account
+// @Description Delete the authenticated user's account and all associated data.
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Account deleted successfully"
+// @Router /account [delete]
+func DeleteAccount(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB)
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":  payGidiErrors.UNAUTHORIZED_ACCESS,
+			"error": "User not found in context",
+		})
+		return
+	}
+
+	currentUser := user.(*models.User)
+
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// List of tables to delete from based on UserID (uint)
+	userID := currentUser.ID
+	uid := currentUser.UID
+
+	tablesByUserID := []string{
+		"account_persons",
+		"account_kycs",
+		"account_contact_info",
+		"account_auth_info",
+		"account_businesses",
+		"account_sessions",
+		"account_activities",
+		"account_preferences",
+		"account_otps",
+		"wallet_accounts",
+	}
+
+	for _, table := range tablesByUserID {
+		// Check if table exists before trying to delete from it to avoid errors if some services are not fully migrated
+		if tx.Migrator().HasTable(table) {
+			if err := tx.Exec("DELETE FROM "+table+" WHERE user_id = ?", userID).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete data from " + table})
+				return
+			}
+		}
+	}
+
+	// Delete from join tables
+	joinTables := []string{"user_roles"}
+	for _, table := range joinTables {
+		if tx.Migrator().HasTable(table) {
+			if err := tx.Exec("DELETE FROM "+table+" WHERE user_id = ?", userID).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete from join table " + table})
+				return
+			}
+		}
+	}
+
+	// Delete from tables where UserID is a string (using UID)
+	tablesByUID := []string{
+		"wallet_payments",
+		"notifications",
+	}
+
+	for _, table := range tablesByUID {
+		if tx.Migrator().HasTable(table) {
+			if err := tx.Exec("DELETE FROM "+table+" WHERE user_id = ?", uid).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete data from " + table})
+				return
+			}
+		}
+	}
+
+	// Finally delete the user
+	if err := tx.Unscoped().Delete(currentUser).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user account"})
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Account and all associated data deleted successfully",
+	})
+}

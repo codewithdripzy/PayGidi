@@ -53,7 +53,8 @@ class _IndividualSignUpScreenState extends State<IndividualSignUpScreen> {
           PgRouteNames.individualOtp,
           extra: {
             'isLogin': false,
-            'phone': "$dialCode${_phoneController.text}"
+            'phone': "$dialCode${_phoneController.text}",
+            'country': widget.country,
           },
         );
       } else {

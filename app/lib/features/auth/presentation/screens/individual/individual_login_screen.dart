@@ -50,7 +50,11 @@ class _IndividualLoginScreenState extends State<IndividualLoginScreen> {
       if (success) {
         context.pushNamed(
           PgRouteNames.individualOtp,
-          extra: {'isLogin': true, 'phone': fullPhone},
+          extra: {
+            'isLogin': true,
+            'phone': fullPhone,
+            'country': _selectedCountry,
+          },
         );
       } else {
         PgSnackBar.show(
