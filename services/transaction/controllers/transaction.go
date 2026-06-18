@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/PayGidi/TransactionService/core/interfaces/responses"
+	"github.com/PayGidi/TransactionService/core/interfaces/legacy_responses"
 	"github.com/PayGidi/TransactionService/models"
 	"github.com/PayGidi/TransactionService/services/squad"
 	"github.com/PayGidi/TransactionService/utils"
@@ -21,8 +21,8 @@ import (
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} map[string]interface{} "Success"
-// @Failure 400 {object} map[string]interface{} "Bad Request"
+// @Success 200 {object} responses.ApiResponse{data=[]legacy_responses.SquadCustomerTransaction} "Success"
+// @Failure 400 {object} responses.ApiResponse "Bad Request"
 // @Router /transactions [get]
 func GetCustomerTransactions(c *gin.Context) {
 	// Get user from context (set by Authenticate middleware)
@@ -106,7 +106,7 @@ func GetCustomerTransactions(c *gin.Context) {
 		return
 	}
 
-	var allTransactions []responses.SquadCustomerTransaction = []responses.SquadCustomerTransaction{}
+	var allTransactions []legacy_responses.SquadCustomerTransaction = []legacy_responses.SquadCustomerTransaction{}
 	seenRefs := make(map[string]bool)
 
 	for _, acc := range accounts {

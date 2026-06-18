@@ -18,20 +18,27 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
-  AuthResponseData? _userData;
-  AuthResponseData? get userData => _userData;
+  PgUser? _userData; // Holds comprehensive user details
+  PgUser? get userData => _userData;
+
+  List<Wallet>? _wallets; // Holds user's wallets
+  List<Wallet>? get wallets => _wallets;
+
+  AuthResponseData? _authResponseData; // Holds basic auth info (tokens, etc.)
+  AuthResponseData? get authResponseData => _authResponseData;
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
   Future<void> checkLoginStatus() async {
     final token = await _storageService.getToken();
-    final userData = await _storageService.getUserData();
-    if (token != null && userData != null) {
+    if (token != null) {
       _isLoggedIn = true;
-      _userData = userData;
+      _authResponseData = await _storageService.getAuthResponseData();
+      _userData = await _storageService.getPgUser();
     } else {
       _isLoggedIn = false;
+      _authResponseData = null;
       _userData = null;
     }
     notifyListeners();
@@ -60,9 +67,16 @@ class AuthProvider extends ChangeNotifier {
       debugPrint(
         "Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}",
       );
-      _userData = response.data;
-      if (response.data != null) {
-        await _storageService.saveUserData(response.data!);
+      _authResponseData = response.data;
+      if (_authResponseData != null) {
+        await _storageService.saveAuthResponseData(_authResponseData!);
+        if (_authResponseData?.token != null) {
+          await _storageService.saveTokens(
+            token: _authResponseData!.token!,
+            refreshToken: _authResponseData!.refreshToken ?? "",
+          );
+          _isLoggedIn = true;
+        }
       }
       return true;
     } else {
@@ -86,18 +100,18 @@ class AuthProvider extends ChangeNotifier {
       debugPrint(
         "Data: ${response.data?.phone}, Needs Onboarding: ${response.data?.needsOnboarding}, Token: ${response.data?.token != null}",
       );
-      _userData = response.data;
-      if (response.data != null) {
-        await _storageService.saveUserData(response.data!);
-        if (response.data?.phone != null) {
-          await _biometricService.saveLastPhone(response.data!.phone!);
+      _authResponseData = response.data;
+      if (_authResponseData != null) {
+        await _storageService.saveAuthResponseData(_authResponseData!);
+        if (_authResponseData?.phone != null) {
+          await _biometricService.saveLastPhone(_authResponseData!.phone!);
         }
-        if (response.data?.token != null) {
+        if (_authResponseData?.token != null) {
           debugPrint("--- AuthProvider: New token received: ${response.data!.token} ---");
           _isLoggedIn = true;
           await _storageService.saveTokens(
-            token: response.data!.token!,
-            refreshToken: response.data!.refreshToken ?? "",
+            token: _authResponseData!.token!,
+            refreshToken: _authResponseData!.refreshToken ?? "",
           );
         } else {
           debugPrint("--- AuthProvider: No new token received in response ---");
@@ -136,15 +150,15 @@ class AuthProvider extends ChangeNotifier {
     setLoading(false);
 
     if (response.isSuccess) {
-      _userData = response.data;
-      if (response.data != null) {
-        await _storageService.saveUserData(response.data!);
-        if (response.data?.token != null) {
+      _authResponseData = response.data;
+      if (_authResponseData != null) {
+        await _storageService.saveAuthResponseData(_authResponseData!);
+        if (_authResponseData?.token != null) {
           debugPrint("--- AuthProvider: New token received: ${response.data!.token} ---");
           _isLoggedIn = true;
           await _storageService.saveTokens(
-            token: response.data!.token!,
-            refreshToken: response.data!.refreshToken ?? "",
+            token: _authResponseData!.token!,
+            refreshToken: _authResponseData!.refreshToken ?? "",
           );
         } else {
           debugPrint("--- AuthProvider: No new token received in response ---");
@@ -161,14 +175,17 @@ class AuthProvider extends ChangeNotifier {
     final response = await _repository.fetchCurrentUser();
 
     if (response.isSuccess && response.data != null) {
-      _userData = response.data;
+      _userData = response.data!.data.user;
+      _wallets = response.data!.data.wallets;
       _isLoggedIn = true;
-      await _storageService.saveUserData(response.data!);
+      await _storageService.savePgUser(_userData!);
       notifyListeners();
       return true;
     } else {
-      _isLoggedIn = false;
-      _userData = null;
+      // A failed /me fetch (network blip, parse error, etc.) must NOT log the
+      // user out. We keep whatever cached data we already have and simply
+      // signal to the caller that the refresh did not succeed.
+      debugPrint("--- fetchAndSetCurrentUser failed: ${response.error} ---");
       notifyListeners();
       return false;
     }
@@ -180,20 +197,20 @@ class AuthProvider extends ChangeNotifier {
     setLoading(true);
     final response = await _repository.completeIndividualAccount(
       request,
-      token: _userData?.token,
+      token: _authResponseData?.token, // Use _authResponseData for token
     );
     setLoading(false);
 
     if (response.isSuccess) {
-      _userData = response.data;
-      if (response.data != null) {
-        await _storageService.saveUserData(response.data!);
-        if (response.data?.token != null) {
+      _authResponseData = response.data;
+      if (_authResponseData != null) {
+        await _storageService.saveAuthResponseData(_authResponseData!);
+        if (_authResponseData?.token != null) {
           debugPrint("--- AuthProvider: New token received: ${response.data!.token} ---");
           _isLoggedIn = true;
           await _storageService.saveTokens(
-            token: response.data!.token!,
-            refreshToken: response.data!.refreshToken ?? "",
+            token: _authResponseData!.token!,
+            refreshToken: _authResponseData!.refreshToken ?? "",
           );
         } else {
           debugPrint("--- AuthProvider: No new token received in response ---");
@@ -209,7 +226,9 @@ class AuthProvider extends ChangeNotifier {
   void logout() {
     _isLoggedIn = false;
     _userData = null;
-    _storageService.clearTokens();
+    _wallets = null;
+    _authResponseData = null;
+    _storageService.clearAllAuthData();
     notifyListeners();
   }
 }

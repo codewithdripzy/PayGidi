@@ -1,3 +1,4 @@
+import 'package:app/core/widgets/coming_soon_screen.dart'; // Add import
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/core/theme/pg_colors.dart';
 // import 'package:app/core/theme/pg_styles.dart';
@@ -24,11 +25,14 @@ class IndividualMainScreen extends StatefulWidget {
 
 class _IndividualMainScreenState extends State<IndividualMainScreen> {
   int _selectedIndex = 0;
+  static const bool _isFeatureEnabled = false; // Flag for enabling/disabling
 
   final List<Widget> _screens = [
     const IndividualHomeScreen(),
-    const IndividualCardsScreen(),
-    const IndividualFinanceScreen(),
+    // const IndividualCardsScreen(),
+    _isFeatureEnabled ? const IndividualCardsScreen() : const ComingSoonScreen(title: "Cards"),
+    // const IndividualFinanceScreen(),
+    _isFeatureEnabled ? const IndividualFinanceScreen() : const ComingSoonScreen(title: "Finance"),
     const IndividualMeScreen(),
   ];
 

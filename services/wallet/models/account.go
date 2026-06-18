@@ -23,6 +23,7 @@ type Account struct {
 	AccountPin            string                 `json:"accountPin"`                         // PIN or security code for account access
 	Status                string                 `json:"status"`
 	Tier                  string                 `json:"tier"`                // Unique identifier for the account on the provider's system
+	Balance               float64                `json:"balance" gorm:"default:0"`           // Local wallet balance
 	CreatedAt             time.Time              `json:"createdAt"`           // Timestamp when the account was created
 	UpdatedAt             time.Time              `json:"updatedAt"`           // Timestamp for last update to the account
 	DeletedAt             *time.Time             `json:"deletedAt,omitempty"` // Timestamp for soft deletion, nil if active

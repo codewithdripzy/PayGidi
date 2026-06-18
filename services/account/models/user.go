@@ -18,7 +18,7 @@ type User struct {
 	ProfilePic       string        `json:"profile_pic,omitempty"`                // URL to the user's profile picture
 	TwoFactorEnabled bool          `json:"twoFactorEnabled"`                     // Indicates if two-factor authentication is enabled
 	IsFirstTime      bool          `json:"isFirstTime"`                          // Indicates if this is the user's first login
-	TwoFactorSecret  string        `json:"twoFactorSecret,omitempty"`            // Secret for two-factor authentication
+	TwoFactorSecret  string        `json:"-"`            // Secret for two-factor authentication
 	TwoFactorMethod  string        `json:"twoFactorMethod,omitempty"`            // Method of two-factor authentication (e.g., "sms", "email", "app")
 	EmailVerified    bool          `json:"emailVerified"`                        // Indicates if the user's email is verified
 	PhoneVerified    bool          `json:"phoneVerified"`                        // Indicates if the user's phone number is verified
@@ -33,7 +33,7 @@ type User struct {
 	BiometricID      string        `json:"biometricID"` // Unique identifier for biometrics (e.g., Device ID + Biometric Hash)
 	Status           string        `json:"status"`      // e.g., "active", "inactive", etc.
 	OTPs             []OTP         `json:"otps" gorm:"foreignKey:UserID"` // List of OTPs associated with the user
-	Pin              string        `json:"pin"`                          // Hashed version of the user's PIN for security
+	Pin              string        `json:"-"`                          // Hashed version of the user's PIN for security
 	CreatedAt        time.Time     `json:"createdAt"`
 	UpdatedAt        time.Time     `json:"updatedAt"`
 	DeletedAt        *time.Time    `json:"deletedAt,omitempty"`

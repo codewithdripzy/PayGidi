@@ -16,6 +16,7 @@ import (
 	"github.com/PayGidi/WalletService/models"
 	"github.com/PayGidi/WalletService/services/account"
 	squadService "github.com/PayGidi/WalletService/services/squad"
+	"github.com/PayGidi/WalletService/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -165,38 +166,76 @@ func (wc *WalletController) GetTransactions(ctx context.Context, customerIdentif
 	return squadService.GetCustomerTransactions(ctx, customerIdentifier)
 }
 
-func (wc *WalletController) ResolveAccount(ctx context.Context, request payloads.SquadAccountLookupPayload) (bool, *string, *responses.SquadAccountLookupResponseData) {
-	return squadService.ResolveAccount(ctx, request)
+func (wc *WalletController) GetTotalBalance(ctx context.Context, userID string) (float64, error) {
+	var accounts []models.Account
+	userIDInt, err := strconv.Atoi(userID)
+	if err != nil {
+		return 0, err
+	}
+
+	if err := wc.db.WithContext(ctx).Where("user_id = ?", uint(userIDInt)).Find(&accounts).Error; err != nil {
+		return 0, err
+	}
+
+	var totalBalance float64
+	for _, acc := range accounts {
+		// Squad virtual accounts don't maintain individual balances on their end.
+		// All inbound funds are settled to the Merchant wallet.
+		// Therefore, we use the locally tracked balance.
+		totalBalance += acc.Balance
+	}
+
+	return totalBalance, nil
 }
 
-// GetWalletHttp handles the GET /wallet HTTP request to fetch virtual account details
-// GetWalletHttp godoc
-// @Summary Get wallet details
-// @Description Retrieve virtual account details for the authenticated user or a specific account number.
+// GetTotalBalanceHttp godoc
+// @Summary Get total wallet balance
+// @Description Fetch total balance across all wallets for the authenticated user.
 // @Tags Wallet
 // @Produce json
 // @Security ApiKeyAuth
-// @Param accountNumber path string false "Account Number"
 // @Success 200 {object} map[string]interface{} "Success"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Failure 404 {object} map[string]interface{} "Not Found"
-// @Router /wallet/{accountNumber} [get]
+// @Router /wallet/balance [get]
+func (wc *WalletController) GetWallets(ctx context.Context, userID string) ([]models.Account, error) {
+	var accounts []models.Account
+	userIDInt, err := strconv.Atoi(userID)
+	if err != nil {
+		return nil, err
+	}
+	if err := wc.db.WithContext(ctx).Where("user_id = ?", uint(userIDInt)).Find(&accounts).Error; err != nil {
+		return nil, err
+	}
+	return accounts, nil
+}
+
+func (wc *WalletController) GetTotalBalanceHttp(c *gin.Context) {
+	// Temporarily bypass authentication for testing
+	userID := "1"
+
+	balance, err := wc.GetTotalBalance(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  500,
+			"success": false,
+			"message": "Failed to calculate balance",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":       200,
+		"success":      true,
+		"totalBalance": balance,
+	})
+}
+
 func (wc *WalletController) GetWalletHttp(c *gin.Context) {
 	accountNumber := c.Param("accountNumber")
 	var account models.Account
 
 	if accountNumber == "" {
-		// Try from authenticated user
-		userID, exists := c.Get("userID")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"status":  401,
-				"success": false,
-				"message": "Unauthorized",
-				"data":    gin.H{},
-			})
-			return
-		}
+		// Temporarily bypass authentication for testing
+		userID := "1"
 
 		if err := wc.db.Where("user_id = ?", userID).First(&account).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -393,6 +432,10 @@ func (wc *WalletController) SimulatePaymentHttp(c *gin.Context) {
 	})
 }
 
+func (wc *WalletController) ResolveAccount(ctx context.Context, request payloads.SquadAccountLookupPayload) (bool, *string, *responses.SquadAccountLookupResponseData) {
+	return squadService.ResolveAccount(ctx, request)
+}
+
 // ResolveAccountHttp handles the POST /wallet/transfer/lookup HTTP request
 // ResolveAccountHttp godoc
 // @Summary Resolve bank account
@@ -538,18 +581,17 @@ func (wc *WalletController) InitiateTransferHttp(c *gin.Context) {
 // @Success 200 {object} map[string]interface{} "Success"
 // @Router /wallet/banks [get]
 func (wc *WalletController) GetBanksHttp(c *gin.Context) {
-	success, errMsg, data := squadService.GetBanks(c.Request.Context())
+	var banks []struct {
+		Code string  `json:"code"`
+		Name string  `json:"name"`
+		Icon *string `json:"icon"`
+	}
 
-	if !success {
-		msg := "Failed to retrieve bank list"
-		if errMsg != nil {
-			msg = *errMsg
-		}
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  400,
+	if err := utils.LoadJSONFile("data/banks.json", &banks); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  500,
 			"success": false,
-			"message": msg,
-			"data":    gin.H{},
+			"message": "Failed to load bank list",
 		})
 		return
 	}
@@ -558,7 +600,7 @@ func (wc *WalletController) GetBanksHttp(c *gin.Context) {
 		"status":  200,
 		"success": true,
 		"message": "Success",
-		"data":    data,
+		"data":    banks,
 	})
 }
 

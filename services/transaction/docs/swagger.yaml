@@ -1,4 +1,39 @@
 basePath: /api/v1
+definitions:
+  legacy_responses.SquadCustomerTransaction:
+    properties:
+      currency:
+        type: string
+      customer:
+        properties:
+          customer_identifier:
+            type: string
+        type: object
+      fee_charged:
+        type: string
+      principal_amount:
+        type: string
+      remarks:
+        type: string
+      settled_amount:
+        type: string
+      transaction_date:
+        type: string
+      transaction_indicator:
+        type: string
+      transaction_reference:
+        type: string
+      virtual_account_number:
+        type: string
+    type: object
+  responses.ApiResponse:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+    type: object
 host: api.paygidi.site
 info:
   contact:
@@ -30,31 +65,32 @@ paths:
       summary: Health Check
       tags:
       - Health
-  /transactions/{customerIdentifier}:
+  /transactions:
     get:
       consumes:
       - application/json
-      description: Fetch transaction history for a specific customer identifier using
-        the Squad API.
-      parameters:
-      - description: Customer Identifier (e.g. email or UID)
-        in: path
-        name: customerIdentifier
-        required: true
-        type: string
+      description: Fetch transaction history for all wallet accounts of the authenticated
+        customer using the Squad API.
       produces:
       - application/json
       responses:
         "200":
           description: Success
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/responses.ApiResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/legacy_responses.SquadCustomerTransaction'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/responses.ApiResponse'
+      security:
+      - BearerAuth: []
       summary: Get customer transactions
       tags:
       - Transactions

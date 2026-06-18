@@ -52,12 +52,10 @@ func SetupRoutes(app *gin.Engine) {
 	{
 		account.GET("", controllers.GetAccountDetails)
 		account.DELETE("", controllers.DeleteAccount)
+		account.GET("/me", controllers.Me)
 		account.POST("/pin", middlewares.ValidateDTO(&validators.SetPinDto{}), controllers.SetPin)
 		account.PUT("/pin", middlewares.ValidateDTO(&validators.UpdatePinDto{}), controllers.UpdatePin)
 	}
-
-	// me route
-	api.GET("/me", middlewares.Authenticate(), controllers.Me)
 
 	api.GET("/health", controllers.HealthCheck)
 }

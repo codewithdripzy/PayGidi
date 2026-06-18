@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
 
 	payGidiErrors "github.com/PayGidi/AccountService/core/interfaces/errors"
@@ -10,6 +11,7 @@ import (
 
 // VerifyVersion is a middleware that checks if the API version is valid
 func VerifyVersion(c *gin.Context) {
+	log.Printf("VerifyVersion middleware called for path: %s", c.Request.URL.Path)
 	// Get the version from the URL
 	version := c.Param("version")
 

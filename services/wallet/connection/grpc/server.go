@@ -35,6 +35,36 @@ func (s *WalletServer) HealthCheck(context.Context, *pb.HealthCheckRequest) (*pb
 	return &pb.HealthCheckResponse{Status: "ok"}, nil
 }
 
+func (s *WalletServer) GetWallets(ctx context.Context, req *pb.GetWalletsRequest) (*pb.GetWalletsResponse, error) {
+	if req == nil || req.UserId == "" {
+		return nil, status.Error(codes.InvalidArgument, "userId is required")
+	}
+
+	accounts, err := s.walletController.GetWallets(ctx, req.UserId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch wallets: %v", err)
+	}
+
+	wallets := make([]*pb.WalletData, 0)
+	for _, a := range accounts {
+		wallets = append(wallets, &pb.WalletData{
+			Id:              uint64(a.ID),
+			AccountNumber:   a.AccountNumber,
+			AccountType:     a.AccountType,
+			AccountCategory: a.AccountCategory,
+			CurrencyCode:    a.CurrencyCode,
+			Status:          a.Status,
+			AccountNickname: a.AccountNickname,
+		})
+	}
+
+	return &pb.GetWalletsResponse{
+		Success: true,
+		Message: "wallets retrieved successfully",
+		Wallets: wallets,
+	}, nil
+}
+
 func (s *WalletServer) CreateWallet(ctx context.Context, req *pb.CreateWalletRequest) (*pb.CreateWalletResponse, error) {
 	log.Printf("[WalletServer] CreateWallet request for UserID: %s, Phone: %s", req.UserId, req.Phone)
 

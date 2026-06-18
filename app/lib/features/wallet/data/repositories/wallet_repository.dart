@@ -67,17 +67,14 @@ class WalletRepository {
     }
   }
 
-  Future<ApiResponse<Map<String, dynamic>>> verifyAccountNumber({
+  Future<ApiResponse<Map<String, dynamic>>> lookupAccount({
     required String accountNumber,
     required String bankCode,
   }) async {
     try {
       final response = await _apiService.post(
-        '/wallet/verify-account',
-        data: {
-          'accountNumber': accountNumber,
-          'bankCode': bankCode,
-        },
+        '/wallet/transfer/lookup',
+        data: {'account_number': accountNumber, 'bank_code': bankCode},
       );
       return ApiResponse.fromJson(
         response.data,

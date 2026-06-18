@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 // Authenticate is a middleware that checks if the user is authenticated
 func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		log.Printf("Authenticate middleware called for path: %s", c.Request.URL.Path)
 		db := c.MustGet("db").(*gorm.DB)
 		if db == nil {
 			c.JSON(http.StatusInternalServerError, gin.H{

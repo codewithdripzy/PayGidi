@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	payGidiErrors "github.com/PayGidi/AccountService/core/interfaces/errors"
 	"github.com/PayGidi/AccountService/models"
+	"github.com/PayGidi/AccountService/services/wallet"
 	"github.com/PayGidi/AccountService/utils"
 	"github.com/PayGidi/AccountService/validators"
 	"github.com/gin-gonic/gin"
@@ -35,15 +37,15 @@ func GetAccountDetails(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Account details retrieved successfully",
 		"data": gin.H{
-			"userId":       currentUser.UID,
-			"username":     currentUser.Username,
-			"email":        currentUser.Email,
-			"phone":        currentUser.Phone,
-			"accountType":  currentUser.AccountType,
-			"status":       currentUser.Status,
-			"person":       currentUser.Person,
-			"isFirstTime":  currentUser.IsFirstTime,
-			"pinSet":       currentUser.Pin != "",
+			"userId":      currentUser.UID,
+			"username":    currentUser.Username,
+			"email":       currentUser.Email,
+			"phone":       currentUser.Phone,
+			"accountType": currentUser.AccountType,
+			"status":      currentUser.Status,
+			"person":      currentUser.Person,
+			"isFirstTime": currentUser.IsFirstTime,
+			"pinSet":      currentUser.Pin != "",
 		},
 	})
 }
@@ -262,12 +264,14 @@ func DeleteAccount(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} responses.ApiResponse{data=models.User} "Current user details"
+// @Success 200 {object} responses.ApiResponse{data=map[string]interface{}} "Current user details with wallets"
 // @Failure 401 {object} responses.ApiResponse "Unauthorized"
 // @Failure 500 {object} responses.ApiResponse "Internal Server Error"
 // @Router /me [get]
 func Me(c *gin.Context) {
-	db, _ := c.Get("db")
+	log.Printf("Me controller called for path: %s", c.Request.URL.Path)
+	dbVal, _ := c.Get("db")
+	db := dbVal.(*gorm.DB)
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -277,11 +281,11 @@ func Me(c *gin.Context) {
 		return
 	}
 
-	currentUser := user.(*models.User)
-	
+	currentUser := user.(models.User)
+
 	// Preload associations
 	var fullUser models.User
-	if err := db.(*gorm.DB).Preload("Person").Preload("Accounts").Preload("Contact").Preload("AuthInfo").Preload("Preferences").Preload("Roles").First(&fullUser, currentUser.ID).Error; err != nil {
+	if err := db.Preload("Person").Preload("Contact").Preload("AuthInfo").Preload("Preferences").Preload("Roles").First(&fullUser, currentUser.ID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
 			"error": "Failed to fetch user associations",
@@ -289,8 +293,26 @@ func Me(c *gin.Context) {
 		return
 	}
 
+	// Fetch wallets via gRPC
+	walletClient, err := wallet.NewWalletService("")
+	var wallets interface{}
+	if err == nil {
+		defer walletClient.Close()
+		resp, err := walletClient.GetWalletsForUser(c.Request.Context(), currentUser.UID)
+		if err == nil && resp.Success {
+			wallets = resp.Wallets
+		} else {
+			log.Printf("[Me] failed to fetch wallets: %v", err)
+		}
+	} else {
+		log.Printf("[Me] failed to create wallet service client: %v", err)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User details retrieved successfully",
-		"data":    fullUser,
+		"data": gin.H{
+			"user":    fullUser,
+			"wallets": wallets,
+		},
 	})
 }
