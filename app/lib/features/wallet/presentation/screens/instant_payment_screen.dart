@@ -308,7 +308,17 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
             color: Colors.grey,
             fontSize: 14,
           ),
-          PgTexts.text600(context, text: value, fontSize: 14),
+          const SizedBox(width: 16),
+          Expanded(
+            child: PgTexts.text600(
+              context,
+              text: value,
+              fontSize: 14,
+              textOverflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              textAlign: TextAlign.right,
+            ),
+          ),
         ],
       ),
     );
