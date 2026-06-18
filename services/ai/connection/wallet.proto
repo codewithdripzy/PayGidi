@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package wallet;
 
-option go_package = "connection/walletpb;pb";
+option go_package = "connection/walletpb;walletpb";
 
 service WalletService {
   rpc CreateWallet (CreateWalletRequest) returns (CreateWalletResponse);
