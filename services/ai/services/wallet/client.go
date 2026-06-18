@@ -3,7 +3,7 @@ package wallet
 import (
 	"context"
 
-	"github.com/PayGidi/AIService/proto/connection/walletpb"
+	walletpb "github.com/PayGidi/AIService/proto/connection/walletpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
