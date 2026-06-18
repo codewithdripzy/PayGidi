@@ -280,7 +280,7 @@ func Me(c *gin.Context) {
 		return
 	}
 
-	currentUser := user.(*models.User)
+	currentUser := user.(models.User)
 
 	// Preload associations
 	var fullUser models.User
