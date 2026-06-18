@@ -35,15 +35,15 @@ func GetAccountDetails(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Account details retrieved successfully",
 		"data": gin.H{
-			"userId":       currentUser.UID,
-			"username":     currentUser.Username,
-			"email":        currentUser.Email,
-			"phone":        currentUser.Phone,
-			"accountType":  currentUser.AccountType,
-			"status":       currentUser.Status,
-			"person":       currentUser.Person,
-			"isFirstTime":  currentUser.IsFirstTime,
-			"pinSet":       currentUser.Pin != "",
+			"userId":      currentUser.UID,
+			"username":    currentUser.Username,
+			"email":       currentUser.Email,
+			"phone":       currentUser.Phone,
+			"accountType": currentUser.AccountType,
+			"status":      currentUser.Status,
+			"person":      currentUser.Person,
+			"isFirstTime": currentUser.IsFirstTime,
+			"pinSet":      currentUser.Pin != "",
 		},
 	})
 }
@@ -278,7 +278,7 @@ func Me(c *gin.Context) {
 	}
 
 	currentUser := user.(*models.User)
-	
+
 	// Preload associations
 	var fullUser models.User
 	if err := db.(*gorm.DB).Preload("Person").Preload("Accounts").Preload("Contact").Preload("AuthInfo").Preload("Preferences").Preload("Roles").First(&fullUser, currentUser.ID).Error; err != nil {
