@@ -106,7 +106,7 @@ class AuthRepository {
 
   Future<ApiResponse<AuthResponseData>> fetchCurrentUser() async {
     try {
-      final response = await _apiService.get('/me');
+      final response = await _apiService.get('/account/me');
       return ApiResponse.fromJson(
         response.data,
         (json) => AuthResponseData.fromJson(json as Map<String, dynamic>),

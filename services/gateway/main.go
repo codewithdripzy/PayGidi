@@ -40,7 +40,7 @@ func main() {
 	// --- Central Swagger UI ---
 	// We'll serve a custom HTML page that aggregates all swagger.json files.
 	r.GET("/docs", serveSwaggerUI)
-	
+
 	// Proxy to each service's swagger.json
 	r.GET("/docs/account/swagger.json", gin.WrapH(proxyRewrite(accountProxy, "/docs/doc.json")))
 	r.GET("/docs/wallet/swagger.json", gin.WrapH(proxyRewrite(walletProxy, "/docs/doc.json")))
@@ -48,30 +48,31 @@ func main() {
 	r.GET("/docs/ai/swagger.json", gin.WrapH(proxyRewrite(aiProxy, "/docs/doc.json")))
 	r.GET("/docs/notification/swagger.json", gin.WrapH(proxyRewrite(notificationProxy, "/docs/doc.json")))
 
-
 	// --- API Routing ---
 	api := r.Group("/api/v1")
-	
+
 	// Account Service routes
 	api.Any("/auth", gin.WrapH(accountProxy))
 	api.Any("/auth/*path", gin.WrapH(accountProxy))
+	api.Any("/account", gin.WrapH(accountProxy))
+	api.Any("/account/*path", gin.WrapH(accountProxy))
 	api.Any("/business", gin.WrapH(accountProxy))
 	api.Any("/business/*path", gin.WrapH(accountProxy))
-	
+
 	// Wallet Service routes
 	api.Any("/wallet", gin.WrapH(walletProxy))
 	api.Any("/wallet/*path", gin.WrapH(walletProxy))
 	api.Any("/payment", gin.WrapH(walletProxy))
 	api.Any("/payment/*path", gin.WrapH(walletProxy))
-	
+
 	// Transaction Service routes
 	api.Any("/transactions", gin.WrapH(transactionProxy))
 	api.Any("/transactions/*path", gin.WrapH(transactionProxy))
-	
+
 	// AI Service routes
 	api.Any("/kyb", gin.WrapH(aiProxy))
 	api.Any("/kyb/*path", gin.WrapH(aiProxy))
-	
+
 	// Notification Service routes
 	api.Any("/notification", gin.WrapH(notificationProxy))
 	api.Any("/notification/*path", gin.WrapH(notificationProxy))
