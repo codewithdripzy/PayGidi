@@ -8,7 +8,6 @@ require github.com/PayGidi/NotificationService v0.0.0
 
 require (
 	github.com/PayGidi/WalletService v0.0.0
-	github.com/PayGidi/shared v0.0.0-00010101000000-000000000000
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
@@ -74,5 +73,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/PayGidi/shared => ../shared
