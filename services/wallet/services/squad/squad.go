@@ -232,7 +232,7 @@ func GetBanks(ctx context.Context) (bool, *string, []responses.SquadBankData) {
 	var response responses.SquadResponse[[]responses.SquadBankData]
 
 	// The endpoint for fetching bank list in Squad is typically /payout/banks
-	_, err := httpclient.Get(client, ctx, "/payout/banks", &response)
+	_, err := httpclient.PostJSON(client, ctx, "/transaction/mandate/banklists", nil, &response)
 	if err != nil {
 		log.Printf("[Squad][GetBanks] request failed: %v", err)
 		errMsg := err.Error()

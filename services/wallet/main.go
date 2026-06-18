@@ -9,6 +9,7 @@ import (
 	"github.com/PayGidi/WalletService/core/constants"
 	_ "github.com/PayGidi/WalletService/docs"
 	"github.com/PayGidi/WalletService/proto/connection/pb"
+	"github.com/PayGidi/WalletService/router"
 	"github.com/PayGidi/WalletService/services/account"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
@@ -70,7 +71,7 @@ func main() {
 	}
 
 	// Setup routes
-	// router.SetupRoutes(app, db, accClient)
+	router.SetupRoutes(app, db, accClient)
 
 	// Start gRPC server in a separate goroutine
 	go func() {

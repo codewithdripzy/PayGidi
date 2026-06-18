@@ -16,6 +16,7 @@ import (
 	"github.com/PayGidi/WalletService/models"
 	"github.com/PayGidi/WalletService/services/account"
 	squadService "github.com/PayGidi/WalletService/services/squad"
+	"github.com/PayGidi/WalletService/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -209,7 +210,7 @@ func (wc *WalletController) GetWallets(ctx context.Context, userID string) ([]mo
 
 func (wc *WalletController) GetTotalBalanceHttp(c *gin.Context) {
 	// Temporarily bypass authentication for testing
-	userID := "1" 
+	userID := "1"
 
 	balance, err := wc.GetTotalBalance(c.Request.Context(), userID)
 	if err != nil {
@@ -234,7 +235,7 @@ func (wc *WalletController) GetWalletHttp(c *gin.Context) {
 
 	if accountNumber == "" {
 		// Temporarily bypass authentication for testing
-		userID := "1" 
+		userID := "1"
 
 		if err := wc.db.Where("user_id = ?", userID).First(&account).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -580,18 +581,17 @@ func (wc *WalletController) InitiateTransferHttp(c *gin.Context) {
 // @Success 200 {object} map[string]interface{} "Success"
 // @Router /wallet/banks [get]
 func (wc *WalletController) GetBanksHttp(c *gin.Context) {
-	success, errMsg, data := squadService.GetBanks(c.Request.Context())
+	var banks []struct {
+		Code string  `json:"code"`
+		Name string  `json:"name"`
+		Icon *string `json:"icon"`
+	}
 
-	if !success {
-		msg := "Failed to retrieve bank list"
-		if errMsg != nil {
-			msg = *errMsg
-		}
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  400,
+	if err := utils.LoadJSONFile("data/banks.json", &banks); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  500,
 			"success": false,
-			"message": msg,
-			"data":    gin.H{},
+			"message": "Failed to load bank list",
 		})
 		return
 	}
@@ -600,7 +600,7 @@ func (wc *WalletController) GetBanksHttp(c *gin.Context) {
 		"status":  200,
 		"success": true,
 		"message": "Success",
-		"data":    data,
+		"data":    banks,
 	})
 }
 
