@@ -66,7 +66,7 @@ func GetCustomerTransactions(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  500,
 			"success": false,
-			"message": "User not found in database",
+			"message": "User not found in database: " + err.Error(),
 			"data":    gin.H{},
 		})
 		return
