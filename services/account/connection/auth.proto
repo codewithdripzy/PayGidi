@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package account;
+package account_service;
 import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/PayGidi/AccountService/proto/connection/pb;pb";
