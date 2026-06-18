@@ -161,6 +161,10 @@ func (wc *WalletController) InitiateTransfer(ctx context.Context, request payloa
 	return squadService.InitiateTransfer(ctx, request)
 }
 
+func (wc *WalletController) GetTransactions(ctx context.Context, customerIdentifier string) (bool, *string, []responses.SquadTransactionData) {
+	return squadService.GetCustomerTransactions(ctx, customerIdentifier)
+}
+
 func (wc *WalletController) GetWallets(ctx context.Context, userID string) ([]models.Account, error) {
 	var accounts []models.Account
 	// Ensure userID is numeric (uint) if that is how it is stored

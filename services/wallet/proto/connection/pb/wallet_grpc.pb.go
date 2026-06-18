@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.33.3
-// source: connection/wallet.proto
+// source: wallet.proto
 
 package pb
 
@@ -29,6 +29,7 @@ const (
 	WalletService_GetPayment_FullMethodName          = "/wallet.WalletService/GetPayment"
 	WalletService_UpdatePaymentStatus_FullMethodName = "/wallet.WalletService/UpdatePaymentStatus"
 	WalletService_HealthCheck_FullMethodName         = "/wallet.WalletService/HealthCheck"
+	WalletService_GetWallets_FullMethodName          = "/wallet.WalletService/GetWallets"
 )
 
 // WalletServiceClient is the client API for WalletService service.
@@ -45,6 +46,7 @@ type WalletServiceClient interface {
 	GetPayment(ctx context.Context, in *GetPaymentRequest, opts ...grpc.CallOption) (*GetPaymentResponse, error)
 	UpdatePaymentStatus(ctx context.Context, in *UpdatePaymentStatusRequest, opts ...grpc.CallOption) (*UpdatePaymentStatusResponse, error)
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
+	GetWallets(ctx context.Context, in *GetWalletsRequest, opts ...grpc.CallOption) (*GetWalletsResponse, error)
 }
 
 type walletServiceClient struct {
@@ -155,6 +157,16 @@ func (c *walletServiceClient) HealthCheck(ctx context.Context, in *HealthCheckRe
 	return out, nil
 }
 
+func (c *walletServiceClient) GetWallets(ctx context.Context, in *GetWalletsRequest, opts ...grpc.CallOption) (*GetWalletsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetWalletsResponse)
+	err := c.cc.Invoke(ctx, WalletService_GetWallets_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WalletServiceServer is the server API for WalletService service.
 // All implementations must embed UnimplementedWalletServiceServer
 // for forward compatibility.
@@ -169,6 +181,7 @@ type WalletServiceServer interface {
 	GetPayment(context.Context, *GetPaymentRequest) (*GetPaymentResponse, error)
 	UpdatePaymentStatus(context.Context, *UpdatePaymentStatusRequest) (*UpdatePaymentStatusResponse, error)
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
+	GetWallets(context.Context, *GetWalletsRequest) (*GetWalletsResponse, error)
 	mustEmbedUnimplementedWalletServiceServer()
 }
 
@@ -208,6 +221,9 @@ func (UnimplementedWalletServiceServer) UpdatePaymentStatus(context.Context, *Up
 }
 func (UnimplementedWalletServiceServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
+}
+func (UnimplementedWalletServiceServer) GetWallets(context.Context, *GetWalletsRequest) (*GetWalletsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWallets not implemented")
 }
 func (UnimplementedWalletServiceServer) mustEmbedUnimplementedWalletServiceServer() {}
 func (UnimplementedWalletServiceServer) testEmbeddedByValue()                       {}
@@ -410,6 +426,24 @@ func _WalletService_HealthCheck_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WalletService_GetWallets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWalletsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).GetWallets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_GetWallets_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).GetWallets(ctx, req.(*GetWalletsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WalletService_ServiceDesc is the grpc.ServiceDesc for WalletService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -457,7 +491,11 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "HealthCheck",
 			Handler:    _WalletService_HealthCheck_Handler,
 		},
+		{
+			MethodName: "GetWallets",
+			Handler:    _WalletService_GetWallets_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "connection/wallet.proto",
+	Metadata: "wallet.proto",
 }
