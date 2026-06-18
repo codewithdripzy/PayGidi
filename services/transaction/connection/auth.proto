@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package account;
+package account_service;
 import "google/protobuf/timestamp.proto";
 
-option go_package = "connection/pb;pb";
+option go_package = "github.com/PayGidi/TransactionService/proto/connection/pb;pb";
 
 service AuthService {
   rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
