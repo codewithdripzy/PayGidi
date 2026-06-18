@@ -23,6 +23,9 @@ func SetupRoutes(app *gin.Engine) {
 	// add middleware to check version
 	api.Use(middlewares.VerifyVersion)
 
+	// me route
+	api.GET("/me", middlewares.Authenticate(), controllers.Me)
+
 	// auth routes
 	api.POST("/auth", middlewares.ValidateDTO(&validators.AuthDto{}), controllers.Auth)
 	api.POST("/auth/verify", middlewares.ValidateDTO(&validators.VerifyAuthOtpDto{}), controllers.VerifyAuthOTP)
@@ -46,6 +49,9 @@ func SetupRoutes(app *gin.Engine) {
 		business.PUT("/docs", middlewares.ValidateDTO(&validators.UpdateBusinessDocsDto{}), controllers.UpdateBusinessDocs)
 	}
 
+	// me route
+	api.GET("/me", middlewares.Authenticate(), controllers.Me)
+
 	// account routes
 	account := api.Group("/account")
 	account.Use(middlewares.Authenticate())
@@ -55,9 +61,6 @@ func SetupRoutes(app *gin.Engine) {
 		account.POST("/pin", middlewares.ValidateDTO(&validators.SetPinDto{}), controllers.SetPin)
 		account.PUT("/pin", middlewares.ValidateDTO(&validators.UpdatePinDto{}), controllers.UpdatePin)
 	}
-
-	// me route
-	api.GET("/me", middlewares.Authenticate(), controllers.Me)
 
 	api.GET("/health", controllers.HealthCheck)
 }
