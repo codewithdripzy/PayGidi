@@ -104,6 +104,25 @@ class AuthRepository {
     }
   }
 
+  Future<ApiResponse<AuthResponseData>> fetchCurrentUser() async {
+    try {
+      final response = await _apiService.get('/me');
+      return ApiResponse.fromJson(
+        response.data,
+        (json) => AuthResponseData.fromJson(json as Map<String, dynamic>),
+      );
+    } on DioException catch (e) {
+      return ApiResponse.fromJson(
+        (e.response?.data is Map)
+            ? e.response?.data
+            : {'error': e.response?.data.toString()},
+        null,
+      );
+    } catch (e) {
+      return ApiResponse(error: 'An unexpected error occurred');
+    }
+  }
+
   Future<ApiResponse<AuthResponseData>> authenticateBiometric(
     BiometricAuthRequest request,
   ) async {

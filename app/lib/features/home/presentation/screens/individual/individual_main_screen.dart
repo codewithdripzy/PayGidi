@@ -1,3 +1,4 @@
+import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/core/theme/pg_colors.dart';
 // import 'package:app/core/theme/pg_styles.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart'; // Import provider
 
 class IndividualMainScreen extends StatefulWidget {
   const IndividualMainScreen({super.key});
@@ -30,11 +32,21 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
     const IndividualMeScreen(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    // Fetch user info when the screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().fetchAndSetCurrentUser();
+    });
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
+
 
   void _showPaymentSelection() {
     final theme = Theme.of(context);
