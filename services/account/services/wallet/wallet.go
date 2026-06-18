@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/PayGidi/AccountService/core/constants"
-	walletpb "github.com/PayGidi/WalletService/proto/connection/pb"
+	pb "github.com/PayGidi/AccountService/proto/connection/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -24,7 +24,7 @@ func CheckNINValidity(ctx context.Context, nin string) (bool, *string) {
 
 	fmt.Println("[VerifyNIN][account-wallet-client] sending VerifyNIN request; nin length:", len(nin))
 
-	response, err := client.client.VerifyNIN(ctx, &walletpb.VerifyNINRequest{Nin: nin})
+	response, err := client.client.VerifyNIN(ctx, &pb.VerifyNINRequest{Nin: nin})
 	if err != nil {
 		fmt.Println("[VerifyNIN][account-wallet-client] grpc VerifyNIN error:", err)
 		errMsg := err.Error()
@@ -58,7 +58,7 @@ func VerifyBVNImage(ctx context.Context, bvn string, base64Image string) (bool, 
 	}
 	defer client.Close()
 
-	response, err := client.client.VerifyBVNImage(ctx, &walletpb.VerifyBVNImageRequest{
+	response, err := client.client.VerifyBVNImage(ctx, &pb.VerifyBVNImageRequest{
 		Bvn:         bvn,
 		Base64Image: base64Image,
 	})
@@ -85,7 +85,7 @@ func VerifyBVNImage(ctx context.Context, bvn string, base64Image string) (bool, 
 
 type WalletService struct {
 	conn   *grpc.ClientConn
-	client walletpb.WalletServiceClient
+	client pb.WalletServiceClient
 }
 
 func NewWalletService(address string) (*WalletService, error) {
@@ -103,7 +103,7 @@ func NewWalletService(address string) (*WalletService, error) {
 
 	return &WalletService{
 		conn:   conn,
-		client: walletpb.NewWalletServiceClient(conn),
+		client: pb.NewWalletServiceClient(conn),
 	}, nil
 }
 
@@ -115,7 +115,7 @@ func (s *WalletService) Close() error {
 	return s.conn.Close()
 }
 
-func (s *WalletService) CreateWalletForUser(ctx context.Context, req *walletpb.CreateWalletRequest, userID uint, recipient string) (*walletpb.CreateWalletResponse, error) {
+func (s *WalletService) CreateWalletForUser(ctx context.Context, req *pb.CreateWalletRequest, userID uint, recipient string) (*pb.CreateWalletResponse, error) {
 	md := metadata.Pairs("x-user-id", strconv.FormatUint(uint64(userID), 10))
 	if recipient != "" {
 		md.Append("x-recipient", recipient)
@@ -126,6 +126,10 @@ func (s *WalletService) CreateWalletForUser(ctx context.Context, req *walletpb.C
 	return s.client.CreateWallet(ctx, req)
 }
 
-func (s *WalletService) CreateWallet(ctx context.Context, req *walletpb.CreateWalletRequest) (*walletpb.CreateWalletResponse, error) {
+func (s *WalletService) GetWalletsForUser(ctx context.Context, userID string) (*pb.GetWalletsResponse, error) {
+	return s.client.GetWallets(ctx, &pb.GetWalletsRequest{UserId: userID})
+}
+
+func (s *WalletService) CreateWallet(ctx context.Context, req *pb.CreateWalletRequest) (*pb.CreateWalletResponse, error) {
 	return s.client.CreateWallet(ctx, req)
 }

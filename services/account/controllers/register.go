@@ -12,7 +12,7 @@ import (
 	walletService "github.com/PayGidi/AccountService/services/wallet"
 	"github.com/PayGidi/AccountService/utils"
 	"github.com/PayGidi/AccountService/validators"
-	walletpb "github.com/PayGidi/WalletService/proto/connection/pb"
+	pb "github.com/PayGidi/AccountService/proto/connection/pb"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -173,7 +173,7 @@ func CompleteAccount(c *gin.Context) {
 	defer cancel()
 
 	log.Printf("[CompleteAccount] calling CreateWalletForUser at %s", constants.WALLET_SERVICE_ADDR)
-	resp, err := walletClient.CreateWalletForUser(ctx, &walletpb.CreateWalletRequest{
+	resp, err := walletClient.CreateWalletForUser(ctx, &pb.CreateWalletRequest{
 		Firstname:    firstName,
 		Middlename:   middleName,
 		Lastname:     lastName,

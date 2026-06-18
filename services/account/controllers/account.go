@@ -6,6 +6,7 @@ import (
 
 	payGidiErrors "github.com/PayGidi/AccountService/core/interfaces/errors"
 	"github.com/PayGidi/AccountService/models"
+	"github.com/PayGidi/AccountService/services/wallet"
 	"github.com/PayGidi/AccountService/utils"
 	"github.com/PayGidi/AccountService/validators"
 	"github.com/gin-gonic/gin"
@@ -263,7 +264,7 @@ func DeleteAccount(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} responses.ApiResponse{data=models.User} "Current user details"
+// @Success 200 {object} responses.ApiResponse{data=map[string]interface{}} "Current user details with wallets"
 // @Failure 401 {object} responses.ApiResponse "Unauthorized"
 // @Failure 500 {object} responses.ApiResponse "Internal Server Error"
 // @Router /me [get]
@@ -292,8 +293,26 @@ func Me(c *gin.Context) {
 		return
 	}
 
+	// Fetch wallets via gRPC
+	walletClient, err := wallet.NewWalletService("")
+	var wallets interface{}
+	if err == nil {
+		defer walletClient.Close()
+		resp, err := walletClient.GetWalletsForUser(c.Request.Context(), currentUser.UID)
+		if err == nil && resp.Success {
+			wallets = resp.Wallets
+		} else {
+			log.Printf("[Me] failed to fetch wallets: %v", err)
+		}
+	} else {
+		log.Printf("[Me] failed to create wallet service client: %v", err)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User details retrieved successfully",
-		"data":    fullUser,
+		"data": gin.H{
+			"user":    fullUser,
+			"wallets": wallets,
+		},
 	})
 }
