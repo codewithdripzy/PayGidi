@@ -19,6 +19,7 @@ import (
 // Authenticate is a middleware that checks if the user is authenticated by calling Account Service via gRPC
 func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		log.Printf("DEBUG: Authenticate middleware triggered for: %s", c.Request.URL.Path)
 		// Extract the token from the Authorization header or Cookie
 		var tokenString string
 		authHeader := c.GetHeader("Authorization")

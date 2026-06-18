@@ -1,6 +1,8 @@
 package router
 
 import (
+	"log"
+
 	"github.com/PayGidi/WalletService/controllers"
 	"github.com/PayGidi/WalletService/core/constants"
 	_ "github.com/PayGidi/WalletService/docs"
@@ -19,19 +21,25 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 	// health check
 	r.GET("/health", controllers.HealthCheck)
 
+	// Create the WalletController instance with both dependencies
 	walletController := controllers.NewWalletController(db, accClient)
 
 	api := r.Group("/api/v1")
+
+	api.GET("/health", func(ctx *gin.Context) {
+		log.Printf("Wallet is running")
+	})
+
 	walletGroup := api.Group("/wallet")
 
 	// Public endpoints - defined outside the authenticated group
+	log.Println("Setting up public routes...")
 	walletGroup.GET("/banks", walletController.GetBanksHttp)
 	walletGroup.GET("/payments/:payment_id", walletController.GetPaymentHttp)
 	walletGroup.POST("/webhook/squad", walletController.HandleSquadWebhook)
 
 	// Authenticated endpoints
-	authGroup := walletGroup.Group("")
-	authGroup.Use(middlewares.Authenticate())
+	authGroup := walletGroup.Group("", middlewares.Authenticate())
 	{
 		authGroup.GET("", walletController.GetWalletHttp)
 		authGroup.GET("/:accountNumber", walletController.GetWalletHttp)

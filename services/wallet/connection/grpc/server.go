@@ -48,13 +48,13 @@ func (s *WalletServer) GetWallets(ctx context.Context, req *pb.GetWalletsRequest
 	wallets := make([]*pb.WalletData, 0)
 	for _, a := range accounts {
 		wallets = append(wallets, &pb.WalletData{
-			Id:                 uint64(a.ID),
-			AccountNumber:      a.AccountNumber,
-			AccountType:        a.AccountType,
-			AccountCategory:    a.AccountCategory,
-			CurrencyCode:       a.CurrencyCode,
-			Status:             a.Status,
-			AccountNickname:    a.AccountNickname,
+			Id:              uint64(a.ID),
+			AccountNumber:   a.AccountNumber,
+			AccountType:     a.AccountType,
+			AccountCategory: a.AccountCategory,
+			CurrencyCode:    a.CurrencyCode,
+			Status:          a.Status,
+			AccountNickname: a.AccountNickname,
 		})
 	}
 
