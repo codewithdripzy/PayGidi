@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	payGidiErrors "github.com/PayGidi/AccountService/core/interfaces/errors"
@@ -267,6 +268,7 @@ func DeleteAccount(c *gin.Context) {
 // @Failure 500 {object} responses.ApiResponse "Internal Server Error"
 // @Router /me [get]
 func Me(c *gin.Context) {
+	log.Printf("Me controller called for path: %s", c.Request.URL.Path)
 	db, _ := c.Get("db")
 	user, exists := c.Get("user")
 	if !exists {

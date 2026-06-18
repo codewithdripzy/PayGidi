@@ -47,6 +47,7 @@ func main() {
 
 	// Middleware to inject db into context
 	app.Use(func(c *gin.Context) {
+		log.Printf("Incoming request: %s %s", c.Request.Method, c.Request.URL.Path)
 		c.Set("db", db)
 		c.Next()
 	})
