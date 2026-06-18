@@ -24,6 +24,140 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/account": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get the profile details of the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Get account details",
+                "responses": {
+                    "200": {
+                        "description": "Account details",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete the authenticated user's account and all associated data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Delete account",
+                "responses": {
+                    "200": {
+                        "description": "Account deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/account/pin": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update the existing PIN for the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Update account PIN",
+                "parameters": [
+                    {
+                        "description": "PIN update data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.UpdatePinDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PIN updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Set a new PIN for the authenticated user. Only works if no PIN is currently set.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Set account PIN",
+                "parameters": [
+                    {
+                        "description": "PIN data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validators.SetPinDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PIN set successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/auth": {
             "post": {
                 "description": "Initiate authentication (registration or login) via phone number. Sends an OTP.",
@@ -660,9 +794,647 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/me": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Fetch the profile details and associations of the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Get current user",
+                "responses": {
+                    "200": {
+                        "description": "Current user details",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/responses.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ApiResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ApiResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "models.Activity": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "description": "Nullable for soft deletes",
+                    "type": "string"
+                },
+                "details": {
+                    "description": "Additional details about the activity",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique identifier for the activity",
+                    "type": "integer"
+                },
+                "ipAddress": {
+                    "description": "IP address from which the activity was performed",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type of activity (e.g., \"login\", \"logout\", \"update_profile\")",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "description": "Belongs to User",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    ]
+                },
+                "userAgent": {
+                    "description": "User agent string for the activity",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "Reference to the user associated with the activity",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.AuthInfo": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastLoginAt": {
+                    "description": "User            User       ` + "`" + `gorm:\"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;\"` + "`" + ` // Belongs to User",
+                    "type": "string"
+                },
+                "lockedReason": {
+                    "type": "string"
+                },
+                "lockedUntil": {
+                    "description": "Timestamp until which the user is locked out",
+                    "type": "string"
+                },
+                "loginAttempts": {
+                    "description": "Number of login attempts",
+                    "type": "integer"
+                },
+                "otpCooldownUntil": {
+                    "description": "Timestamp until which the user is cooled down from requesting OTP",
+                    "type": "string"
+                },
+                "otpRequestCount": {
+                    "description": "Number of OTP requests",
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userID": {
+                    "description": "Unique identifier for the user",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Business": {
+            "type": "object",
+            "properties": {
+                "additionalDocs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "facebook": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "industry": {
+                    "type": "string"
+                },
+                "instagram": {
+                    "type": "string"
+                },
+                "linkedIn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "registrationDoc": {
+                    "description": "URL to the document",
+                    "type": "string"
+                },
+                "registrationNumber": {
+                    "type": "string"
+                },
+                "twitter": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "e.g., \"LLC\", \"Sole Proprietorship\"",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                },
+                "website": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ContactInfo": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "user": {
+                    "description": "Belongs to User",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    ]
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.KYC": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "document": {
+                    "description": "base64 or URL to document",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "kycType": {
+                    "description": "e.g., \"passport\", \"nationalID\"",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "\"pending\", \"approved\", \"rejected\"",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "remove uniqueIndex, keep index for performance",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.OTP": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "forWhat": {
+                    "description": "e.g., \"register\", \"login\", \"setPin\", \"updatePin\"",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "integer"
+                },
+                "verified": {
+                    "type": "boolean"
+                },
+                "via": {
+                    "description": "sms, email, whatsapp",
+                    "type": "string"
+                }
+            }
+        },
+        "models.Permission": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "e.g., \"read_account\", \"edit_user\"",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Person": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                },
+                "otherNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "userID": {
+                    "description": "Make sure only one Person per User",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Preference": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "description": "Nullable for soft deletes",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique identifier for the preference",
+                    "type": "integer"
+                },
+                "language": {
+                    "description": "e.g., \"en\", \"fr\", etc.",
+                    "type": "string"
+                },
+                "notificationsEnabled": {
+                    "description": "Indicates if notifications are enabled",
+                    "type": "boolean"
+                },
+                "theme": {
+                    "description": "e.g., \"light\", \"dark\"",
+                    "type": "string"
+                },
+                "timezone": {
+                    "description": "e.g., \"UTC\", \"America/New_York\"",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Role": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description of the role",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "e.g., \"admin\", \"user\"",
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Permission"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Session": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "currentSessionID": {
+                    "description": "Token for the current session",
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "description": "Expiration time for the session",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastKnownIp": {
+                    "description": "Last known IP address of the user",
+                    "type": "string"
+                },
+                "lastUserAgent": {
+                    "description": "User agent string for the session",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "description": "Belongs to User",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    ]
+                },
+                "userId": {
+                    "description": "Reference to the user associated with the session",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "required": [
+                "email",
+                "username"
+            ],
+            "properties": {
+                "accountType": {
+                    "description": "individual or business",
+                    "type": "string"
+                },
+                "activities": {
+                    "description": "List of activities performed by the user",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Activity"
+                    }
+                },
+                "authInfo": {
+                    "description": "Authentication-related information",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.AuthInfo"
+                        }
+                    ]
+                },
+                "biometricEnabled": {
+                    "type": "boolean"
+                },
+                "biometricID": {
+                    "description": "Unique identifier for biometrics (e.g., Device ID + Biometric Hash)",
+                    "type": "string"
+                },
+                "business": {
+                    "description": "Business-related information (if accountType is business)",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Business"
+                        }
+                    ]
+                },
+                "contact": {
+                    "description": "Contact information for the user",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ContactInfo"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "emailVerified": {
+                    "description": "Indicates if the user's email is verified",
+                    "type": "boolean"
+                },
+                "hashedNIN": {
+                    "description": "Hashed version of the user's NIN for security",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isFirstTime": {
+                    "description": "Indicates if this is the user's first login",
+                    "type": "boolean"
+                },
+                "kycs": {
+                    "description": "List of KYC documents associated with the user",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.KYC"
+                    }
+                },
+                "otps": {
+                    "description": "List of OTPs associated with the user",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OTP"
+                    }
+                },
+                "person": {
+                    "description": "One-to-one link",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Person"
+                        }
+                    ]
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "phoneVerified": {
+                    "description": "Indicates if the user's phone number is verified",
+                    "type": "boolean"
+                },
+                "pin": {
+                    "description": "Hashed version of the user's PIN for security",
+                    "type": "string"
+                },
+                "preferences": {
+                    "description": "User preferences",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Preference"
+                        }
+                    ]
+                },
+                "profile_pic": {
+                    "description": "URL to the user's profile picture",
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Role"
+                    }
+                },
+                "sessions": {
+                    "description": "List of active sessions for the user",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Session"
+                    }
+                },
+                "status": {
+                    "description": "e.g., \"active\", \"inactive\", etc.",
+                    "type": "string"
+                },
+                "twoFactorEnabled": {
+                    "description": "Indicates if two-factor authentication is enabled",
+                    "type": "boolean"
+                },
+                "twoFactorMethod": {
+                    "description": "Method of two-factor authentication (e.g., \"sms\", \"email\", \"app\")",
+                    "type": "string"
+                },
+                "twoFactorSecret": {
+                    "description": "Secret for two-factor authentication",
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 3
+                }
+            }
+        },
+        "responses.ApiResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "validators.AuthDto": {
             "type": "object",
             "required": [
@@ -725,7 +1497,8 @@ const docTemplate = `{
                     "enum": [
                         "completeRegister",
                         "login",
-                        "resetPassword",
+                        "setPin",
+                        "updatePin",
                         "twoFactorAuth"
                     ]
                 },
@@ -733,6 +1506,21 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 15,
                     "minLength": 10
+                }
+            }
+        },
+        "validators.SetPinDto": {
+            "type": "object",
+            "required": [
+                "confirmPin",
+                "pin"
+            ],
+            "properties": {
+                "confirmPin": {
+                    "type": "string"
+                },
+                "pin": {
+                    "type": "string"
                 }
             }
         },
@@ -786,6 +1574,25 @@ const docTemplate = `{
                 }
             }
         },
+        "validators.UpdatePinDto": {
+            "type": "object",
+            "required": [
+                "confirmPin",
+                "newPin",
+                "oldPin"
+            ],
+            "properties": {
+                "confirmPin": {
+                    "type": "string"
+                },
+                "newPin": {
+                    "type": "string"
+                },
+                "oldPin": {
+                    "type": "string"
+                }
+            }
+        },
         "validators.VerifyAuthOtpDto": {
             "type": "object",
             "required": [
@@ -834,7 +1641,8 @@ const docTemplate = `{
                     "enum": [
                         "completeRegister",
                         "login",
-                        "resetPassword",
+                        "setPin",
+                        "updatePin",
                         "twoFactorAuth"
                     ]
                 },
@@ -851,8 +1659,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "nin": {
-                    "type": "string",
-                    "minLength": 10
+                    "type": "string"
                 }
             }
         }

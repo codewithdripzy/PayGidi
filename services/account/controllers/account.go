@@ -262,7 +262,9 @@ func DeleteAccount(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "Current user details"
+// @Success 200 {object} responses.ApiResponse{data=models.User} "Current user details"
+// @Failure 401 {object} responses.ApiResponse "Unauthorized"
+// @Failure 500 {object} responses.ApiResponse "Internal Server Error"
 // @Router /me [get]
 func Me(c *gin.Context) {
 	db, _ := c.Get("db")
