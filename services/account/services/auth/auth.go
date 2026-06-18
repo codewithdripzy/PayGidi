@@ -140,7 +140,7 @@ func (s *AuthServer) ValidateToken(ctx context.Context, req *pb.ValidateTokenReq
 	// Token parsing logic
 	res := &pb.ValidateTokenResponse{
 		Valid:    true,
-		UserId:   fmt.Sprint(userData.ID),
+		UserId:   userData.UID,
 		Email:    userData.Email,
 		UserData: mapUserData(userData),
 	}
