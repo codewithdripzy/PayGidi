@@ -3,7 +3,6 @@ module github.com/PayGidi/TransactionService
 go 1.26.3
 
 require (
-	github.com/PayGidi/shared v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
@@ -69,5 +68,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/PayGidi/shared => ../shared

@@ -5,7 +5,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/PayGidi/shared/responses"
 	"github.com/PayGidi/TransactionService/core/interfaces/legacy_responses"
 	"github.com/PayGidi/TransactionService/models"
 	"github.com/PayGidi/TransactionService/services/squad"
