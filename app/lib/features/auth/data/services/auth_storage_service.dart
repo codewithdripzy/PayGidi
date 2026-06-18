@@ -7,27 +7,12 @@ class AuthStorageService {
 
   static const _tokenKey = 'auth_token';
   static const _refreshTokenKey = 'refresh_token';
-  static const _userKey = 'user_data';
+  static const _authResponseDataKey = 'auth_response_data';
+  static const _pgUserKey = 'pg_user_data';
 
   Future<void> saveTokens({required String token, required String refreshToken}) async {
     await _storage.write(key: _tokenKey, value: token);
     await _storage.write(key: _refreshTokenKey, value: refreshToken);
-  }
-
-  Future<void> saveUserData(AuthResponseData userData) async {
-    await _storage.write(key: _userKey, value: jsonEncode(userData.toJson()));
-  }
-
-  Future<AuthResponseData?> getUserData() async {
-    final userJson = await _storage.read(key: _userKey);
-    if (userJson != null) {
-      try {
-        return AuthResponseData.fromJson(jsonDecode(userJson));
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
   }
 
   Future<String?> getToken() async {
@@ -38,9 +23,42 @@ class AuthStorageService {
     return await _storage.read(key: _refreshTokenKey);
   }
 
-  Future<void> clearTokens() async {
+  Future<void> saveAuthResponseData(AuthResponseData authResponseData) async {
+    await _storage.write(key: _authResponseDataKey, value: jsonEncode(authResponseData.toJson()));
+  }
+
+  Future<AuthResponseData?> getAuthResponseData() async {
+    final authResponseJson = await _storage.read(key: _authResponseDataKey);
+    if (authResponseJson != null) {
+      try {
+        return AuthResponseData.fromJson(jsonDecode(authResponseJson));
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  Future<void> savePgUser(PgUser pgUser) async {
+    await _storage.write(key: _pgUserKey, value: jsonEncode(pgUser.toJson()));
+  }
+
+  Future<PgUser?> getPgUser() async {
+    final pgUserJson = await _storage.read(key: _pgUserKey);
+    if (pgUserJson != null) {
+      try {
+        return PgUser.fromJson(jsonDecode(pgUserJson));
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  Future<void> clearAllAuthData() async {
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _refreshTokenKey);
-    await _storage.delete(key: _userKey);
+    await _storage.delete(key: _authResponseDataKey);
+    await _storage.delete(key: _pgUserKey);
   }
 }
