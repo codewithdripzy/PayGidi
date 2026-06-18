@@ -157,6 +157,23 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> fetchAndSetCurrentUser() async {
+    final response = await _repository.fetchCurrentUser();
+
+    if (response.isSuccess && response.data != null) {
+      _userData = response.data;
+      _isLoggedIn = true;
+      await _storageService.saveUserData(response.data!);
+      notifyListeners();
+      return true;
+    } else {
+      _isLoggedIn = false;
+      _userData = null;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> completeIndividualAccount(
     IndividualCompleteAccountRequest request,
   ) async {

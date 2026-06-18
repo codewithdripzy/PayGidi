@@ -106,7 +106,7 @@ func GetCustomerTransactions(c *gin.Context) {
 		return
 	}
 
-	var allTransactions []responses.SquadCustomerTransaction
+	var allTransactions []responses.SquadCustomerTransaction = []responses.SquadCustomerTransaction{}
 	seenRefs := make(map[string]bool)
 
 	for _, acc := range accounts {
