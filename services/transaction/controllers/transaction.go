@@ -63,8 +63,8 @@ func GetCustomerTransactions(c *gin.Context) {
 	// Fetch user from DB to get the ID (primary key)
 	var dbUser models.User
 	if err := db.Where("uid = ?", user.UID).First(&dbUser).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  500,
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status":  401,
 			"success": false,
 			"message": "User not found in database: " + err.Error(),
 			"data":    gin.H{},
