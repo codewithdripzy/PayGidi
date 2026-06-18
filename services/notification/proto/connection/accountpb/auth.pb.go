@@ -697,25 +697,25 @@ func file_auth_proto_rawDescGZIP() []byte {
 
 var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_auth_proto_goTypes = []any{
-	(*ValidateTokenRequest)(nil),  // 0: transaction_auth_client.ValidateTokenRequest
-	(*Preference)(nil),            // 1: transaction_auth_client.Preference
-	(*PersonData)(nil),            // 2: transaction_auth_client.PersonData
-	(*UserData)(nil),              // 3: transaction_auth_client.UserData
-	(*Permission)(nil),            // 4: transaction_auth_client.Permission
-	(*Role)(nil),                  // 5: transaction_auth_client.Role
-	(*ValidateTokenResponse)(nil), // 6: transaction_auth_client.ValidateTokenResponse
+	(*ValidateTokenRequest)(nil),  // 0: account.ValidateTokenRequest
+	(*Preference)(nil),            // 1: account.Preference
+	(*PersonData)(nil),            // 2: account.PersonData
+	(*UserData)(nil),              // 3: account.UserData
+	(*Permission)(nil),            // 4: account.Permission
+	(*Role)(nil),                  // 5: account.Role
+	(*ValidateTokenResponse)(nil), // 6: account.ValidateTokenResponse
 	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
 }
 var file_auth_proto_depIdxs = []int32{
-	2, // 0: transaction_auth_client.UserData.personData:type_name -> transaction_auth_client.PersonData
-	1, // 1: transaction_auth_client.UserData.preference:type_name -> transaction_auth_client.Preference
-	5, // 2: transaction_auth_client.UserData.roles:type_name -> transaction_auth_client.Role
-	4, // 3: transaction_auth_client.Role.permissions:type_name -> transaction_auth_client.Permission
-	7, // 4: transaction_auth_client.Role.createdAt:type_name -> google.protobuf.Timestamp
-	7, // 5: transaction_auth_client.Role.updatedAt:type_name -> google.protobuf.Timestamp
-	3, // 6: transaction_auth_client.ValidateTokenResponse.userData:type_name -> transaction_auth_client.UserData
-	0, // 7: transaction_auth_client.AuthService.ValidateToken:input_type -> transaction_auth_client.ValidateTokenRequest
-	6, // 8: transaction_auth_client.AuthService.ValidateToken:output_type -> transaction_auth_client.ValidateTokenResponse
+	2, // 0: account.UserData.personData:type_name -> account.PersonData
+	1, // 1: account.UserData.preference:type_name -> account.Preference
+	5, // 2: account.UserData.roles:type_name -> account.Role
+	4, // 3: account.Role.permissions:type_name -> account.Permission
+	7, // 4: account.Role.createdAt:type_name -> google.protobuf.Timestamp
+	7, // 5: account.Role.updatedAt:type_name -> google.protobuf.Timestamp
+	3, // 6: account.ValidateTokenResponse.userData:type_name -> account.UserData
+	0, // 7: account.AuthService.ValidateToken:input_type -> account.ValidateTokenRequest
+	6, // 8: account.AuthService.ValidateToken:output_type -> account.ValidateTokenResponse
 	8, // [8:9] is the sub-list for method output_type
 	7, // [7:8] is the sub-list for method input_type
 	7, // [7:7] is the sub-list for extension type_name

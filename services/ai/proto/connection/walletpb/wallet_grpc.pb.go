@@ -4,7 +4,7 @@
 // - protoc             v6.33.3
 // source: wallet.proto
 
-package walletpb
+package pb
 
 import (
 	context "context"
@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WalletService_CreateWallet_FullMethodName        = "/ai_wallet_client.WalletService/CreateWallet"
-	WalletService_InitiatePayment_FullMethodName     = "/ai_wallet_client.WalletService/InitiatePayment"
-	WalletService_InitiateTransfer_FullMethodName    = "/ai_wallet_client.WalletService/InitiateTransfer"
-	WalletService_GetTransactions_FullMethodName     = "/ai_wallet_client.WalletService/GetTransactions"
-	WalletService_ResolveAccount_FullMethodName      = "/ai_wallet_client.WalletService/ResolveAccount"
-	WalletService_VerifyNIN_FullMethodName           = "/ai_wallet_client.WalletService/VerifyNIN"
-	WalletService_VerifyBVNImage_FullMethodName      = "/ai_wallet_client.WalletService/VerifyBVNImage"
-	WalletService_GetPayment_FullMethodName          = "/ai_wallet_client.WalletService/GetPayment"
-	WalletService_UpdatePaymentStatus_FullMethodName = "/ai_wallet_client.WalletService/UpdatePaymentStatus"
-	WalletService_HealthCheck_FullMethodName         = "/ai_wallet_client.WalletService/HealthCheck"
+	WalletService_CreateWallet_FullMethodName        = "/wallet.WalletService/CreateWallet"
+	WalletService_InitiatePayment_FullMethodName     = "/wallet.WalletService/InitiatePayment"
+	WalletService_InitiateTransfer_FullMethodName    = "/wallet.WalletService/InitiateTransfer"
+	WalletService_GetTransactions_FullMethodName     = "/wallet.WalletService/GetTransactions"
+	WalletService_ResolveAccount_FullMethodName      = "/wallet.WalletService/ResolveAccount"
+	WalletService_VerifyNIN_FullMethodName           = "/wallet.WalletService/VerifyNIN"
+	WalletService_VerifyBVNImage_FullMethodName      = "/wallet.WalletService/VerifyBVNImage"
+	WalletService_GetPayment_FullMethodName          = "/wallet.WalletService/GetPayment"
+	WalletService_UpdatePaymentStatus_FullMethodName = "/wallet.WalletService/UpdatePaymentStatus"
+	WalletService_HealthCheck_FullMethodName         = "/wallet.WalletService/HealthCheck"
 )
 
 // WalletServiceClient is the client API for WalletService service.
@@ -414,7 +414,7 @@ func _WalletService_HealthCheck_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var WalletService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ai_wallet_client.WalletService",
+	ServiceName: "wallet.WalletService",
 	HandlerType: (*WalletServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
