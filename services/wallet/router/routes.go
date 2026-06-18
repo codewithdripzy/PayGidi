@@ -48,6 +48,9 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 		// Create Wallet
 		walletGroup.POST("/create", walletController.CreateWalletHttp)
 
+		// Balance
+		walletGroup.GET("/balance", walletController.GetTotalBalanceHttp)
+
 		// Payments (KYB Trust Layer integration)
 		walletGroup.POST("/payments/new", walletController.CreatePaymentHttp)
 

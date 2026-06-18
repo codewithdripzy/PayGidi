@@ -342,10 +342,12 @@ class PgUser {
       emailVerified: json['emailVerified'] as bool,
       phoneVerified: json['phoneVerified'] as bool,
       accountType: json['accountType'] as String,
-      authInfo:
-      json['authInfo'] != null ? AuthInfo.fromJson(json['authInfo']) : null,
-      business:
-      json['business'] != null ? Business.fromJson(json['business']) : null,
+      authInfo: json['authInfo'] != null
+          ? AuthInfo.fromJson(json['authInfo'])
+          : null,
+      business: json['business'] != null
+          ? Business.fromJson(json['business'])
+          : null,
       sessions: json['sessions'] as List<dynamic>?,
       activities: json['activities'] as List<dynamic>?,
       preferences: json['preferences'] != null
@@ -361,6 +363,11 @@ class PgUser {
       hasPin: json['hasPin'] as bool?, // Added hasPin to fromJson
     );
   }
+
+  // Convenience getters
+  String? get firstName => person?.firstName;
+  String? get lastName => person?.lastName;
+  bool get needsOnboarding => isFirstTime;
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -514,9 +521,11 @@ class AccountResponse {
   AccountResponse({required this.data, required this.message});
 
   factory AccountResponse.fromJson(Map<String, dynamic> json) {
+    // ApiResponse.fromJson already unwraps the outer 'data' key before calling
+    // this factory, so `json` here IS the data payload {"user":{...},"wallets":[...]}.
     return AccountResponse(
-      data: AccountResponseData.fromJson(json['data']),
-      message: json['message'] as String,
+      data: AccountResponseData.fromJson(json),
+      message: '',
     );
   }
 }

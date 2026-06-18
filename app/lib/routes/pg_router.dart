@@ -37,7 +37,7 @@ class PayGidiRouter {
       refreshListenable: authProvider,
       redirect: (context, state) {
         final isLoggedIn = authProvider.isLoggedIn;
-        final needsOnboarding = authProvider.userData?.isFirstTime ?? false;
+        final needsOnboarding = authProvider.authResponseData?.needsOnboarding ?? false;
         
         final isSplash = state.matchedLocation == "/${PgRouteNames.splashPage}";
         final isOnboarding =

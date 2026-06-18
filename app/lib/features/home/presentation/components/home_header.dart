@@ -43,7 +43,9 @@ class HomeHeader extends StatelessWidget {
             ),
             PgTexts.text700(
               context,
-              text: authProvider.userData?.firstName ?? "Guest User",
+              text: authProvider.userData?.firstName ??
+                  authProvider.authResponseData?.firstName ??
+                  "Guest User",
               fontSize: 16,
               color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
               fontFamily: PgFonts.googleSans,

@@ -165,18 +165,65 @@ func (wc *WalletController) GetTransactions(ctx context.Context, customerIdentif
 	return squadService.GetCustomerTransactions(ctx, customerIdentifier)
 }
 
-func (wc *WalletController) GetWallets(ctx context.Context, userID string) ([]models.Account, error) {
+func (wc *WalletController) GetTotalBalance(ctx context.Context, userID string) (float64, error) {
 	var accounts []models.Account
-	// Ensure userID is numeric (uint) if that is how it is stored
 	userIDInt, err := strconv.Atoi(userID)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	
+
 	if err := wc.db.WithContext(ctx).Where("user_id = ?", uint(userIDInt)).Find(&accounts).Error; err != nil {
-		return nil, err
+		return 0, err
 	}
-	return accounts, nil
+
+	var totalBalance float64
+	for _, acc := range accounts {
+		// Fetch virtual account details from Squad to get actual balance
+		success, _, data := squadService.GetVirtualAccount(ctx, acc.ProviderAccountNumber)
+		if success && data != nil {
+			balance, _ := strconv.ParseFloat(data.AccountBalance, 64)
+			totalBalance += balance
+		}
+	}
+
+	return totalBalance, nil
+}
+
+// GetTotalBalanceHttp godoc
+// @Summary Get total wallet balance
+// @Description Fetch total balance across all wallets for the authenticated user.
+// @Tags Wallet
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Success"
+// @Router /wallet/balance [get]
+func (wc *WalletController) GetTotalBalanceHttp(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status":  401,
+			"success": false,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	userIDStr := fmt.Sprintf("%v", userID)
+	balance, err := wc.GetTotalBalance(c.Request.Context(), userIDStr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  500,
+			"success": false,
+			"message": "Failed to calculate balance",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":       200,
+		"success":      true,
+		"totalBalance": balance,
+	})
 }
 
 func (wc *WalletController) ResolveAccount(ctx context.Context, request payloads.SquadAccountLookupPayload) (bool, *string, *responses.SquadAccountLookupResponseData) {

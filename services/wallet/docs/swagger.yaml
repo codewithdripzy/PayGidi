@@ -31,6 +31,8 @@ definitions:
         - individual
         - business
         type: string
+      address:
+        type: string
       businessName:
         type: string
       bvn:
@@ -58,6 +60,7 @@ definitions:
       userId:
         type: string
     required:
+    - address
     - dateOfBirth
     - email
     - firstname
@@ -179,6 +182,22 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get wallet transactions
+      tags:
+      - Wallet
+  /wallet/balance:
+    get:
+      description: Fetch total balance across all wallets for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get total wallet balance
       tags:
       - Wallet
   /wallet/banks:

@@ -172,19 +172,20 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> fetchAndSetCurrentUser() async {
-    final response = await _repository.fetchCurrentUser(); // Now returns ApiResponse<AccountResponse>
+    final response = await _repository.fetchCurrentUser();
 
     if (response.isSuccess && response.data != null) {
       _userData = response.data!.data.user;
       _wallets = response.data!.data.wallets;
-      _isLoggedIn = true; // Ensure isLoggedIn is true if user data is fetched successfully
+      _isLoggedIn = true;
       await _storageService.savePgUser(_userData!);
       notifyListeners();
       return true;
     } else {
-      _isLoggedIn = false;
-      _userData = null;
-      _wallets = null;
+      // A failed /me fetch (network blip, parse error, etc.) must NOT log the
+      // user out. We keep whatever cached data we already have and simply
+      // signal to the caller that the refresh did not succeed.
+      debugPrint("--- fetchAndSetCurrentUser failed: ${response.error} ---");
       notifyListeners();
       return false;
     }

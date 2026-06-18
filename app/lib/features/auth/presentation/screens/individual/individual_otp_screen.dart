@@ -71,7 +71,10 @@ class _IndividualOtpScreenState extends State<IndividualOtpScreen> {
     if (!mounted) return;
 
     if (success) {
-      final needsOnboarding = authProvider.userData?.needsOnboarding ?? false;
+      // userData is null at this point — it's populated later by /me.
+      // needsOnboarding lives on authResponseData, which is set by verifyOtp().
+      final needsOnboarding =
+          authProvider.authResponseData?.needsOnboarding ?? false;
       if (!needsOnboarding) {
         context.goNamed(PgRouteNames.individualMain);
       } else {

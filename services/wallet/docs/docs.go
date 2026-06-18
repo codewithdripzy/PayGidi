@@ -50,6 +50,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/wallet/balance": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Fetch total balance across all wallets for the authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get total wallet balance",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/wallet/banks": {
             "get": {
                 "security": [
@@ -628,6 +654,7 @@ const docTemplate = `{
         "dto.CreateWalletDto": {
             "type": "object",
             "required": [
+                "address",
                 "dateOfBirth",
                 "email",
                 "firstname",
@@ -644,6 +671,9 @@ const docTemplate = `{
                         "individual",
                         "business"
                     ]
+                },
+                "address": {
+                    "type": "string"
                 },
                 "businessName": {
                     "type": "string"
