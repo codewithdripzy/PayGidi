@@ -284,7 +284,7 @@ func Me(c *gin.Context) {
 
 	// Preload associations
 	var fullUser models.User
-	if err := db.(*gorm.DB).Preload("Person").Preload("Accounts").Preload("Contact").Preload("AuthInfo").Preload("Preferences").Preload("Roles").First(&fullUser, currentUser.ID).Error; err != nil {
+	if err := db.Preload("Person").Preload("Accounts").Preload("Contact").Preload("AuthInfo").Preload("Preferences").Preload("Roles").First(&fullUser, currentUser.ID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
 			"error": "Failed to fetch user associations",
