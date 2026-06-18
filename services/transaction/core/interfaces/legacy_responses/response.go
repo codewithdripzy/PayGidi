@@ -1,4 +1,4 @@
-package responses
+package legacy_responses
 
 type VfdResponse[T any] struct {
 	Status  string `json:"status"`

@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/PayGidi/TransactionService/core/interfaces/responses"
+	"github.com/PayGidi/TransactionService/core/interfaces/legacy_responses"
 	httpclient "github.com/PayGidi/TransactionService/utils/http"
 )
 
@@ -23,9 +23,9 @@ func refreshSquadClient() {
 }
 
 // GetCustomerTransactions fetches the transactions for a specific customer identifier from Squad.
-func GetCustomerTransactions(ctx context.Context, customerIdentifier string) (bool, *string, []responses.SquadCustomerTransaction) {
+func GetCustomerTransactions(ctx context.Context, customerIdentifier string) (bool, *string, []legacy_responses.SquadCustomerTransaction) {
 	refreshSquadClient()
-	var response responses.SquadResponse[[]responses.SquadCustomerTransaction]
+	var response legacy_responses.SquadResponse[[]legacy_responses.SquadCustomerTransaction]
 
 	path := fmt.Sprintf("/virtual-account/customer/transactions/%s", customerIdentifier)
 	_, err := httpclient.Get(client, ctx, path, &response)

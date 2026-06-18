@@ -44,9 +44,14 @@
                 }
             }
         },
-        "/transactions/{customerIdentifier}": {
+        "/transactions": {
             "get": {
-                "description": "Fetch transaction history for a specific customer identifier using the Squad API.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetch transaction history for all wallet accounts of the authenticated customer using the Squad API.",
                 "consumes": [
                     "application/json"
                 ],
@@ -57,30 +62,88 @@
                     "Transactions"
                 ],
                 "summary": "Get customer transactions",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Customer Identifier (e.g. email or UID)",
-                        "name": "customerIdentifier",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/responses.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/legacy_responses.SquadCustomerTransaction"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/responses.ApiResponse"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "legacy_responses.SquadCustomerTransaction": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "customer": {
+                    "type": "object",
+                    "properties": {
+                        "customer_identifier": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "fee_charged": {
+                    "type": "string"
+                },
+                "principal_amount": {
+                    "type": "string"
+                },
+                "remarks": {
+                    "type": "string"
+                },
+                "settled_amount": {
+                    "type": "string"
+                },
+                "transaction_date": {
+                    "type": "string"
+                },
+                "transaction_indicator": {
+                    "type": "string"
+                },
+                "transaction_reference": {
+                    "type": "string"
+                },
+                "virtual_account_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.ApiResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         }
