@@ -23,9 +23,6 @@ func SetupRoutes(app *gin.Engine) {
 	// add middleware to check version
 	api.Use(middlewares.VerifyVersion)
 
-	// me route
-	api.GET("/me", middlewares.Authenticate(), controllers.Me)
-
 	// auth routes
 	api.POST("/auth", middlewares.ValidateDTO(&validators.AuthDto{}), controllers.Auth)
 	api.POST("/auth/verify", middlewares.ValidateDTO(&validators.VerifyAuthOtpDto{}), controllers.VerifyAuthOTP)
