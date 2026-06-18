@@ -299,7 +299,7 @@ class IndividualMeScreen extends StatelessWidget {
                 heightSpacing(2),
                 PgTexts.text400(
                   context,
-                  text: user?.phone ?? "",
+                  text: user?.email ?? "",
                   fontSize: 14,
                   color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
                       .withValues(alpha: 0.7),

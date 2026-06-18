@@ -178,12 +178,10 @@ func (wc *WalletController) GetTotalBalance(ctx context.Context, userID string) 
 
 	var totalBalance float64
 	for _, acc := range accounts {
-		// Fetch virtual account details from Squad to get actual balance
-		success, _, data := squadService.GetVirtualAccount(ctx, acc.ProviderAccountNumber)
-		if success && data != nil {
-			balance, _ := strconv.ParseFloat(data.AccountBalance, 64)
-			totalBalance += balance
-		}
+		// Squad virtual accounts don't maintain individual balances on their end.
+		// All inbound funds are settled to the Merchant wallet. 
+		// Therefore, we use the locally tracked balance.
+		totalBalance += acc.Balance
 	}
 
 	return totalBalance, nil

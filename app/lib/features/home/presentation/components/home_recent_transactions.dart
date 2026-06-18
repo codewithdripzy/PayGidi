@@ -9,7 +9,9 @@ import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 /// A list of the user's most recent transactions.
 /// Displays transaction title, date, and amount with credit/debit indicators.
@@ -43,7 +45,7 @@ class _HomeRecentTransactionsState extends State<HomeRecentTransactions> {
             PgTexts.text600(
               context,
               text: "Recent Transactions",
-              fontSize: 18,
+              fontSize: 16,
               color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
             ),
             GestureDetector(
@@ -60,7 +62,10 @@ class _HomeRecentTransactionsState extends State<HomeRecentTransactions> {
                   const SizedBox(width: 4),
                   SvgPicture.asset(
                     PgAssets.customIcon(iconName: "arrow_right"),
-                    colorFilter: const ColorFilter.mode(PgColors.secondary, BlendMode.srcIn),
+                    colorFilter: const ColorFilter.mode(
+                      PgColors.secondary,
+                      BlendMode.srcIn,
+                    ),
                     width: 14,
                   ),
                 ],
@@ -70,12 +75,92 @@ class _HomeRecentTransactionsState extends State<HomeRecentTransactions> {
         ),
         const SizedBox(height: 16),
         if (walletProvider.isLoadingTransactions)
-          const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+          Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 3,
+              separatorBuilder: (context, index) =>
+                  Divider(height: 1, thickness: 1, color: Colors.grey.shade100),
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 16,
+                              width: 150,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              height: 12,
+                              width: 80,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(height: 16, width: 60, color: Colors.white),
+                    ],
+                  ),
+                );
+              },
+            ),
+          )
         else if (transactions.isEmpty)
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: PgTexts.text400(context, text: "No transactions yet", color: Colors.grey),
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: PgColors.primary.withValues(alpha: 0.05),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Iconsax.receipt_copy,
+                      size: 36,
+                      color: PgColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  PgTexts.text600(
+                    context,
+                    text: "No transactions yet",
+                    fontSize: 20,
+                    color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
+                  ),
+                  const SizedBox(height: 3),
+                  PgTexts.text400(
+                    context,
+                    text: "Your recent activities will show up here.",
+                    color:
+                        theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.7,
+                        ) ??
+                        Colors.black54,
+                  ),
+                ],
+              ),
             ),
           )
         else
@@ -86,14 +171,13 @@ class _HomeRecentTransactionsState extends State<HomeRecentTransactions> {
             separatorBuilder: (context, index) => Divider(
               height: 1,
               thickness: 1,
-              color: theme.brightness == Brightness.dark ? Colors.white10 : Colors.grey.shade100,
+              color: theme.brightness == Brightness.dark
+                  ? Colors.white10
+                  : Colors.grey.shade100,
             ),
             itemBuilder: (context, index) {
               final tx = transactions[index];
-              return _buildTransaction(
-                context,
-                transaction: tx,
-              );
+              return _buildTransaction(context, transaction: tx);
             },
           ),
       ],
@@ -105,7 +189,9 @@ class _HomeRecentTransactionsState extends State<HomeRecentTransactions> {
     required Transaction transaction,
   }) {
     final theme = Theme.of(context);
-    final statusColor = transaction.isCredit ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+    final statusColor = transaction.isCredit
+        ? const Color(0xFF10B981)
+        : const Color(0xFFEF4444);
 
     return InkWell(
       onTap: () => context.pushNamed(
@@ -126,10 +212,7 @@ class _HomeRecentTransactionsState extends State<HomeRecentTransactions> {
                 angle: transaction.isCredit ? 0 : math.pi / 2,
                 child: SvgPicture.asset(
                   PgAssets.customIcon(iconName: 'arrow_trend'),
-                  colorFilter: ColorFilter.mode(
-                    statusColor,
-                    BlendMode.srcIn,
-                  ),
+                  colorFilter: ColorFilter.mode(statusColor, BlendMode.srcIn),
                   width: 22,
                 ),
               ),
@@ -171,5 +254,3 @@ class _HomeRecentTransactionsState extends State<HomeRecentTransactions> {
     );
   }
 }
-
-

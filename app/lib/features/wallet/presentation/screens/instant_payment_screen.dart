@@ -12,6 +12,7 @@ import 'package:app/features/wallet/presentation/providers/wallet_provider.dart'
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 class InstantPaymentScreen extends StatefulWidget {
   const InstantPaymentScreen({super.key});
@@ -113,7 +114,23 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
                 child: Consumer<WalletProvider>(
                   builder: (context, provider, child) {
                     if (provider.isLoadingBanks) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey.shade300,
+                        highlightColor: Colors.grey.shade100,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          itemCount: 8,
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemBuilder: (context, index) => ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Container(
+                              height: 16,
+                              width: double.infinity,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      );
                     }
                     
                     final filteredBanks = provider.banks.where((bank) => 

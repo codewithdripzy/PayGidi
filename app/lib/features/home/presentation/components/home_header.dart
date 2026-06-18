@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 /// A custom header for the Home Screen that displays the app logo,
 /// a personalized greeting for the user, and a notification icon.
@@ -41,14 +42,35 @@ class HomeHeader extends StatelessWidget {
               fontSize: 12,
               color: Colors.grey,
             ),
-            PgTexts.text700(
-              context,
-              text: authProvider.userData?.firstName ??
-                  authProvider.authResponseData?.firstName ??
-                  "Guest User",
-              fontSize: 16,
-              color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
-              fontFamily: PgFonts.googleSans,
+            Builder(
+              builder: (context) {
+                final name = authProvider.userData?.firstName ??
+                    authProvider.authResponseData?.firstName;
+                
+                if (name != null) {
+                  return PgTexts.text700(
+                    context,
+                    text: name,
+                    fontSize: 16,
+                    color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
+                    fontFamily: PgFonts.googleSans,
+                  );
+                }
+
+                // Shimmer loading skeleton
+                return Shimmer.fromColors(
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
+                  child: Container(
+                    height: 20,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
