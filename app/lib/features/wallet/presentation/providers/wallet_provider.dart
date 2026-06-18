@@ -119,11 +119,11 @@ class WalletProvider with ChangeNotifier {
     ]);
   }
 
-  Future<ApiResponse<Map<String, dynamic>>> verifyAccount({
+  Future<ApiResponse<Map<String, dynamic>>> lookupAccount({
     required String accountNumber,
     required String bankCode,
   }) async {
-    return await _walletRepository.verifyAccountNumber(
+    return await _walletRepository.lookupAccount(
       accountNumber: accountNumber,
       bankCode: bankCode,
     );

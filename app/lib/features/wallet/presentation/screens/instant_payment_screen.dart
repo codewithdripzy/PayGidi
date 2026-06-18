@@ -52,9 +52,12 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
   Future<void> _verifyAccount() async {
     if (_selectedBank == null) return;
     setState(() => _isValidatingAccount = true);
-    
+
     final walletProvider = context.read<WalletProvider>();
-    final response = await walletProvider.verifyAccount(
+    // Assuming WalletProvider has a corresponding method or needs one added.
+    // The previous code called `walletProvider.verifyAccount`.
+    // I need to make sure this maps to the `/transfer/lookup` endpoint.
+    final response = await walletProvider.lookupAccount(
       accountNumber: _accountController.text,
       bankCode: _selectedBank!.code,
     );
@@ -63,11 +66,14 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       setState(() {
         _isValidatingAccount = false;
         if (response.data != null) {
-          _accountName = response.data!['accountName'] ?? response.data!['account_name'];
+          _accountName =
+              response.data!['accountName'] ?? response.data!['account_name'];
         } else {
           _accountName = null;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response.error ?? "Failed to verify account")),
+            SnackBar(
+              content: Text(response.error ?? "Failed to verify account"),
+            ),
           );
         }
       });
@@ -91,7 +97,8 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
             children: [
               const SizedBox(height: 12),
               Container(
-                width: 40, height: 4,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
                   color: Colors.grey.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
@@ -118,7 +125,10 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
                         baseColor: Colors.grey.shade300,
                         highlightColor: Colors.grey.shade100,
                         child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 8,
+                          ),
                           itemCount: 8,
                           separatorBuilder: (context, index) => const Divider(),
                           itemBuilder: (context, index) => ListTile(
@@ -132,29 +142,42 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
                         ),
                       );
                     }
-                    
-                    final filteredBanks = provider.banks.where((bank) => 
-                      bank.name.toLowerCase().contains(_searchQuery.toLowerCase())
-                    ).toList();
+
+                    final filteredBanks = provider.banks
+                        .where(
+                          (bank) => bank.name.toLowerCase().contains(
+                            _searchQuery.toLowerCase(),
+                          ),
+                        )
+                        .toList();
 
                     if (filteredBanks.isEmpty) {
-                      return Center(child: PgTexts.text400(context, text: "No banks found"));
+                      return Center(
+                        child: PgTexts.text400(context, text: "No banks found"),
+                      );
                     }
 
                     return ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 8,
+                      ),
                       itemCount: filteredBanks.length,
                       separatorBuilder: (context, index) => const Divider(),
                       itemBuilder: (context, index) => ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: PgTexts.text500(context, text: filteredBanks[index].name),
+                        title: PgTexts.text500(
+                          context,
+                          text: filteredBanks[index].name,
+                        ),
                         onTap: () {
                           setState(() {
                             _selectedBank = filteredBanks[index];
                             _accountName = null;
                           });
                           Navigator.pop(context);
-                          if (_accountController.text.length == 10) _verifyAccount();
+                          if (_accountController.text.length == 10)
+                            _verifyAccount();
                         },
                       ),
                     );
@@ -186,7 +209,8 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
           children: [
             Center(
               child: Container(
-                width: 40, height: 4,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
                   color: Colors.grey.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
@@ -195,7 +219,11 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
             ),
             const SizedBox(height: 32),
             Center(
-              child: PgTexts.text700(context, text: "Review Payment", fontSize: 22),
+              child: PgTexts.text700(
+                context,
+                text: "Review Payment",
+                fontSize: 22,
+              ),
             ),
             const SizedBox(height: 32),
             Container(
@@ -203,7 +231,9 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
               decoration: BoxDecoration(
                 color: theme.cardTheme.color,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: theme.dividerTheme.color ?? Colors.grey.shade100),
+                border: Border.all(
+                  color: theme.dividerTheme.color ?? Colors.grey.shade100,
+                ),
               ),
               child: Column(
                 children: [
@@ -223,8 +253,16 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                PgTexts.text500(context, text: "Total Payable", color: Colors.grey),
-                PgTexts.text700(context, text: "₦${_amountController.text}", fontSize: 20),
+                PgTexts.text500(
+                  context,
+                  text: "Total Payable",
+                  color: Colors.grey,
+                ),
+                PgTexts.text700(
+                  context,
+                  text: "₦${_amountController.text}",
+                  fontSize: 20,
+                ),
               ],
             ),
             const SizedBox(height: 40),
@@ -243,7 +281,12 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
                     colors: [PgColors.primary, PgColors.secondary],
                   ),
                 ),
-                child: PgTexts.text600(context, text: "Confirm & Pay", color: Colors.white, fontSize: 16),
+                child: PgTexts.text600(
+                  context,
+                  text: "Confirm & Pay",
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -259,7 +302,12 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          PgTexts.text400(context, text: label, color: Colors.grey, fontSize: 14),
+          PgTexts.text400(
+            context,
+            text: label,
+            color: Colors.grey,
+            fontSize: 14,
+          ),
           PgTexts.text600(context, text: value, fontSize: 14),
         ],
       ),
@@ -270,10 +318,13 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     final auth = context.read<AuthProvider>();
     final biometricService = context.read<BiometricService>();
     bool biometricEnabled = await biometricService.isBiometricEnabled();
-    
+
     if (biometricEnabled) {
       bool authenticated = await biometricService.authenticateLocally();
-      if (authenticated) { _executePayment("0000"); return; } // Dummy pin if biometric authenticated
+      if (authenticated) {
+        _executePayment("0000");
+        return;
+      } // Dummy pin if biometric authenticated
     }
 
     if (auth.userData?.hasPin ?? false) {
@@ -299,7 +350,8 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     PgPinSheet.show(
       context,
       title: "Create PIN",
-      description: "You haven't set a transaction PIN. Create one now to continue.",
+      description:
+          "You haven't set a transaction PIN. Create one now to continue.",
       onVerify: (pin) {
         Navigator.pop(context);
         _showConfirmPinFlow(pin);
@@ -317,7 +369,9 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
           Navigator.pop(context);
           _executePayment(pin);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("PINs do not match.")));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text("PINs do not match.")));
         }
       },
     );
@@ -325,7 +379,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
 
   Future<void> _executePayment(String pin) async {
     setState(() => _isValidatingAccount = true);
-    
+
     final walletProvider = context.read<WalletProvider>();
     final response = await walletProvider.transfer(
       amount: double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0,
@@ -340,7 +394,8 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
         PgSuccessDialog.show(
           context,
           title: "Payment Successful",
-          message: "You have successfully sent ₦${_amountController.text} to $_accountName",
+          message:
+              "You have successfully sent ₦${_amountController.text} to $_accountName",
           buttonText: "Continue",
           onButtonPressed: () {
             Navigator.pop(context);
@@ -359,7 +414,9 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final backgroundColor = isDark ? theme.scaffoldBackgroundColor : PgColors.homeBackground;
+    final backgroundColor = isDark
+        ? theme.scaffoldBackgroundColor
+        : PgColors.homeBackground;
 
     return buildPGAnnotatedRegion(
       brightness: isDark ? Brightness.light : Brightness.dark,
@@ -369,136 +426,208 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                heightSpacing(24),
-                PgScaleButton(
-                  onTap: () {
-                    if (_currentStep > 0) {
-                      setState(() => _currentStep = 0);
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: theme.cardTheme.color,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: theme.dividerTheme.color ?? Colors.grey.shade100),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              heightSpacing(24),
+              PgScaleButton(
+                onTap: () {
+                  if (_currentStep > 0) {
+                    setState(() => _currentStep = 0);
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: theme.cardTheme.color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: theme.dividerTheme.color ?? Colors.grey.shade100,
                     ),
-                    child: Icon(Icons.arrow_back_outlined, size: 20, color: theme.textTheme.bodyLarge?.color),
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_outlined,
+                    size: 20,
+                    color: theme.textTheme.bodyLarge?.color,
                   ),
                 ),
-                heightSpacing(24),
-                PgTexts.text700(context, text: "Instant Payment", fontSize: 28),
-                heightSpacing(4),
-                PgTexts.text400(
-                  context, 
-                  text: _currentStep == 0 
-                    ? "Enter recipient details to send money." 
-                    : "How much would you like to send to $_accountName?", 
-                  fontSize: 16, 
-                  color: Colors.grey
-                ),
-                heightSpacing(32),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        if (_currentStep == 0) ...[
-                          PgTextField(
-                            controller: _accountController,
-                            hintText: "Account Number",
-                            label: "Account Number",
-                            keyboardType: TextInputType.number,
-                            maxLength: 10,
-                            prefixIcon: const Icon(Iconsax.card_copy, size: 20, color: Colors.grey),
-                            suffixIcon: _isValidatingAccount ? const SizedBox(width: 20, height: 20, child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2))) : null,
-                          ),
-                          const SizedBox(height: 12),
-                          GestureDetector(
-                            onTap: _showBankSelection,
-                            child: AbsorbPointer(
-                              child: PgTextField(
-                                hintText: _selectedBank?.name ?? "Select Bank",
-                                label: "Bank",
-                                prefixIcon: const Icon(Iconsax.bank_copy, size: 20, color: Colors.grey),
-                                suffixIcon: const Icon(Iconsax.arrow_down_1_copy),
+              ),
+              heightSpacing(24),
+              PgTexts.text700(context, text: "Instant Payment", fontSize: 28),
+              heightSpacing(4),
+              PgTexts.text400(
+                context,
+                text: _currentStep == 0
+                    ? "Enter recipient details to send money."
+                    : "How much would you like to send to $_accountName?",
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+              heightSpacing(32),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (_currentStep == 0) ...[
+                        GestureDetector(
+                          onTap: _showBankSelection,
+                          child: AbsorbPointer(
+                            child: PgTextField(
+                              // Use a controller or just display text to control color
+                              // Since PgTextField takes 'hintText', and we want it to look "filled",
+                              // we might need to adjust PgTextField or just use 'controller'
+                              controller: TextEditingController(
+                                text: _selectedBank?.name ?? "",
                               ),
+                              hintText: "Select Bank",
+                              label: "Bank",
+                              prefixIcon: const Icon(
+                                Iconsax.bank_copy,
+                                size: 20,
+                                color: Colors.grey,
+                              ),
+                              suffixIcon: const Icon(Iconsax.arrow_down_1_copy),
+                              // This is a trick to make it look "greyed out" if we can't change the field style
+                              // enabled: false,
                             ),
                           ),
-                          if (_accountName != null) ...[
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.check_circle, color: Colors.green, size: 18),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: PgTexts.text600(context, text: _accountName!, color: Colors.green, fontSize: 14),
+                        ),
+                        const SizedBox(height: 16),
+                        PgTextField(
+                          controller: _accountController,
+                          hintText: "Account Number",
+                          label: "Account Number",
+                          keyboardType: TextInputType.number,
+                          maxLength: 10,
+                          prefixIcon: const Icon(
+                            Iconsax.card_copy,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
+                          suffixIcon: _isValidatingAccount
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(12),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1,
+                                    ),
                                   ),
-                                ],
+                                )
+                              : null,
+                        ),
+                        if (_accountName != null) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.green.withValues(alpha: 0.2),
                               ),
                             ),
-                          ],
-                        ] else ...[
-                          PgTextField(
-                            controller: _amountController,
-                            hintText: "0.00",
-                            label: "Amount",
-                            keyboardType: TextInputType.number,
-                            prefixIcon: const Icon(Iconsax.money_2_copy, size: 20, color: Colors.grey),
-                            prefix: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 4.0),
-                              child: Text("₦", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: PgTexts.text600(
+                                    context,
+                                    text: _accountName!,
+                                    color: Colors.green,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                        const SizedBox(height: 40),
+                      ] else ...[
+                        PgTextField(
+                          controller: _amountController,
+                          hintText: "0.00",
+                          label: "Amount",
+                          keyboardType: TextInputType.number,
+                          prefixIcon: const Icon(
+                            Iconsax.money_2_copy,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
+                          prefix: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Text(
+                              "₦",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
-                    ),
+                      const SizedBox(height: 40),
+                    ],
                   ),
                 ),
-                PgScaleButton(
-                  onTap: () {
-                    if (_currentStep == 0) {
-                      if (_accountController.text.length == 10 && _selectedBank != null && _accountName != null) {
-                        setState(() => _currentStep = 1);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please enter valid account details.")));
-                      }
+              ),
+              PgScaleButton(
+                onTap: () {
+                  if (_currentStep == 0) {
+                    if (_accountController.text.length == 10 &&
+                        _selectedBank != null &&
+                        _accountName != null) {
+                      setState(() => _currentStep = 1);
                     } else {
-                      if (_amountController.text.isNotEmpty) {
-                        _showReviewBottomSheet();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please enter an amount.")));
-                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please enter valid account details."),
+                        ),
+                      );
                     }
-                  },
-                  child: Container(
-                    height: 60,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      gradient: const LinearGradient(
-                        colors: [PgColors.primary, PgColors.secondary],
-                      ),
+                  } else {
+                    if (_amountController.text.isNotEmpty) {
+                      _showReviewBottomSheet();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please enter an amount."),
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: Container(
+                  height: 60,
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    gradient: const LinearGradient(
+                      colors: [PgColors.primary, PgColors.secondary],
                     ),
-                    child: PgTexts.text600(context, text: _currentStep == 0 ? "Continue" : "Proceed to Review", color: Colors.white, fontSize: 16),
+                  ),
+                  child: PgTexts.text600(
+                    context,
+                    text: _currentStep == 0 ? "Continue" : "Proceed to Review",
+                    color: Colors.white,
+                    fontSize: 16,
                   ),
                 ),
-                heightSpacing(30),
-              ],
-            ),
+              ),
+              heightSpacing(30),
+            ],
           ),
+        ),
       ),
     );
   }

@@ -35,6 +35,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 	// Public endpoints - defined outside the authenticated group
 	log.Println("Setting up public routes...")
 	walletGroup.GET("/banks", walletController.GetBanksHttp)
+	walletGroup.POST("/transfer/lookup", walletController.ResolveAccountHttp)
+
 	walletGroup.GET("/payments/:payment_id", walletController.GetPaymentHttp)
 	walletGroup.POST("/webhook/squad", walletController.HandleSquadWebhook)
 
@@ -46,7 +48,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 		authGroup.GET("/:accountNumber/transactions", walletController.GetTransactionsHttp)
 
 		// Transfers
-		authGroup.POST("/transfer/lookup", walletController.ResolveAccountHttp)
 		authGroup.POST("/transfer", walletController.InitiateTransferHttp)
 		authGroup.GET("/transfer/list", walletController.GetAllTransfersHttp)
 		authGroup.POST("/transfer/requery", walletController.RequeryTransferHttp)
