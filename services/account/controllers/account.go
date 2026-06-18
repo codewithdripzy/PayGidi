@@ -254,3 +254,41 @@ func DeleteAccount(c *gin.Context) {
 		"message": "Account and all associated data deleted successfully",
 	})
 }
+
+// Me godoc
+// @Summary Get current user
+// @Description Fetch the profile details and associations of the authenticated user.
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Current user details"
+// @Router /me [get]
+func Me(c *gin.Context) {
+	db, _ := c.Get("db")
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":  payGidiErrors.UNAUTHORIZED_ACCESS,
+			"error": "User not found in context",
+		})
+		return
+	}
+
+	currentUser := user.(*models.User)
+	
+	// Preload associations
+	var fullUser models.User
+	if err := db.(*gorm.DB).Preload("Person").Preload("Accounts").Preload("Contact").Preload("AuthInfo").Preload("Preferences").Preload("Roles").First(&fullUser, currentUser.ID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
+			"error": "Failed to fetch user associations",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User details retrieved successfully",
+		"data":    fullUser,
+	})
+}
