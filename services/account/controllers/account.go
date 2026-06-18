@@ -269,7 +269,8 @@ func DeleteAccount(c *gin.Context) {
 // @Router /me [get]
 func Me(c *gin.Context) {
 	log.Printf("Me controller called for path: %s", c.Request.URL.Path)
-	db, _ := c.Get("db")
+	dbVal, _ := c.Get("db")
+	db := dbVal.(*gorm.DB)
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
