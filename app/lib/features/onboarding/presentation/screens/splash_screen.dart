@@ -29,6 +29,8 @@ class _SplashScreenState extends State<SplashScreen> {
         if (!mounted) return;
         if (authProvider.isLoggedIn) {
           context.goNamed(PgRouteNames.individualMain);
+        } else if (authProvider.hasSeenOnboarding) {
+          context.goNamed(PgRouteNames.individualLogin);
         } else {
           context.goNamed(PgRouteNames.onboardingPage);
         }

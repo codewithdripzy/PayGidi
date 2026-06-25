@@ -18,6 +18,9 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
+  bool _hasSeenOnboarding = false;
+  bool get hasSeenOnboarding => _hasSeenOnboarding;
+
   PgUser? _userData; // Holds comprehensive user details
   PgUser? get userData => _userData;
 
@@ -41,6 +44,7 @@ class AuthProvider extends ChangeNotifier {
       _authResponseData = null;
       _userData = null;
     }
+    _hasSeenOnboarding = await _storageService.getHasSeenOnboarding();
     notifyListeners();
   }
 
@@ -221,6 +225,12 @@ class AuthProvider extends ChangeNotifier {
       _errorMessage = response.error ?? 'Failed to complete account';
       return false;
     }
+  }
+
+  Future<void> setHasSeenOnboarding(bool value) async {
+    _hasSeenOnboarding = value;
+    await _storageService.setHasSeenOnboarding(value);
+    notifyListeners();
   }
 
   void logout() {

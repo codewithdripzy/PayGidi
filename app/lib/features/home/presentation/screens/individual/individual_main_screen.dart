@@ -77,22 +77,22 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
                 ),
                 heightSpacing(24),
                 _buildPaymentOption(
+                  icon: Iconsax.link_1_copy,
+                  title: "Secure Payment Link",
+                  subtitle: "Create a safe payment link to send to merchants",
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.pushNamed(PgRouteNames.paymentLink);
+                  },
+                ),
+                heightSpacing(16),
+                _buildPaymentOption(
                   icon: Iconsax.send_1_copy,
                   title: "Instant Payment",
                   subtitle: "Send money instantly to anyone",
                   onTap: () {
                     Navigator.pop(context);
                     context.pushNamed(PgRouteNames.instantPayment);
-                  },
-                ),
-                heightSpacing(16),
-                _buildPaymentOption(
-                  icon: Iconsax.link_1_copy,
-                  title: "Payment Link",
-                  subtitle: "Create link to make payments to merchants",
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.pushNamed(PgRouteNames.paymentLink);
                   },
                 ),
                 heightSpacing(16),

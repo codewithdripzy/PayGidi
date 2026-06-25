@@ -9,6 +9,7 @@ class AuthStorageService {
   static const _refreshTokenKey = 'refresh_token';
   static const _authResponseDataKey = 'auth_response_data';
   static const _pgUserKey = 'pg_user_data';
+  static const _hasSeenOnboardingKey = 'has_seen_onboarding';
 
   Future<void> saveTokens({required String token, required String refreshToken}) async {
     await _storage.write(key: _tokenKey, value: token);
@@ -53,6 +54,15 @@ class AuthStorageService {
       }
     }
     return null;
+  }
+
+  Future<bool> getHasSeenOnboarding() async {
+    final value = await _storage.read(key: _hasSeenOnboardingKey);
+    return value == 'true';
+  }
+
+  Future<void> setHasSeenOnboarding(bool value) async {
+    await _storage.write(key: _hasSeenOnboardingKey, value: value.toString());
   }
 
   Future<void> clearAllAuthData() async {

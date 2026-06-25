@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/theme/pg_styles.dart';
@@ -6,11 +7,12 @@ import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/features/onboarding/presentation/components/onboarding_indicator.dart';
 import 'package:app/features/onboarding/presentation/components/onboarding_title.dart';
 import 'package:app/routes/pg_route_names.dart';
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -197,7 +199,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       const Spacer(),
                       PgScaleButton(
-                        onTap: () {
+                        onTap: () async {
+                          await context.read<AuthProvider>().setHasSeenOnboarding(true);
+                          if (!context.mounted) return;
                           context.pushNamed(PgRouteNames.rolePage);
                         },
                         child: AnimatedContainer(

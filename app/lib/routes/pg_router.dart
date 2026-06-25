@@ -71,7 +71,9 @@ class PayGidiRouter {
         if (isSplash) return null;
 
         if (!isLoggedIn && !isAuthPage && !isCompleteAccountPage) {
-          return "/${PgRouteNames.onboardingPage}";
+          return authProvider.hasSeenOnboarding
+              ? "/${PgRouteNames.individualLogin}"
+              : "/${PgRouteNames.onboardingPage}";
         }
 
         if (isLoggedIn) {
