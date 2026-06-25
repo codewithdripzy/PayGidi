@@ -50,7 +50,7 @@ class WalletRepository {
 
   Future<ApiResponse<VirtualAccount>> getVirtualAccount() async {
     try {
-      final response = await _apiService.get('/wallet/virtual-account');
+      final response = await _apiService.get('/wallet');
       return ApiResponse.fromJson(
         response.data,
         (json) => VirtualAccount.fromJson(json as Map<String, dynamic>),

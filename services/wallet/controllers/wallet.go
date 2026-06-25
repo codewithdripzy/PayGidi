@@ -234,10 +234,26 @@ func (wc *WalletController) GetWalletHttp(c *gin.Context) {
 	var account models.Account
 
 	if accountNumber == "" {
-		// Temporarily bypass authentication for testing
-		userID := "1"
+		userID, exists := c.Get("userID")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"status":  401,
+				"success": false,
+				"message": "Unauthorized",
+				"data":    gin.H{},
+			})
+			return
+		}
 
-		if err := wc.db.Where("user_id = ?", userID).First(&account).Error; err != nil {
+		var userIDStr string
+		switch v := userID.(type) {
+		case string:
+			userIDStr = v
+		default:
+			userIDStr = fmt.Sprintf("%v", v)
+		}
+
+		if err := wc.db.Where("user_id = ?", userIDStr).First(&account).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  404,
 				"success": false,

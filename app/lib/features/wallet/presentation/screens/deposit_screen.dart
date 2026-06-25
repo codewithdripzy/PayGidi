@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 class DepositScreen extends StatefulWidget {
   const DepositScreen({super.key});
@@ -60,11 +61,7 @@ class _DepositScreenState extends State<DepositScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: walletProvider.isLoadingVirtualAccount
-                ? const Center(
-                    child: Padding(
-                    padding: EdgeInsets.only(top: 100),
-                    child: CircularProgressIndicator(),
-                  ))
+                ? _buildSkeleton()
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -160,6 +157,85 @@ class _DepositScreenState extends State<DepositScreen> {
                   ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          heightSpacing(24),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+          heightSpacing(18),
+          Container(
+            width: 120,
+            height: 34,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          heightSpacing(4),
+          Container(
+            width: 300,
+            height: 16,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          heightSpacing(40),
+          _buildSkeletonCard(),
+          heightSpacing(24),
+          _buildSkeletonCard(),
+          heightSpacing(24),
+          _buildSkeletonCard(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkeletonCard() {
+    return Container(
+      width: double.infinity,
+      height: 100,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 80,
+            height: 14,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const Spacer(),
+          Container(
+            width: double.infinity,
+            height: 22,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
       ),
     );
   }
