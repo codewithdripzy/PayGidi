@@ -110,6 +110,13 @@ class _HomeBalanceCardState extends State<HomeBalanceCard> {
 
   String _formatBalance(double? balance) {
     if (balance == null) return "0.00";
-    return balance.toStringAsFixed(2);
+    final parts = balance.toStringAsFixed(2).split('.');
+    final intPart = parts[0];
+    final buf = StringBuffer();
+    for (int i = 0; i < intPart.length; i++) {
+      if (i > 0 && (intPart.length - i) % 3 == 0) buf.write(',');
+      buf.write(intPart[i]);
+    }
+    return '${buf.toString()}.${parts[1]}';
   }
 }
