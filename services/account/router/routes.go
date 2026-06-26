@@ -55,6 +55,12 @@ func SetupRoutes(app *gin.Engine) {
 		account.GET("/me", controllers.Me)
 		account.POST("/pin", middlewares.ValidateDTO(&validators.SetPinDto{}), controllers.SetPin)
 		account.PUT("/pin", middlewares.ValidateDTO(&validators.UpdatePinDto{}), controllers.UpdatePin)
+		account.POST("/block", controllers.BlockAccount)
+		account.POST("/unblock", controllers.UnblockAccount)
+		account.POST("/report", middlewares.ValidateDTO(&validators.ReportIssueDto{}), controllers.ReportIssue)
+		account.GET("/devices", controllers.ListDevices)
+		account.DELETE("/devices/:id", controllers.RemoveDevice)
+		account.GET("/referral", controllers.GetReferralInfo)
 	}
 
 	api.GET("/health", controllers.HealthCheck)

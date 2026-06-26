@@ -33,6 +33,10 @@ var (
 
 	NOTIFICATION_SERVICE_ADDR string = "notification-service:50052"
 	ACCOUNT_SERVICE_ADDR      string = "account-service:50051"
+
+	// Webhook worker config
+	WebhookWorkerInterval  string = "5s"
+	WebhookPollerInterval  string = "5m"
 )
 
 func ConfigDotenv() error {

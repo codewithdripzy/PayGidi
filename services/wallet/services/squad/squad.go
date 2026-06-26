@@ -324,6 +324,69 @@ func GetAllTransfers(ctx context.Context) (bool, *string, []responses.SquadTrans
 	return true, nil, response.Data
 }
 
+// WebhookErrorLogEntry represents a single entry from Squad's webhook error log.
+type WebhookErrorLogEntry struct {
+	TransactionReference string `json:"transaction_reference"`
+	VirtualAccountNumber string `json:"virtual_account_number"`
+	PrincipalAmount      string `json:"principal_amount"`
+	SettledAmount        string `json:"settled_amount"`
+	FeeCharged           string `json:"fee_charged"`
+	TransactionDate      string `json:"transaction_date"`
+	CustomerIdentifier   string `json:"customer_identifier"`
+	Remarks              string `json:"remarks"`
+	Currency             string `json:"currency"`
+	Channel              string `json:"channel"`
+	SenderName           string `json:"sender_name"`
+	TransactionUUID      string `json:"transaction_uuid"`
+}
+
+// GetWebhookErrorLog retrieves missed webhook notifications from Squad's error log.
+// Returns up to 100 entries by default.
+func GetWebhookErrorLog(ctx context.Context) (bool, *string, []WebhookErrorLogEntry) {
+	refreshSquadClient()
+	var response responses.SquadResponse[[]WebhookErrorLogEntry]
+
+	_, err := httpclient.Get(client, ctx, "/virtual-account/webhook/logs", &response)
+	if err != nil {
+		log.Printf("[Squad][GetWebhookErrorLog] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg, nil
+	}
+
+	if !response.Success {
+		log.Printf("[Squad][GetWebhookErrorLog] provider error: %s", response.Message)
+		return false, &response.Message, nil
+	}
+
+	if response.Data == nil {
+		response.Data = []WebhookErrorLogEntry{}
+	}
+
+	return true, nil, response.Data
+}
+
+// DeleteWebhookErrorLog deletes a webhook error log entry after it has been processed.
+// This prevents it from appearing in subsequent GetWebhookErrorLog calls.
+func DeleteWebhookErrorLog(ctx context.Context, transactionReference string) (bool, *string) {
+	refreshSquadClient()
+	var response responses.SquadResponse[any]
+
+	path := fmt.Sprintf("/virtual-account/webhook/logs/%s", transactionReference)
+	_, err := client.Delete(ctx, path, &response)
+	if err != nil {
+		log.Printf("[Squad][DeleteWebhookErrorLog] request failed: %v", err)
+		errMsg := err.Error()
+		return false, &errMsg
+	}
+
+	if !response.Success {
+		log.Printf("[Squad][DeleteWebhookErrorLog] provider error: %s", response.Message)
+		return false, &response.Message
+	}
+
+	return true, nil
+}
+
 // RequeryTransfer allows you to re-query the status of a transfer.
 func RequeryTransfer(ctx context.Context, transactionReference string) (bool, *string, any) {
 	refreshSquadClient()

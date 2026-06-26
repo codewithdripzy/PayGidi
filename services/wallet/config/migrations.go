@@ -35,6 +35,7 @@ func RunAutoMigrations(db *gorm.DB) error {
 		&models.SavingsGoal{},
 		&models.Thrift{},
 		&models.ThriftMember{},
+		&models.WebhookTransaction{},
 	); err != nil {
 		var pgErr *pgconn.PgError
 		if (errors.As(err, &pgErr) && pgErr.Code == "42P07") || strings.Contains(err.Error(), "SQLSTATE 42P07") {

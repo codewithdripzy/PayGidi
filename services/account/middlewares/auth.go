@@ -65,9 +65,18 @@ func Authenticate() gin.HandlerFunc {
 			return
 		}
 
+		// Validate that the session exists in the database
+		if _, err := utils.LookupSessionByToken(db, tokenString); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":  payGidiErrors.UNAUTHORIZED,
+				"error": "Session expired or revoked. Please login again.",
+			})
+			c.Abort()
+			return
+		}
+
 		// Get the user info from db
 		var user models.User
-
 		if err := db.Where("id = ?", userID).First(&user).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code":  payGidiErrors.UNAUTHORIZED,

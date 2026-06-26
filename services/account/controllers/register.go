@@ -136,12 +136,24 @@ func CompleteAccount(c *gin.Context) {
 		return
 	}
 
+	// Generate unique referral code for this user
+	var referralCode string
+	for {
+		referralCode = utils.GenerateReferralCode()
+		var count int64
+		tx.Model(&models.User{}).Where("referral_code = ?", referralCode).Count(&count)
+		if count == 0 {
+			break
+		}
+	}
+
 	salt := os.Getenv("NIN_HASH_SALT")
 	updates := map[string]interface{}{
 		"email":          email,
 		"status":         "active",
 		"is_first_time":  true,
 		"phone_verified": true, // Since they verified via OTP to get here
+		"referral_code":  referralCode,
 	}
 
 	if nin != "" {
@@ -157,6 +169,27 @@ func CompleteAccount(c *gin.Context) {
 	var businessName string
 	if u.AccountType == "business" {
 		businessName = validatedBody.(*validators.BusinessCompleteAccountDto).Name
+	}
+
+	// Process referral if referral code was provided
+	if u.AccountType != "business" {
+		data := validatedBody.(*validators.IndividualCompleteAccountDto)
+		if data.ReferralCode != "" {
+			var referrer models.User
+			if err := tx.Where("referral_code = ?", data.ReferralCode).First(&referrer).Error; err == nil {
+				referral := models.Referral{
+					ReferrerID: referrer.ID,
+					ReferredID: u.ID,
+				}
+				if err := tx.Create(&referral).Error; err != nil {
+					log.Printf("[CompleteAccount] failed to create referral record: %v", err)
+				} else {
+					log.Printf("[CompleteAccount] user %d referred by user %d (code: %s)", u.ID, referrer.ID, data.ReferralCode)
+				}
+			} else {
+				log.Printf("[CompleteAccount] invalid referral code: %s", data.ReferralCode)
+			}
+		}
 	}
 
 	// Create wallet for all accounts (Synchronously as requested)
@@ -223,6 +256,7 @@ func CompleteAccount(c *gin.Context) {
 			"email":              email,
 			"accountNo":          resp.AccountNo,
 			"customerIdentifier": resp.CustomerIdentifier,
+			"referralCode":       referralCode,
 		},
 	})
 

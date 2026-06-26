@@ -47,6 +47,8 @@ func RunAutoMigrations(db *gorm.DB) error {
 		&models.ContactInfo{},
 		&models.KYC{},
 		&models.OTP{},
+		&models.AccountIssue{},
+		&models.Referral{},
 	); err != nil {
 		return err
 	}

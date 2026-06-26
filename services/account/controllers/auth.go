@@ -346,6 +346,16 @@ func VerifyAuthOTP(c *gin.Context) {
 		fmt.Printf("Failed to reset OTP request count: %v\n", err)
 	}
 
+	// Create session with device info
+	deviceInfo := &models.DeviceInfo{
+		DeviceName: verifyData.DeviceName,
+		DeviceType: verifyData.DeviceType,
+		DeviceOS:   verifyData.DeviceOS,
+	}
+	if _, err := utils.CreateSession(db.(*gorm.DB), data.ID, token, deviceInfo, c.ClientIP(), c.Request.UserAgent()); err != nil {
+		fmt.Printf("Failed to create session: %v\n", err)
+	}
+
 	utils.SendUserNotification(
 		data.ID,
 		"Login Successful",
@@ -455,6 +465,16 @@ func BiometricAuth(c *gin.Context) {
 
 	// Update last login time
 	userService.UpdateUserLastLogin(db.(*gorm.DB), user.ID)
+
+	// Create session with device info
+	deviceInfo := &models.DeviceInfo{
+		DeviceName: authData.DeviceName,
+		DeviceType: authData.DeviceType,
+		DeviceOS:   authData.DeviceOS,
+	}
+	if _, err := utils.CreateSession(db.(*gorm.DB), user.ID, token, deviceInfo, c.ClientIP(), c.Request.UserAgent()); err != nil {
+		fmt.Printf("Failed to create session: %v\n", err)
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Biometric login successful 👋🏽",

@@ -11,6 +11,10 @@ import 'package:app/features/home/presentation/screens/individual/profile/person
 import 'package:app/features/home/presentation/screens/individual/profile/profile_detail_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/security_pin_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/theme_selection_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/contact_us_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/help_center_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/invitation_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/safety_center_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/transaction_history_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -145,10 +149,7 @@ class IndividualMeScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const IndividualProfileDetailScreen(
-                            title: "Invitation",
-                            description: "Invite your friends and earn rewards.",
-                          ),
+                          builder: (context) => const InvitationScreen(),
                         ),
                       ),
                     ),
@@ -158,10 +159,7 @@ class IndividualMeScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const IndividualProfileDetailScreen(
-                            title: "Safety Center",
-                            description: "Tips and tools to keep your account safe.",
-                          ),
+                          builder: (context) => const SafetyCenterScreen(),
                         ),
                       ),
                     ),
@@ -171,10 +169,7 @@ class IndividualMeScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const IndividualProfileDetailScreen(
-                            title: "Help Center",
-                            description: "Find answers to common questions.",
-                          ),
+                          builder: (context) => const HelpCenterScreen(),
                         ),
                       ),
                     ),
@@ -184,10 +179,7 @@ class IndividualMeScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const IndividualProfileDetailScreen(
-                            title: "Contact Us",
-                            description: "Get in touch with our support team.",
-                          ),
+                          builder: (context) => const ContactUsScreen(),
                         ),
                       ),
                     ),
@@ -250,7 +242,12 @@ class IndividualMeScreen extends StatelessWidget {
   Widget _buildProfileCard(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.userData;
+    final authData = auth.authResponseData;
     final theme = Theme.of(context);
+
+    final firstName = user?.firstName ?? authData?.firstName;
+    final lastName = user?.lastName ?? authData?.lastName;
+    final email = user?.email ?? authData?.email;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -277,8 +274,8 @@ class IndividualMeScreen extends StatelessWidget {
             child: Center(
               child: PgTexts.text700(
                 context,
-                text: (user?.firstName?.isNotEmpty ?? false)
-                    ? user!.firstName![0].toUpperCase()
+                text: (firstName?.isNotEmpty ?? false)
+                    ? firstName![0].toUpperCase()
                     : "U",
                 color: Colors.white,
                 fontSize: 24,
@@ -292,14 +289,14 @@ class IndividualMeScreen extends StatelessWidget {
               children: [
                 PgTexts.text600(
                   context,
-                  text: "${user?.firstName ?? 'User'} ${user?.lastName ?? ''}",
+                  text: "${firstName ?? 'User'} ${lastName ?? ''}",
                   fontSize: 18,
                   color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
                 ),
                 heightSpacing(2),
                 PgTexts.text400(
                   context,
-                  text: user?.email ?? "",
+                  text: email ?? "",
                   fontSize: 14,
                   color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
                       .withValues(alpha: 0.7),

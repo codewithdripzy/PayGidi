@@ -46,6 +46,7 @@ class _IndividualCompleteAccount2ScreenState
   final _ninController = TextEditingController();
   final _dobController = TextEditingController();
   final _addressController = TextEditingController();
+  final _referralController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _selectedGender;
   DateTime? _birthDate;
@@ -56,6 +57,7 @@ class _IndividualCompleteAccount2ScreenState
     _ninController.dispose();
     _dobController.dispose();
     _addressController.dispose();
+    _referralController.dispose();
     super.dispose();
   }
 
@@ -118,6 +120,9 @@ class _IndividualCompleteAccount2ScreenState
         bvn: _bvnController.text,
         gender: _selectedGender == "Male" ? "1" : "2",
         country: widget.country?.code ?? "NG",
+        referralCode: _referralController.text.isNotEmpty
+            ? _referralController.text.toUpperCase()
+            : null,
       );
 
       final success = await authProvider.completeIndividualAccount(request);
@@ -341,6 +346,61 @@ class _IndividualCompleteAccount2ScreenState
                       ),
                     ),
                   ),
+                  heightSpacing(24),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: PgColors.primary.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: PgColors.primary.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Iconsax.gift_copy,
+                              size: 18,
+                              color: PgColors.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            PgTexts.text500(
+                              context,
+                              text: "Referral Code (Optional)",
+                              fontSize: 13,
+                              color: PgColors.primary,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        PgTextField(
+                          label: "",
+                          hintText: "Enter referral code",
+                          controller: _referralController,
+                          prefixIcon:
+                              const Icon(Iconsax.user_add_copy, size: 20),
+                          textInputAction: TextInputAction.done,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[A-Za-z0-9]'),
+                            ),
+                            UpperCaseTextFormatter(),
+                            LengthLimitingTextInputFormatter(6),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        PgTexts.text400(
+                          context,
+                          text: "Got a referral code? Enter it here to get rewards.",
+                          fontSize: 11,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
+                  ),
                   heightSpacing(40),
                   Consumer<AuthProvider>(
                     builder: (context, auth, child) {
@@ -387,6 +447,19 @@ class _IndividualCompleteAccount2ScreenState
           ),
         ),
       ),
+    );
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }

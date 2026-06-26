@@ -3,9 +3,11 @@ package main
 import (
 	"log"
 	"net"
+	"time"
 
 	"github.com/PayGidi/WalletService/config"
 	grpcserver "github.com/PayGidi/WalletService/connection/grpc"
+	"github.com/PayGidi/WalletService/controllers"
 	"github.com/PayGidi/WalletService/core/constants"
 	_ "github.com/PayGidi/WalletService/docs"
 	"github.com/PayGidi/WalletService/proto/connection/pb"
@@ -72,6 +74,14 @@ func main() {
 
 	// Setup routes
 	router.SetupRoutes(app, db, accClient)
+
+	// Start webhook background worker (processes queued webhook records)
+	workerInterval, _ := time.ParseDuration(constants.WebhookWorkerInterval)
+	controllers.StartWebhookWorker(db, workerInterval)
+
+	// Start missed-webhook poller (fetches from Squad's error log)
+	pollerInterval, _ := time.ParseDuration(constants.WebhookPollerInterval)
+	controllers.StartMissedWebhookPoller(db, pollerInterval)
 
 	// Start gRPC server in a separate goroutine
 	go func() {

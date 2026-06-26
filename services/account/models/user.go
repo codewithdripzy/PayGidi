@@ -34,6 +34,8 @@ type User struct {
 	Status           string        `json:"status"`      // e.g., "active", "inactive", etc.
 	OTPs             []OTP         `json:"otps" gorm:"foreignKey:UserID"` // List of OTPs associated with the user
 	Pin              string        `json:"-"`                          // Hashed version of the user's PIN for security
+	ReferralCode     string        `json:"referralCode" gorm:"uniqueIndex;size:6"`   // Unique referral code for inviting others
+	Referrals        []Referral    `json:"referrals" gorm:"foreignKey:ReferrerID"`    // Users referred by this user
 	CreatedAt        time.Time     `json:"createdAt"`
 	UpdatedAt        time.Time     `json:"updatedAt"`
 	DeletedAt        *time.Time    `json:"deletedAt,omitempty"`

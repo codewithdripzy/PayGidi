@@ -4,6 +4,10 @@ import 'package:app/core/widgets/pg_pin_sheet.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/block_account_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/privacy_settings_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/report_issue_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/trusted_devices_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +30,8 @@ class SecurityPinScreen extends StatelessWidget {
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: theme.scaffoldBackgroundColor,
+          surfaceTintColor: Colors.transparent,
+          scrolledUnderElevation: 0,
           elevation: 0,
           leading: IconButton(
             icon: Icon(
@@ -52,15 +58,24 @@ class SecurityPinScreen extends StatelessWidget {
                 title: "Authentication",
                 items: [
                   _SecurityMenuItem(
-                    icon: Iconsax.lock_copy,
-                    title: "Change Password",
+                    icon: Iconsax.shield_tick_copy,
+                    title: "Account Security",
+                    subtitle: "Passwordless login & security settings",
                     onTap: () {
-                      // Implement change password
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "You're using passwordless login with OTP and biometrics.",
+                          ),
+                        ),
+                      );
                     },
                   ),
                   _SecurityMenuItem(
                     icon: Iconsax.key_copy,
-                    title: hasPin ? "Update Transaction PIN" : "Set Transaction PIN",
+                    title: hasPin
+                        ? "Update Transaction PIN"
+                        : "Set Transaction PIN",
                     onTap: () {
                       if (!hasPin) {
                         _showSetPinFlow(context);
@@ -80,16 +95,26 @@ class SecurityPinScreen extends StatelessWidget {
                     icon: Iconsax.danger_copy,
                     title: "Report an Issue",
                     onTap: () {
-                      // Implement report
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ReportIssueScreen(),
+                        ),
+                      );
                     },
                   ),
                   _SecurityMenuItem(
                     icon: Iconsax.user_minus_copy,
                     title: "Block Account",
-                    onTap: () {
-                      _showBlockAccountDialog(context);
-                    },
                     isDangerous: true,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BlockAccountScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -102,14 +127,24 @@ class SecurityPinScreen extends StatelessWidget {
                     icon: Iconsax.device_message_copy,
                     title: "Trusted Devices",
                     onTap: () {
-                      // Implement trusted devices
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TrustedDevicesScreen(),
+                        ),
+                      );
                     },
                   ),
                   _SecurityMenuItem(
                     icon: Iconsax.shield_search_copy,
                     title: "Privacy Settings",
                     onTap: () {
-                      // Implement privacy settings
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PrivacySettingsScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -138,18 +173,37 @@ class SecurityPinScreen extends StatelessWidget {
       context,
       title: "Confirm Your PIN",
       description: "Please re-enter your 4-digit PIN to confirm.",
-      onVerify: (pin) {
+      onVerify: (pin) async {
         if (pin == firstPin) {
-          // Success
+          Navigator.pop(context);
+          final response = await context
+              .read<AuthProvider>()
+              .setPin(pin: pin, confirmPin: pin);
+
+          if (!context.mounted) return;
+
+          if (response.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("PIN set successfully!"),
+                backgroundColor: Color(0xFF22C55E),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(response.error ?? "Failed to set PIN"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        } else {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("PIN set successfully!")),
-          );
-          // In a real app, call backend here
-        } else {
-          // Error
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("PINs do not match. Try again.")),
+            const SnackBar(
+              content: Text("PINs do not match. Try again."),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       },
@@ -161,35 +215,65 @@ class SecurityPinScreen extends StatelessWidget {
       context,
       title: "Current PIN",
       description: "Enter your current 4-digit PIN.",
-      onVerify: (pin) {
+      onVerify: (oldPin) {
         Navigator.pop(context);
-        _showSetPinFlow(context);
+        _showNewPinFlow(context, oldPin);
       },
     );
   }
 
-  void _showBlockAccountDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Block Account?"),
-        content: const Text(
-          "This will temporarily disable all transactions on your account. You will need to contact support to unblock it.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              // Implement block logic
-              Navigator.pop(context);
-            },
-            child: const Text("Block", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+  void _showNewPinFlow(BuildContext context, String oldPin) {
+    PgPinSheet.show(
+      context,
+      title: "New PIN",
+      description: "Enter your new 4-digit PIN.",
+      onVerify: (newPin) {
+        Navigator.pop(context);
+        _showConfirmUpdatePinFlow(context, oldPin, newPin);
+      },
+    );
+  }
+
+  void _showConfirmUpdatePinFlow(
+      BuildContext context, String oldPin, String newPin) {
+    PgPinSheet.show(
+      context,
+      title: "Confirm New PIN",
+      description: "Please re-enter your new 4-digit PIN to confirm.",
+      onVerify: (pin) async {
+        if (pin == newPin) {
+          Navigator.pop(context);
+          final response = await context
+              .read<AuthProvider>()
+              .updatePin(oldPin: oldPin, newPin: newPin, confirmPin: newPin);
+
+          if (!context.mounted) return;
+
+          if (response.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("PIN updated successfully!"),
+                backgroundColor: Color(0xFF22C55E),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(response.error ?? "Failed to update PIN"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        } else {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("PINs do not match. Try again."),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
     );
   }
 
@@ -241,17 +325,33 @@ class SecurityPinScreen extends StatelessWidget {
                             size: 22,
                             color: item.isDangerous
                                 ? Colors.red
-                                : (theme.textTheme.bodyLarge?.color ?? PgColors.black),
+                                : (theme.textTheme.bodyLarge?.color ??
+                                    PgColors.black),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: PgTexts.text500(
-                              context,
-                              text: item.title,
-                              fontSize: 16,
-                              color: item.isDangerous
-                                  ? Colors.red
-                                  : (theme.textTheme.bodyLarge?.color ?? PgColors.black),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                PgTexts.text500(
+                                  context,
+                                  text: item.title,
+                                  fontSize: 16,
+                                  color: item.isDangerous
+                                      ? Colors.red
+                                      : (theme.textTheme.bodyLarge?.color ??
+                                          PgColors.black),
+                                ),
+                                if (item.subtitle != null) ...[
+                                  const SizedBox(height: 2),
+                                  PgTexts.text400(
+                                    context,
+                                    text: item.subtitle!,
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                           const Icon(
@@ -284,6 +384,7 @@ class SecurityPinScreen extends StatelessWidget {
 class _SecurityMenuItem {
   final IconData icon;
   final String title;
+  final String? subtitle;
   final VoidCallback onTap;
   final bool isDangerous;
 
@@ -291,6 +392,7 @@ class _SecurityMenuItem {
     required this.icon,
     required this.title,
     required this.onTap,
+    this.subtitle,
     this.isDangerous = false,
   });
 }

@@ -11,20 +11,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/PayGidi/WalletService/models"
 	"github.com/gin-gonic/gin"
 )
-
-type SquadWebhookPayload struct {
-	Event string `json:"event"`
-	Data  struct {
-		TransactionReference string  `json:"transaction_reference"`
-		Amount               float64 `json:"amount"`
-		GatewayReference     string  `json:"gateway_reference"`
-		VirtualAccountNumber string  `json:"virtual_account_number"`
-		CustomerIdentifier   string  `json:"customer_identifier"`
-	} `json:"data"`
-}
 
 func (wc *WalletController) HandleSquadWebhook(c *gin.Context) {
 	secretKey := os.Getenv("SQUAD_SECRET_KEY")
@@ -36,31 +24,46 @@ func (wc *WalletController) HandleSquadWebhook(c *gin.Context) {
 		return
 	}
 
-	// Verify Signature
+	// Verify HMAC-SHA512 signature
 	if !verifySquadSignature(body, signature, secretKey) {
 		log.Printf("[Webhook] Invalid signature received")
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid signature"})
 		return
 	}
 
-	var payload SquadWebhookPayload
+	var payload SquadWebhookPayloadV3
 	if err := json.Unmarshal(body, &payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json"})
 		return
 	}
 
-	log.Printf("[Webhook] Received event: %s for ref: %s", payload.Event, payload.Data.TransactionReference)
+	data := payload.Data
+	log.Printf("[Webhook] event=%s ref=%s va=%s amount=%s sender=%s",
+		payload.Event, data.TransactionReference, data.VirtualAccountNumber,
+		data.SettledAmount, data.SenderName)
 
-	if payload.Event == "virtual_account_credited" {
-		// Handle funding of wallet
-		var account models.Account
-		if err := wc.db.Where("provider_account_number = ?", payload.Data.VirtualAccountNumber).First(&account).Error; err == nil {
-			// Update balance or log transaction
-			log.Printf("[Webhook] Crediting account: %s with %f", account.AccountNumber, payload.Data.Amount)
-			
-			// Here you would typically update the account balance or create a transaction record
-			// For PayGidi, we might also want to check if this is tied to a specific 'Payment' record
-		}
+	if payload.Event != "virtual_account_credited" {
+		c.JSON(http.StatusOK, gin.H{"message": "ignored"})
+		return
+	}
+
+	// Deduplicate by transaction reference
+	if dedupByReference(wc.db, data.TransactionReference) {
+		log.Printf("[Webhook] duplicate ref=%s — skipping", data.TransactionReference)
+		c.JSON(http.StatusOK, gin.H{"message": "duplicate"})
+		return
+	}
+
+	// Enqueue to the persistent queue (DB-backed) and process async
+	record, queued, err := enqueueWebhookRecord(wc.db, data, body)
+	if err != nil {
+		log.Printf("[Webhook] failed to enqueue ref=%s: %v", data.TransactionReference, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to record transaction"})
+		return
+	}
+
+	if queued {
+		log.Printf("[Webhook] enqueued ref=%s id=%d", record.TransactionReference, record.ID)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})

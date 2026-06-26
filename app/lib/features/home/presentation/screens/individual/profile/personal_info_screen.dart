@@ -15,6 +15,7 @@ class PersonalInfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.userData;
+    final authData = auth.authResponseData;
     final theme = Theme.of(context);
 
     return buildPGAnnotatedRegion(
@@ -59,11 +60,14 @@ class PersonalInfoScreen extends StatelessWidget {
                   color: theme.textTheme.titleLarge?.color ?? PgColors.black,
                 ),
                 heightSpacing(32),
-                _buildInfoItem(context, "First Name", user?.firstName ?? ""),
-                _buildInfoItem(context, "Last Name", user?.lastName ?? ""),
-                _buildInfoItem(context, "Phone Number", user?.phone ?? ""),
-                _buildInfoItem(
-                    context, "Email Address", user?.email ?? "Not set"),
+                _buildInfoItem(context, "First Name",
+                    user?.firstName ?? authData?.firstName ?? ""),
+                _buildInfoItem(context, "Last Name",
+                    user?.lastName ?? authData?.lastName ?? ""),
+                _buildInfoItem(context, "Phone Number",
+                    user?.phone ?? authData?.phone ?? ""),
+                _buildInfoItem(context, "Email Address",
+                    user?.email ?? authData?.email ?? "Not set"),
                 _buildInfoItem(
                     context, "Account Type", user?.accountType ?? "Individual"),
               ],

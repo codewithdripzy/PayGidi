@@ -31,3 +31,13 @@ func GenerateUID() string {
 	id := uuid.New()
 	return id.String()
 }
+
+// GenerateReferralCode generates a random 6-character alphanumeric referral code.
+func GenerateReferralCode() string {
+	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	code := make([]byte, 6)
+	for i := range code {
+		code[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(code)
+}

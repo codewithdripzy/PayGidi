@@ -13,10 +13,25 @@ class AuthRequest {
 class VerifyOtpRequest {
   final String phone;
   final String code;
+  final String? deviceName;
+  final String? deviceType;
+  final String? deviceOs;
 
-  VerifyOtpRequest({required this.phone, required this.code});
+  VerifyOtpRequest({
+    required this.phone,
+    required this.code,
+    this.deviceName,
+    this.deviceType,
+    this.deviceOs,
+  });
 
-  Map<String, dynamic> toJson() => {'phone': phone, 'otp': code};
+  Map<String, dynamic> toJson() => {
+    'phone': phone,
+    'otp': code,
+    if (deviceName != null) 'deviceName': deviceName,
+    if (deviceType != null) 'deviceType': deviceType,
+    if (deviceOs != null) 'deviceOs': deviceOs,
+  };
 }
 
 class IndividualCompleteAccountRequest {
@@ -294,7 +309,7 @@ class PgUser {
   final List<dynamic>? otps; // Assuming dynamic for now
   final String createdAt;
   final String updatedAt;
-  final bool? hasPin; // Added hasPin
+  bool? hasPin; // Added hasPin (mutable so provider can update from /me response)
 
   PgUser({
     required this.id,
@@ -533,8 +548,13 @@ class AccountResponse {
 class AccountResponseData {
   final PgUser user;
   final List<Wallet>? wallets;
+  final bool hasPin;
 
-  AccountResponseData({required this.user, this.wallets});
+  AccountResponseData({
+    required this.user,
+    this.wallets,
+    this.hasPin = false,
+  });
 
   factory AccountResponseData.fromJson(Map<String, dynamic> json) {
     return AccountResponseData(
@@ -542,6 +562,7 @@ class AccountResponseData {
       wallets: (json['wallets'] as List<dynamic>?)
           ?.map((e) => Wallet.fromJson(e as Map<String, dynamic>))
           .toList(),
+      hasPin: json['hasPin'] as bool? ?? false,
     );
   }
 }
@@ -554,11 +575,109 @@ class BiometricRegisterRequest {
   Map<String, dynamic> toJson() => {'biometricID': biometricID};
 }
 
+class ReferralInfo {
+  final String referralCode;
+  final int totalReferrals;
+  final int bonusesEarned;
+  final int pendingReferrals;
+  final double bonusPerThreshold;
+  final double threshold;
+
+  ReferralInfo({
+    required this.referralCode,
+    required this.totalReferrals,
+    required this.bonusesEarned,
+    required this.pendingReferrals,
+    required this.bonusPerThreshold,
+    required this.threshold,
+  });
+
+  factory ReferralInfo.fromJson(Map<String, dynamic> json) {
+    return ReferralInfo(
+      referralCode: json['referralCode'] as String? ?? '',
+      totalReferrals: json['totalReferrals'] as int? ?? 0,
+      bonusesEarned: json['bonusesEarned'] as int? ?? 0,
+      pendingReferrals: json['pendingReferrals'] as int? ?? 0,
+      bonusPerThreshold: (json['bonusPerThreshold'] as num?)?.toDouble() ?? 2000,
+      threshold: (json['threshold'] as num?)?.toDouble() ?? 3,
+    );
+  }
+
+  factory ReferralInfo.empty() => ReferralInfo(
+    referralCode: '',
+    totalReferrals: 0,
+    bonusesEarned: 0,
+    pendingReferrals: 0,
+    bonusPerThreshold: 2000,
+    threshold: 3,
+  );
+
+  String get bonusLabel => '₦${bonusPerThreshold.toStringAsFixed(0)} per ${threshold.toStringAsFixed(0)} referrals';
+  double get progress => threshold > 0 ? (totalReferrals % threshold) / threshold : 0;
+  int get nextBonusProgress => totalReferrals % threshold.toInt();
+}
+
+class DeviceInfoModel {
+  final int id;
+  final String deviceName;
+  final String deviceType;
+  final String deviceOs;
+  final String lastKnownIp;
+  final bool isCurrent;
+  final String createdAt;
+  final String updatedAt;
+
+  DeviceInfoModel({
+    required this.id,
+    required this.deviceName,
+    required this.deviceType,
+    required this.deviceOs,
+    required this.lastKnownIp,
+    required this.isCurrent,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory DeviceInfoModel.fromJson(Map<String, dynamic> json) {
+    return DeviceInfoModel(
+      id: json['id'] as int,
+      deviceName: json['deviceName'] as String? ?? '',
+      deviceType: json['deviceType'] as String? ?? '',
+      deviceOs: json['deviceOs'] as String? ?? '',
+      lastKnownIp: json['lastKnownIp'] as String? ?? '',
+      isCurrent: json['isCurrent'] as bool? ?? false,
+      createdAt: json['createdAt'] as String? ?? '',
+      updatedAt: json['updatedAt'] as String? ?? '',
+    );
+  }
+
+  String get deviceDisplayName {
+    if (deviceName.isNotEmpty) return deviceName;
+    if (deviceOs.isNotEmpty) return '$deviceType ($deviceOs)';
+    return deviceType.isNotEmpty ? deviceType : 'Unknown Device';
+  }
+}
+
 class BiometricAuthRequest {
   final String biometricID;
   final String phone;
+  final String? deviceName;
+  final String? deviceType;
+  final String? deviceOs;
 
-  BiometricAuthRequest({required this.biometricID, required this.phone});
+  BiometricAuthRequest({
+    required this.biometricID,
+    required this.phone,
+    this.deviceName,
+    this.deviceType,
+    this.deviceOs,
+  });
 
-  Map<String, dynamic> toJson() => {'biometricID': biometricID, 'phone': phone};
+  Map<String, dynamic> toJson() => {
+    'biometricID': biometricID,
+    'phone': phone,
+    if (deviceName != null) 'deviceName': deviceName,
+    if (deviceType != null) 'deviceType': deviceType,
+    if (deviceOs != null) 'deviceOs': deviceOs,
+  };
 }

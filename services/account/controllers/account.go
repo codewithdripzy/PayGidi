@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	payGidiErrors "github.com/PayGidi/AccountService/core/interfaces/errors"
 	"github.com/PayGidi/AccountService/models"
@@ -314,6 +315,265 @@ func Me(c *gin.Context) {
 		"data": gin.H{
 			"user":    fullUser,
 			"wallets": wallets,
+			"hasPin":  fullUser.Pin != "",
 		},
+	})
+}
+
+// BlockAccount godoc
+// @Summary Block user account
+// @Description Temporarily block the authenticated user's account. All transactions will be disabled.
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Account blocked successfully"
+// @Router /account/block [post]
+func BlockAccount(c *gin.Context) {
+	db, _ := c.Get("db")
+	user, _ := c.Get("user")
+	currentUser := user.(*models.User)
+
+	if currentUser.Status == "blocked" {
+		c.JSON(http.StatusConflict, gin.H{
+			"code":  payGidiErrors.INVALID_REQUEST_BODY,
+			"error": "Account is already blocked",
+		})
+		return
+	}
+
+	if err := db.(*gorm.DB).Model(currentUser).Update("status", "blocked").Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
+			"error": "Failed to block account",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Account blocked successfully",
+	})
+}
+
+// UnblockAccount godoc
+// @Summary Unblock user account
+// @Description Unblock the authenticated user's account.
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Account unblocked successfully"
+// @Router /account/unblock [post]
+func UnblockAccount(c *gin.Context) {
+	db, _ := c.Get("db")
+	user, _ := c.Get("user")
+	currentUser := user.(*models.User)
+
+	if currentUser.Status != "blocked" {
+		c.JSON(http.StatusConflict, gin.H{
+			"code":  payGidiErrors.INVALID_REQUEST_BODY,
+			"error": "Account is not blocked",
+		})
+		return
+	}
+
+	if err := db.(*gorm.DB).Model(currentUser).Update("status", "active").Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
+			"error": "Failed to unblock account",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Account unblocked successfully",
+	})
+}
+
+// ReportIssue godoc
+// @Summary Report an issue
+// @Description Submit a report or issue from the authenticated user.
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param body body validators.ReportIssueDto true "Issue report data"
+// @Success 200 {object} map[string]interface{} "Issue reported successfully"
+// @Router /account/report [post]
+func ReportIssue(c *gin.Context) {
+	db, _ := c.Get("db")
+	user, _ := c.Get("user")
+	currentUser := user.(*models.User)
+
+	validatedBody, _ := c.Get("validatedBody")
+	data := validatedBody.(*validators.ReportIssueDto)
+
+	issue := models.AccountIssue{
+		UserID:  currentUser.ID,
+		Subject: data.Subject,
+		Message: data.Message,
+	}
+
+	if err := db.(*gorm.DB).Create(&issue).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
+			"error": "Failed to submit report",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Issue reported successfully",
+	})
+}
+
+// GetReferralInfo godoc
+// @Summary Get referral info
+// @Description Get the user's referral code and referral statistics.
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Referral info"
+// @Router /account/referral [get]
+func GetReferralInfo(c *gin.Context) {
+	db, _ := c.Get("db")
+	user, _ := c.Get("user")
+	currentUser := user.(*models.User)
+
+	var totalReferrals int64
+	db.(*gorm.DB).Model(&models.Referral{}).Where("referrer_id = ?", currentUser.ID).Count(&totalReferrals)
+
+	bonusThreshold := int64(3)
+	bonusesEarned := totalReferrals / bonusThreshold
+	pendingReferrals := bonusThreshold - (totalReferrals % bonusThreshold)
+	if pendingReferrals == bonusThreshold {
+		pendingReferrals = 0
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Referral info retrieved successfully",
+		"data": gin.H{
+			"referralCode":     currentUser.ReferralCode,
+			"totalReferrals":   totalReferrals,
+			"bonusesEarned":    bonusesEarned,
+			"pendingReferrals": pendingReferrals,
+			"bonusPerThreshold": float64(2000),
+			"threshold":        float64(bonusThreshold),
+		},
+	})
+}
+
+// ListDevices godoc
+// @Summary List trusted devices
+// @Description Get all active sessions (devices) for the authenticated user.
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "List of devices"
+// @Router /account/devices [get]
+func ListDevices(c *gin.Context) {
+	db, _ := c.Get("db")
+	user, _ := c.Get("user")
+	currentUser := user.(*models.User)
+
+	var sessions []models.Session
+	if err := db.(*gorm.DB).Where("user_id = ?", currentUser.ID).Order("is_current desc, updated_at desc").Find(&sessions).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
+			"error": "Failed to fetch devices",
+		})
+		return
+	}
+
+	// Build response (never expose token hashes)
+	type DeviceResponse struct {
+		ID          uint      `json:"id"`
+		DeviceName  string    `json:"deviceName"`
+		DeviceType  string    `json:"deviceType"`
+		DeviceOS    string    `json:"deviceOs"`
+		LastKnownIP string    `json:"lastKnownIp"`
+		IsCurrent   bool      `json:"isCurrent"`
+		CreatedAt   time.Time `json:"createdAt"`
+		UpdatedAt   time.Time `json:"updatedAt"`
+	}
+	devices := make([]DeviceResponse, 0, len(sessions))
+	for _, s := range sessions {
+		devices = append(devices, DeviceResponse{
+			ID:          s.ID,
+			DeviceName:  s.DeviceName,
+			DeviceType:  s.DeviceType,
+			DeviceOS:    s.DeviceOS,
+			LastKnownIP: s.LastKnownIP,
+			IsCurrent:   s.IsCurrent,
+			CreatedAt:   s.CreatedAt,
+			UpdatedAt:   s.UpdatedAt,
+		})
+	}
+
+	if devices == nil {
+		devices = []DeviceResponse{}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Devices retrieved successfully",
+		"data":    devices,
+	})
+}
+
+// RemoveDevice godoc
+// @Summary Remove a trusted device
+// @Description Logout from a specific device (session).
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path int true "Device (session) ID"
+// @Success 200 {object} map[string]interface{} "Device removed"
+// @Router /account/devices/{id} [delete]
+func RemoveDevice(c *gin.Context) {
+	db, _ := c.Get("db")
+	user, _ := c.Get("user")
+	currentUser := user.(*models.User)
+
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":  payGidiErrors.VALIDATION_ERROR,
+			"error": "Invalid device ID",
+		})
+		return
+	}
+
+	var session models.Session
+	if err := db.(*gorm.DB).Where("id = ? AND user_id = ?", id, currentUser.ID).First(&session).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"code":  payGidiErrors.NOT_FOUND,
+			"error": "Device not found",
+		})
+		return
+	}
+
+	// Don't allow removing the current device via this endpoint
+	if session.IsCurrent {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":  payGidiErrors.VALIDATION_ERROR,
+			"error": "Cannot remove current device. Use logout instead.",
+		})
+		return
+	}
+
+	if err := db.(*gorm.DB).Delete(&session).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,
+			"error": "Failed to remove device",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Device removed successfully",
 	})
 }

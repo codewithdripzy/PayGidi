@@ -1,7 +1,9 @@
+import 'package:app/core/network/api_response.dart';
 import 'package:app/core/services/biometric_service.dart';
 import 'package:app/features/auth/data/models/auth_models.dart';
 import 'package:app/features/auth/data/repositories/auth_repository.dart';
 import 'package:app/features/auth/data/services/auth_storage_service.dart';
+import 'package:app/features/auth/data/utils/device_info.dart';
 import 'package:flutter/material.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -93,8 +95,15 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> verifyOtp({required String phone, required String code}) async {
     setLoading(true);
 
+    final deviceInfo = DeviceInfo.current;
     final response = await _repository.verifyOTP(
-      VerifyOtpRequest(phone: phone, code: code),
+      VerifyOtpRequest(
+        phone: phone,
+        code: code,
+        deviceName: deviceInfo.deviceName,
+        deviceType: deviceInfo.deviceType,
+        deviceOs: deviceInfo.deviceOs,
+      ),
     );
     setLoading(false);
 
@@ -148,8 +157,15 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
 
+    final deviceInfo = DeviceInfo.current;
     final response = await _repository.authenticateBiometric(
-      BiometricAuthRequest(biometricID: biometricId, phone: phone),
+      BiometricAuthRequest(
+        biometricID: biometricId,
+        phone: phone,
+        deviceName: deviceInfo.deviceName,
+        deviceType: deviceInfo.deviceType,
+        deviceOs: deviceInfo.deviceOs,
+      ),
     );
     setLoading(false);
 
@@ -181,6 +197,7 @@ class AuthProvider extends ChangeNotifier {
     if (response.isSuccess && response.data != null) {
       _userData = response.data!.data.user;
       _wallets = response.data!.data.wallets;
+      _userData?.hasPin = response.data!.data.hasPin;
       _isLoggedIn = true;
       await _storageService.savePgUser(_userData!);
       notifyListeners();
@@ -225,6 +242,105 @@ class AuthProvider extends ChangeNotifier {
       _errorMessage = response.error ?? 'Failed to complete account';
       return false;
     }
+  }
+
+  Future<ApiResponse<void>> setPin({
+    required String pin,
+    required String confirmPin,
+  }) async {
+    setLoading(true);
+    final response = await _repository.setPin(pin: pin, confirmPin: confirmPin);
+    setLoading(false);
+
+    if (response.isSuccess) {
+      _userData?.hasPin = true;
+      await _storageService.savePgUser(_userData!);
+      notifyListeners();
+    }
+
+    return response;
+  }
+
+  Future<ApiResponse<void>> updatePin({
+    required String oldPin,
+    required String newPin,
+    required String confirmPin,
+  }) async {
+    setLoading(true);
+    final response = await _repository.updatePin(
+      oldPin: oldPin,
+      newPin: newPin,
+      confirmPin: confirmPin,
+    );
+    setLoading(false);
+
+    if (response.isSuccess) {
+      notifyListeners();
+    }
+
+    return response;
+  }
+
+  Future<ApiResponse<void>> blockAccount() async {
+    setLoading(true);
+    final response = await _repository.blockAccount();
+    setLoading(false);
+
+    if (response.isSuccess) {
+      notifyListeners();
+    }
+
+    return response;
+  }
+
+  Future<ApiResponse<void>> reportIssue({
+    required String subject,
+    required String message,
+  }) async {
+    setLoading(true);
+    final response = await _repository.reportIssue(
+      subject: subject,
+      message: message,
+    );
+    setLoading(false);
+    return response;
+  }
+
+  // Referral info
+  ReferralInfo? _referralInfo;
+  ReferralInfo? get referralInfo => _referralInfo;
+
+  Future<void> fetchReferralInfo() async {
+    final response = await _repository.fetchReferralInfo();
+    if (response.isSuccess && response.data != null) {
+      _referralInfo = response.data;
+      notifyListeners();
+    }
+  }
+
+  // Device management
+  List<DeviceInfoModel> _devices = [];
+  List<DeviceInfoModel> get devices => _devices;
+
+  Future<ApiResponse<void>> fetchDevices() async {
+    final response = await _repository.fetchDevices();
+    if (response.isSuccess && response.data != null) {
+      _devices = response.data!;
+      notifyListeners();
+    }
+    return ApiResponse(error: response.error, data: null);
+  }
+
+  Future<ApiResponse<void>> removeDevice(int deviceId) async {
+    setLoading(true);
+    final response = await _repository.removeDevice(deviceId);
+    setLoading(false);
+
+    if (response.isSuccess) {
+      _devices.removeWhere((d) => d.id == deviceId);
+      notifyListeners();
+    }
+    return ApiResponse(error: response.error, data: null);
   }
 
   Future<void> setHasSeenOnboarding(bool value) async {

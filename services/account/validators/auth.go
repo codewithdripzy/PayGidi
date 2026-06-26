@@ -6,8 +6,11 @@ type AuthDto struct {
 }
 
 type VerifyAuthOtpDto struct {
-	Phone string `json:"phone" validate:"required,min=10,max=15"`
-	Code  string `json:"otp" validate:"required,len=5"`
+	Phone      string `json:"phone" validate:"required,min=10,max=15"`
+	Code       string `json:"otp" validate:"required,len=5"`
+	DeviceName string `json:"deviceName" validate:"omitempty,min=1,max=100"`
+	DeviceType string `json:"deviceType" validate:"omitempty,oneof=mobile desktop tablet"`
+	DeviceOS   string `json:"deviceOs" validate:"omitempty,max=50"`
 }
 
 type IndividualCompleteAccountDto struct {
@@ -57,6 +60,9 @@ type VerifyBVNImageDto struct {
 type BiometricAuthDto struct {
 	Phone       string `json:"phone" validate:"required,min=10,max=15"`
 	BiometricID string `json:"biometricID" validate:"required"`
+	DeviceName  string `json:"deviceName" validate:"omitempty,min=1,max=100"`
+	DeviceType  string `json:"deviceType" validate:"omitempty,oneof=mobile desktop tablet"`
+	DeviceOS    string `json:"deviceOs" validate:"omitempty,max=50"`
 }
 
 type RegisterBiometricDto struct {
@@ -72,4 +78,15 @@ type UpdatePinDto struct {
 	OldPin     string `json:"oldPin" validate:"required,len=4,numeric"`
 	NewPin     string `json:"newPin" validate:"required,len=4,numeric"`
 	ConfirmPin string `json:"confirmPin" validate:"required,eqfield=NewPin"`
+}
+
+type ReportIssueDto struct {
+	Subject string `json:"subject" validate:"required,min=3,max=200"`
+	Message string `json:"message" validate:"required,min=10"`
+}
+
+type DeviceInfoDto struct {
+	DeviceName string `json:"deviceName" validate:"omitempty,min=1,max=100"`
+	DeviceType string `json:"deviceType" validate:"omitempty,oneof=mobile desktop tablet"`
+	DeviceOS   string `json:"deviceOs" validate:"omitempty,max=50"`
 }
