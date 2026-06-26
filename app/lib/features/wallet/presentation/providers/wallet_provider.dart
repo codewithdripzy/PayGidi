@@ -40,6 +40,31 @@ class WalletProvider with ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  // Polling
+  bool _polling = false;
+  static const _pollInterval = Duration(seconds: 15);
+
+  void startPolling() {
+    if (_polling) return;
+    _polling = true;
+    _poll();
+  }
+
+  void stopPolling() {
+    _polling = false;
+  }
+
+  void _poll() async {
+    while (_polling) {
+      await Future.delayed(_pollInterval);
+      if (!_polling) break;
+      final previous = _balance?.totalBalance;
+      await fetchBalance();
+      // Only notify if balance actually changed
+      if (previous != _balance?.totalBalance) notifyListeners();
+    }
+  }
+
   Future<void> fetchBalance() async {
     _isLoadingBalance = true;
     _error = null;

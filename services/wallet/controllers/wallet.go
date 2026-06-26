@@ -309,7 +309,12 @@ func (wc *WalletController) GetWalletHttp(c *gin.Context) {
 		"status":  200,
 		"success": true,
 		"message": "Success",
-		"data":    data,
+		"data": gin.H{
+			"totalBalance":       account.Balance,
+			"personalSavings":    0,
+			"thriftSavings":      0,
+			"virtualAccount":     data,
+		},
 	})
 }
 

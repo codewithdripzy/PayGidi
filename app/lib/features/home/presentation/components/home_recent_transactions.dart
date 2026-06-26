@@ -241,9 +241,10 @@ class _HomeRecentTransactionsState extends State<HomeRecentTransactions> {
                 ],
               ),
             ),
+            // ${transaction.isCredit ? '+' : '-'}₦
             PgTexts.text500(
               context,
-              text: "${transaction.isCredit ? '+' : '-'}₦${transaction.amount}",
+              text: transaction.amount,
               fontSize: 16,
               color: statusColor,
               fontFamily: PgFonts.googleSans,

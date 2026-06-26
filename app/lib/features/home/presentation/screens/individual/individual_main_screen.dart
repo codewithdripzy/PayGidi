@@ -8,6 +8,7 @@ import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/finance/presentation/screens/individual_finance_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_me_screen.dart';
+import 'package:app/features/wallet/presentation/providers/wallet_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -35,10 +36,17 @@ class _IndividualMainScreenState extends State<IndividualMainScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch user info when the screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().fetchAndSetCurrentUser();
+      final auth = context.read<AuthProvider>();
+      auth.fetchAndSetCurrentUser();
+      context.read<WalletProvider>().startPolling();
     });
+  }
+
+  @override
+  void dispose() {
+    // Polling stops when provider is disposed
+    super.dispose();
   }
 
   void _onItemTapped(int index) {
