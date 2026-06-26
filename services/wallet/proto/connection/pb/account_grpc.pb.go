@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_ValidateToken_FullMethodName = "/account.AuthService/ValidateToken"
-	AuthService_GetUser_FullMethodName       = "/account.AuthService/GetUser"
+	AuthService_ValidateToken_FullMethodName = "/account_service.AuthService/ValidateToken"
+	AuthService_GetUser_FullMethodName       = "/account_service.AuthService/GetUser"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -142,7 +142,7 @@ func _AuthService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AuthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "account.AuthService",
+	ServiceName: "account_service.AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
