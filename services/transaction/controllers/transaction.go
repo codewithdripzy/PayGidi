@@ -60,21 +60,9 @@ func GetCustomerTransactions(c *gin.Context) {
 	}
 	db := dbVal.(*gorm.DB)
 
-	// Fetch user from DB to get the ID (primary key)
-	var dbUser models.User
-	if err := db.Where("uid = ?", user.UID).First(&dbUser).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"status":  401,
-			"success": false,
-			"message": "User not found in database: " + err.Error(),
-			"data":    gin.H{},
-		})
-		return
-	}
-
 	// Fetch all accounts associated with the user
 	var accounts []models.Account
-	if err := db.Where("user_id = ?", dbUser.ID).Find(&accounts).Error; err != nil {
+	if err := db.Where("user_id = ?", user.ID).Find(&accounts).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  500,
 			"success": false,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -80,8 +81,13 @@ func Authenticate() gin.HandlerFunc {
 			return
 		}
 
+		// Parse userID to uint for internal use
+		userIDUint64, _ := strconv.ParseUint(resp.UserId, 10, 32)
+		userID := uint(userIDUint64)
+
 		// Map pb.UserData to models.User
 		user := models.User{
+			ID:       userID,
 			UID:      resp.UserId,
 			Email:    resp.Email,
 			Username: resp.UserData.GetUsername(),
@@ -99,7 +105,7 @@ func Authenticate() gin.HandlerFunc {
 
 		// Set user info in context
 		c.Set("user", user)
-		c.Set("userID", resp.UserId)
+		c.Set("userID", userID)
 		c.Set("customerId", resp.UserId)
 
 		// Call the next handler in the chain
