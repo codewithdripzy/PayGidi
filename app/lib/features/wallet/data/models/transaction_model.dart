@@ -21,17 +21,68 @@ class Transaction {
     required this.recipientOrSender,
   });
 
+  static String _extractSender(String remarks) {
+    // "Transfer from NAME to ... | [CID]" or "Transfer from NAME to sandbox | [CID]"
+    final fromMatch = RegExp(r'from\s+(.+?)\s+to\b', caseSensitive: false).firstMatch(remarks);
+    if (fromMatch != null) return fromMatch.group(1)!.trim();
+    final parts = remarks.split(' | ');
+    return parts.isNotEmpty ? parts[0].trim() : remarks;
+  }
+
+  static String _formatAmount(String amount, bool isCredit) {
+    final parsed = double.tryParse(amount) ?? 0;
+    final formatted = parsed.toStringAsFixed(2);
+    final parts = formatted.split('.');
+    final intPart = parts[0];
+    final buf = StringBuffer();
+    for (int i = 0; i < intPart.length; i++) {
+      if (i > 0 && (intPart.length - i) % 3 == 0) buf.write(',');
+      buf.write(intPart[i]);
+    }
+    return '${isCredit ? '+' : '-'}₦${buf.toString()}.${parts[1]}';
+  }
+
+  static String _formatDate(String raw) {
+    try {
+      final dt = DateTime.parse(raw);
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+      final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+      final min = dt.minute.toString().padLeft(2, '0');
+      return '${months[dt.month - 1]} ${dt.day}${_daySuffix(dt.day)}, ${dt.year} • $hour:$min $ampm';
+    } catch (_) {
+      return raw;
+    }
+  }
+
+  static String _daySuffix(int day) {
+    if (day >= 11 && day <= 13) return 'th';
+    switch (day % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  }
+
   factory Transaction.fromJson(Map<String, dynamic> json) {
+    final ref = json['transaction_reference']?.toString() ?? '';
+    final remarks = json['remarks']?.toString() ?? '';
+    final principalAmount = json['principal_amount']?.toString() ?? '0';
+    final transactionDate = json['transaction_date']?.toString() ?? '';
+    final indicator = json['transaction_indicator']?.toString() ?? '';
+    final isCredit = indicator == 'C';
+
     return Transaction(
-      id: json['id']?.toString() ?? '',
-      title: json['title'] ?? json['description'] ?? '',
-      date: json['date'] ?? json['createdAt'] ?? '',
-      amount: json['amount']?.toString() ?? '0',
-      isCredit: json['type'] == 'CREDIT' || json['isCredit'] == true,
-      status: json['status'] ?? 'Successful',
-      reference: json['reference'] ?? '',
-      type: json['type'] ?? '',
-      recipientOrSender: json['recipientOrSender'] ?? json['counterpartyName'] ?? '',
+      id: ref,
+      title: remarks.isNotEmpty ? remarks : 'Deposit',
+      date: _formatDate(transactionDate),
+      amount: _formatAmount(principalAmount, isCredit),
+      isCredit: isCredit,
+      status: 'Successful',
+      reference: ref,
+      type: 'Deposit',
+      recipientOrSender: _extractSender(remarks),
     );
   }
 

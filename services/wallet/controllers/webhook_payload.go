@@ -1,6 +1,7 @@
 package controllers
 
-// SquadWebhookDataV3 matches the full Squad virtual-account webhook payload.
+// SquadWebhookDataV3 matches the Squad virtual-account webhook payload (V2/V3).
+// Squad sends the payload fields directly at the top level, no outer envelope.
 type SquadWebhookDataV3 struct {
 	TransactionReference string `json:"transaction_reference"`
 	VirtualAccountNumber string `json:"virtual_account_number"`
@@ -16,10 +17,4 @@ type SquadWebhookDataV3 struct {
 	SenderName           string `json:"sender_name"`
 	TransactionUUID      string `json:"transaction_uuid"`
 	EncryptedBody        string `json:"encrypted_body"`
-}
-
-// SquadWebhookPayloadV3 is the top-level Squad webhook structure.
-type SquadWebhookPayloadV3 struct {
-	Event string             `json:"event"`
-	Data  SquadWebhookDataV3 `json:"data"`
 }

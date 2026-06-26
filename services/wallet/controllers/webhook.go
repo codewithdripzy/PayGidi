@@ -24,28 +24,23 @@ func (wc *WalletController) HandleSquadWebhook(c *gin.Context) {
 		return
 	}
 
-	// Verify HMAC-SHA512 signature
-	if !verifySquadSignature(body, signature, secretKey) {
+	var data SquadWebhookDataV3
+	if err := json.Unmarshal(body, &data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json"})
+		return
+	}
+
+	// Verify HMAC-SHA512 signature — try V3 pipe-delimited first, fallback to V1 full-body
+	if !verifySquadSignatureV3(data, signature, secretKey) &&
+		!verifySquadSignatureV1(body, signature, secretKey) {
 		log.Printf("[Webhook] Invalid signature received")
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid signature"})
 		return
 	}
 
-	var payload SquadWebhookPayloadV3
-	if err := json.Unmarshal(body, &payload); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json"})
-		return
-	}
-
-	data := payload.Data
-	log.Printf("[Webhook] event=%s ref=%s va=%s amount=%s sender=%s",
-		payload.Event, data.TransactionReference, data.VirtualAccountNumber,
+	log.Printf("[Webhook] ref=%s va=%s amount=%s sender=%s",
+		data.TransactionReference, data.VirtualAccountNumber,
 		data.SettledAmount, data.SenderName)
-
-	if payload.Event != "virtual_account_credited" {
-		c.JSON(http.StatusOK, gin.H{"message": "ignored"})
-		return
-	}
 
 	// Deduplicate by transaction reference
 	if dedupByReference(wc.db, data.TransactionReference) {
@@ -69,9 +64,27 @@ func (wc *WalletController) HandleSquadWebhook(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }
 
-func verifySquadSignature(body []byte, signature, secretKey string) bool {
+// verifySquadSignatureV1 verifies HMAC-SHA512 of the entire request body (V1 method).
+func verifySquadSignatureV1(body []byte, signature, secretKey string) bool {
 	h := hmac.New(sha512.New, []byte(secretKey))
 	h.Write(body)
+	expectedSignature := hex.EncodeToString(h.Sum(nil))
+	return strings.EqualFold(expectedSignature, signature)
+}
+
+// verifySquadSignatureV3 verifies HMAC-SHA512 of pipe-delimited fields (V2/V3 method).
+// Fields: transaction_reference|virtual_account_number|currency|principal_amount|settled_amount|customer_identifier
+func verifySquadSignatureV3(data SquadWebhookDataV3, signature, secretKey string) bool {
+	dataToHash := strings.Join([]string{
+		data.TransactionReference,
+		data.VirtualAccountNumber,
+		data.Currency,
+		data.PrincipalAmount,
+		data.SettledAmount,
+		data.CustomerIdentifier,
+	}, "|")
+	h := hmac.New(sha512.New, []byte(secretKey))
+	h.Write([]byte(dataToHash))
 	expectedSignature := hex.EncodeToString(h.Sum(nil))
 	return strings.EqualFold(expectedSignature, signature)
 }
