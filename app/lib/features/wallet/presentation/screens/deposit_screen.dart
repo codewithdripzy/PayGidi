@@ -38,9 +38,15 @@ class _DepositScreenState extends State<DepositScreen> {
     final walletProvider = context.watch<WalletProvider>();
     final account = walletProvider.virtualAccount;
 
-    final accountNumber = account?.accountNumber ?? "8123456789";
-    final bankName = account?.bankName ?? "Wema Bank (PayGidi)";
-    final accountName = account?.accountName ?? "Joel Onuoha / PayGidi";
+    final accountNumber = (account?.accountNumber ?? '').isNotEmpty
+        ? account!.accountNumber
+        : '-';
+    final bankName = (account?.bankName ?? '').isNotEmpty
+        ? account!.bankName
+        : '-';
+    final accountName = (account?.accountName ?? '').isNotEmpty
+        ? account!.accountName
+        : '-';
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;

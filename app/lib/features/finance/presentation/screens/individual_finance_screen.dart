@@ -118,14 +118,12 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                     goals: context.watch<FinanceProvider>().savingsGoals,
                   ),
                 ),
-                if (_joinedThrifts.isNotEmpty || _publicThrifts.isNotEmpty) ...[
-                  const SizedBox(height: 32),
-                  _buildThriftTabs(context),
-                  const SizedBox(height: 24),
-                  _selectedThriftTabIndex == 0
-                      ? _buildJoinedThrifts(context)
-                      : _buildPublicThrifts(context),
-                ],
+                const SizedBox(height: 32),
+                _buildThriftTabs(context),
+                const SizedBox(height: 24),
+                _selectedThriftTabIndex == 0
+                    ? _buildJoinedThrifts(context)
+                    : _buildPublicThrifts(context),
                 const SizedBox(height: 32),
               ],
             ),
@@ -337,9 +335,66 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
     );
   }
 
+  Widget _buildThriftEmptyState(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+        decoration: BoxDecoration(
+          color: isDark ? PgColors.black1 : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? const Color(0xFF2A2A2A) : Colors.grey.shade100,
+          ),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: PgColors.primary.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 32, color: PgColors.primary),
+            ),
+            const SizedBox(height: 16),
+            PgTexts.text600(
+              context,
+              text: title,
+              fontSize: 16,
+              color: isDark ? Colors.white : PgColors.black,
+            ),
+            const SizedBox(height: 4),
+            PgTexts.text400(
+              context,
+              text: subtitle,
+              fontSize: 13,
+              color: isDark ? Colors.white60 : Colors.grey,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildJoinedThrifts(BuildContext context) {
     final thrifts = _joinedThrifts;
-    if (thrifts.isEmpty) return const SizedBox.shrink();
+    if (thrifts.isEmpty) {
+      return _buildThriftEmptyState(
+        context,
+        icon: Iconsax.add_square_copy,
+        title: "No thrifts joined yet",
+        subtitle: "Join a public thrift or create your own to get started.",
+      );
+    }
 
     return SizedBox(
       height: 220,
@@ -467,7 +522,14 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
 
   Widget _buildPublicThrifts(BuildContext context) {
     final thrifts = _publicThrifts;
-    if (thrifts.isEmpty) return const SizedBox.shrink();
+    if (thrifts.isEmpty) {
+      return _buildThriftEmptyState(
+        context,
+        icon: Iconsax.people_copy,
+        title: "No public thrifts available",
+        subtitle: "Check back later for public thrifts you can join.",
+      );
+    }
 
     return SizedBox(
       height: 220,

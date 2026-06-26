@@ -3,6 +3,7 @@ import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/finance/data/models/savings_goal_model.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:intl/intl.dart';
 
 class FinanceGoals extends StatelessWidget {
@@ -13,8 +14,6 @@ class FinanceGoals extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (goals.isEmpty) return const SizedBox.shrink();
-
     final theme = Theme.of(context);
     final currencyFormatter = NumberFormat.currency(
       symbol: "₦",
@@ -34,7 +33,7 @@ class FinanceGoals extends StatelessWidget {
               color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
                   .withValues(alpha: 0.5),
             ),
-            if (onSeeAll != null)
+            if (onSeeAll != null && goals.isNotEmpty)
               GestureDetector(
                 onTap: onSeeAll,
                 child: PgTexts.gradientText(
@@ -47,26 +46,75 @@ class FinanceGoals extends StatelessWidget {
           ],
         ),
         heightSpacing(8),
-        SizedBox(
-          height: 220,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: goals.map((goal) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  right: 16,
-                  left: goals.first == goal ? 0 : 0,
+        goals.isEmpty
+            ? _buildEmptyState(context)
+            : SizedBox(
+                height: 220,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: goals.map((goal) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        right: 16,
+                        left: goals.first == goal ? 0 : 0,
+                      ),
+                      child: _buildGoalCard(
+                        context,
+                        goal: goal,
+                        currencyFormatter: currencyFormatter,
+                      ),
+                    );
+                  }).toList(),
                 ),
-                child: _buildGoalCard(
-                  context,
-                  goal: goal,
-                  currencyFormatter: currencyFormatter,
-                ),
-              );
-            }).toList(),
-          ),
-        ),
+              ),
       ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      decoration: BoxDecoration(
+        color: isDark ? PgColors.black1 : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? const Color(0xFF2A2A2A) : Colors.grey.shade100,
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: PgColors.primary.withValues(alpha: 0.05),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Iconsax.chart_2_copy,
+              size: 32,
+              color: PgColors.primary,
+            ),
+          ),
+          heightSpacing(16),
+          PgTexts.text600(
+            context,
+            text: "No savings goals yet",
+            fontSize: 16,
+            color: isDark ? Colors.white : PgColors.black,
+          ),
+          heightSpacing(4),
+          PgTexts.text400(
+            context,
+            text:
+                "Create a goal to start saving towards something you want.",
+            fontSize: 13,
+            color: isDark ? Colors.white60 : Colors.grey,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 

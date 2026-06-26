@@ -29,15 +29,14 @@ class ComingSoonScreen extends StatelessWidget {
             heightSpacing(24),
             Row(
               children: [
-                Expanded(
-                  child: PgTexts.text700(
-                    context,
-                    text: title,
-                    fontSize: 28,
-                    color: theme.textTheme.titleLarge?.color ?? PgColors.black,
-                    fontFamily: PgFonts.stackSans,
-                  ),
+                PgTexts.text700(
+                  context,
+                  text: title,
+                  fontSize: 28,
+                  color: theme.textTheme.titleLarge?.color ?? PgColors.black,
+                  fontFamily: PgFonts.stackSans,
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -56,13 +55,14 @@ class ComingSoonScreen extends StatelessWidget {
                 ),
               ],
             ),
-            heightSpacing(4),
+            heightSpacing(2),
             PgTexts.text400(
               context,
               text: "We're building something great for you.",
               fontSize: 16,
               color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
                   .withValues(alpha: 0.7),
+              maxLines: 2,
             ),
             heightSpacing(32),
             Expanded(
@@ -82,35 +82,39 @@ class ComingSoonScreen extends StatelessWidget {
                     PgTexts.text600(
                       context,
                       text: "Virtual & Physical Cards",
-                      fontSize: 18,
-                      color:
-                          theme.textTheme.bodyLarge?.color ?? PgColors.black,
+                      fontSize: 19,
+                      color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
                       textAlign: TextAlign.center,
                     ),
-                    heightSpacing(8),
-                    PgTexts.text400(
-                      context,
-                      text:
-                          "Create virtual cards for secure online payments and order a physical card for everyday spending. We'll let you know as soon as it's ready.",
-                      fontSize: 14,
-                      color: (theme.textTheme.bodyMedium?.color ??
-                              PgColors.black)
-                          .withValues(alpha: 0.7),
-                      textAlign: TextAlign.center,
+                    heightSpacing(5),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: Text(
+                        "Create virtual cards for secure online payments and order a physical card for everyday spending.",
+                        style: TextStyle(
+                          color:
+                              (theme.textTheme.bodyMedium?.color ??
+                                      PgColors.black)
+                                  .withValues(alpha: 0.7),
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    heightSpacing(32),
+                    heightSpacing(24),
                     PgScaleButton(
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: const Row(
                               children: [
-                                Icon(Iconsax.notification_copy,
-                                    color: Colors.white, size: 18),
-                                SizedBox(width: 8),
-                                Text(
-                                  "We'll notify you when it's available!",
+                                Icon(
+                                  Iconsax.notification_copy,
+                                  color: Colors.white,
+                                  size: 18,
                                 ),
+                                SizedBox(width: 8),
+                                Text("We'll notify you when it's available!"),
                               ],
                             ),
                             behavior: SnackBarBehavior.floating,
@@ -122,15 +126,13 @@ class ComingSoonScreen extends StatelessWidget {
                       },
                       child: Container(
                         height: 52,
-                        width: 200,
+                        width: 170,
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(100),
                           gradient: const LinearGradient(
-                            colors: [
-                              PgColors.primary,
-                              PgColors.secondary,
-                            ],
+                            colors: [PgColors.primary, PgColors.secondary],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),

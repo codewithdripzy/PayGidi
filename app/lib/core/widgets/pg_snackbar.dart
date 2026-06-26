@@ -17,11 +17,11 @@ class PgSnackBar {
         content: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isError ? const Color(0xFFE53935) : PgColors.primary,
+            color: isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: (isError ? const Color(0xFFE53935) : PgColors.primary)
+                color: (isError ? const Color(0xFFE53935) : const Color(0xFF22C55E))
                     .withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
