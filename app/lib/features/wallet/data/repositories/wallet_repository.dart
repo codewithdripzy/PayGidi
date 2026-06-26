@@ -107,7 +107,9 @@ class WalletRepository {
       );
       return ApiResponse.fromJson(
         response.data,
-        (json) => json as Map<String, dynamic>,
+        (json) => json is Map<String, dynamic>
+            ? json
+            : <String, dynamic>{'message': json?.toString() ?? ''},
       );
     } on DioException catch (e) {
       return ApiResponse.fromJson(
