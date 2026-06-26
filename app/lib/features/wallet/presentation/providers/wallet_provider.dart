@@ -44,9 +44,10 @@ class WalletProvider with ChangeNotifier {
   bool _polling = false;
   static const _pollInterval = Duration(seconds: 15);
 
-  void startPolling() {
+  Future<void> startPolling() async {
     if (_polling) return;
     _polling = true;
+    await fetchBalance();
     _poll();
   }
 

@@ -39,7 +39,10 @@ class IndividualHomeScreen extends StatelessWidget {
               children: [
               const HomeHeader(),
               const SizedBox(height: 32),
-              HomeBalanceCard(balance: walletProvider.balance?.totalBalance),
+              HomeBalanceCard(
+                balance: walletProvider.balance?.totalBalance,
+                isLoading: walletProvider.isLoadingBalance,
+              ),
               const SizedBox(height: 32),
               const HomeQuickActions(),
               const SizedBox(height: 32),

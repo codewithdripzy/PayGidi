@@ -4,13 +4,13 @@ import 'package:app/core/widgets/pg_texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 
-/// A card component that displays the user's total balance.
-/// It includes a toggle to show or hide the balance amount for privacy.
 class HomeBalanceCard extends StatefulWidget {
   final double? balance;
+  final bool isLoading;
 
-  const HomeBalanceCard({super.key, this.balance});
+  const HomeBalanceCard({super.key, this.balance, this.isLoading = false});
 
   @override
   State<HomeBalanceCard> createState() => _HomeBalanceCardState();
@@ -74,16 +74,36 @@ class _HomeBalanceCardState extends State<HomeBalanceCard> {
             ],
           ),
           const SizedBox(height: 16),
-          PgTexts.text700(
-            context,
-            text: _showBalance
-                ? "₦${_formatBalance(widget.balance)}"
-                : "₦ **********",
-            fontSize: 36,
-            color: Colors.white,
-            fontFamily: PgFonts.googleSans,
-          ),
+          widget.isLoading
+              ? _buildShimmer(isDark)
+              : PgTexts.text700(
+                  context,
+                  text: _showBalance
+                      ? "₦${_formatBalance(widget.balance)}"
+                      : "₦ **********",
+                  fontSize: 36,
+                  color: Colors.white,
+                  fontFamily: PgFonts.googleSans,
+                ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildShimmer(bool isDark) {
+    final baseColor = isDark ? Colors.white24 : Colors.white30;
+    final highlightColor = isDark ? Colors.white38 : Colors.white60;
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(
+        height: 36,
+        width: 180,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     );
   }
