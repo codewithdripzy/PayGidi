@@ -130,7 +130,7 @@ func InitiateTransfer(ctx context.Context, payload payloads.SquadTransferPayload
 	var response responses.SquadResponse[responses.SquadTransferResponseData]
 
 	// Ensure amount is in kobo (if it's not already handled by the caller)
-	_, err := httpclient.PostJSON(client, ctx, "/payout", payload, &response)
+	_, err := httpclient.PostJSON(client, ctx, "/payout/transfer", payload, &response)
 	if err != nil {
 		log.Printf("[Squad][InitiateTransfer] request failed: %v", err)
 		errMsg := err.Error()

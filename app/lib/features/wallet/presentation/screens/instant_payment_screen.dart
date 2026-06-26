@@ -28,6 +28,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
   final _amountController = TextEditingController();
   Bank? _selectedBank;
   bool _isValidatingAccount = false;
+  bool _isProcessingPayment = false;
   String? _accountName;
   int _currentStep = 0;
   String _searchQuery = "";
@@ -179,8 +180,9 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
                             _accountName = null;
                           });
                           Navigator.pop(context);
-                          if (_accountController.text.length == 10)
+                          if (_accountController.text.length == 10) {
                             _verifyAccount();
+                          }
                         },
                       ),
                     );
@@ -344,7 +346,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     if (biometricEnabled) {
       bool authenticated = await biometricService.authenticateLocally();
       if (authenticated) {
-        _executePayment("0000");
+        _executePayment();
         return;
       }
     }
@@ -363,7 +365,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       description: "Enter your 4-digit transaction PIN to complete payment.",
       onVerify: (pin) {
         Navigator.pop(context);
-        _executePayment(pin);
+        _executePayment();
       },
     );
   }
@@ -389,7 +391,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       onVerify: (pin) {
         if (pin == firstPin) {
           Navigator.pop(context);
-          _executePayment(pin);
+          _executePayment();
         } else {
           ScaffoldMessenger.of(
             context,
@@ -399,8 +401,8 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     );
   }
 
-  Future<void> _executePayment(String pin) async {
-    setState(() => _isValidatingAccount = true);
+  Future<void> _executePayment() async {
+    setState(() => _isProcessingPayment = true);
 
     final walletProvider = context.read<WalletProvider>();
     final amount = double.tryParse(_rawAmount) ?? 0;
@@ -408,11 +410,13 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       amount: amount,
       accountNumber: _accountController.text,
       bankCode: _selectedBank!.code,
-      pin: pin,
+      accountName: _accountName,
+      narration: "Instant Payment",
+      currencyId: "NGN",
     );
 
     if (mounted) {
-      setState(() => _isValidatingAccount = false);
+      setState(() => _isProcessingPayment = false);
       if (response.error == null) {
         _sendReceiptEmail(amount);
         if (!mounted) return;
@@ -428,6 +432,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
           },
         );
       } else {
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(response.error ?? "Payment failed")),
         );
@@ -439,7 +444,8 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     try {
       final auth = context.read<AuthProvider>();
       final email = auth.userData?.email;
-      final notifyEnabled = auth.userData?.preferences?.notificationsEnabled ?? false;
+      final notifyEnabled =
+          auth.userData?.preferences?.notificationsEnabled ?? false;
       if (email == null || email.isEmpty || !notifyEnabled) return;
 
       final apiService = context.read<ApiService>();
@@ -448,7 +454,8 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
         data: {
           'to': email,
           'subject': 'Payment Receipt - PayGidi',
-          'body': '''
+          'body':
+              '''
 Dear ${auth.userData?.person?.firstName ?? 'Valued Customer'},
 
 Your payment of ₦${_formatComma(_rawAmount)} to $_accountName has been successful.
@@ -619,7 +626,7 @@ PayGidi Team
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.left,
                           style: const TextStyle(
-                            fontSize: 32,
+                            fontSize: 18,
                             fontWeight: FontWeight.w600,
                             fontFamily: PgFonts.googleSans,
                           ),
@@ -631,12 +638,14 @@ PayGidi Team
                               color: Colors.grey.shade400,
                               fontFamily: PgFonts.googleSans,
                             ),
-                            prefixIcon: Padding(
-                              padding: const EdgeInsets.only(left: 16, top: 16),
+                            prefixIcon: Container(
+                              alignment: Alignment.centerLeft,
+                              width: 40,
+                              padding: const EdgeInsets.only(left: 16, top: 0),
                               child: Text(
                                 "₦",
                                 style: TextStyle(
-                                  fontSize: 28,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.grey.shade600,
                                   fontFamily: PgFonts.googleSans,
@@ -649,30 +658,41 @@ PayGidi Team
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
-                              vertical: 20,
+                              vertical: 15,
                             ),
                             fillColor: Colors.white,
                             filled: true,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade200),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade200,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade200),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade200,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(color: PgColors.primary, width: 1.5),
+                              borderSide: const BorderSide(
+                                color: PgColors.primary,
+                                width: 1.5,
+                              ),
                             ),
                           ),
                           onChanged: (value) {
-                            final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+                            final digits = value.replaceAll(
+                              RegExp(r'[^0-9]'),
+                              '',
+                            );
                             if (digits.isEmpty) {
                               _rawAmount = '';
                               if (_amountController.text.isNotEmpty) {
                                 _amountController.text = '';
-                                _amountController.selection = TextSelection.collapsed(offset: 0);
+                                _amountController.selection =
+                                    TextSelection.collapsed(offset: 0);
                               }
                               return;
                             }
@@ -681,7 +701,10 @@ PayGidi Team
                             final prev = _amountController.text;
                             if (formatted != prev) {
                               _amountController.text = formatted;
-                              _amountController.selection = TextSelection.collapsed(offset: formatted.length);
+                              _amountController.selection =
+                                  TextSelection.collapsed(
+                                    offset: formatted.length,
+                                  );
                             }
                           },
                         ),
@@ -692,47 +715,71 @@ PayGidi Team
                 ),
               ),
               PgScaleButton(
-                onTap: () {
-                  if (_currentStep == 0) {
-                    if (_accountController.text.length == 10 &&
-                        _selectedBank != null &&
-                        _accountName != null) {
-                      setState(() => _currentStep = 1);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please enter valid account details."),
-                        ),
-                      );
-                    }
-                  } else {
-                    if (_amountController.text.isNotEmpty) {
-                      _showReviewBottomSheet();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please enter an amount."),
-                        ),
-                      );
-                    }
-                  }
-                },
-                child: Container(
+                onTap: _isProcessingPayment
+                    ? null
+                    : () {
+                        if (_currentStep == 0) {
+                          if (_accountController.text.length == 10 &&
+                              _selectedBank != null &&
+                              _accountName != null) {
+                            setState(() => _currentStep = 1);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text("Please enter valid account details."),
+                              ),
+                            );
+                          }
+                        } else {
+                          if (_amountController.text.isNotEmpty) {
+                            _showReviewBottomSheet();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Please enter an amount."),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   height: 60,
                   width: double.infinity,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),
-                    gradient: const LinearGradient(
-                      colors: [PgColors.primary, PgColors.secondary],
-                    ),
+                    gradient: _isProcessingPayment ||
+                            (_currentStep == 0
+                                ? (_selectedBank == null ||
+                                    _accountController.text.length != 10 ||
+                                    _accountName == null)
+                                : _rawAmount.isEmpty)
+                        ? const LinearGradient(
+                            colors: [Colors.grey, Colors.grey],
+                          )
+                        : const LinearGradient(
+                            colors: [PgColors.primary, PgColors.secondary],
+                          ),
                   ),
-                  child: PgTexts.text600(
-                    context,
-                    text: _currentStep == 0 ? "Continue" : "Proceed to Review",
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
+                  child: _isProcessingPayment
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : PgTexts.text600(
+                          context,
+                          text: _currentStep == 0
+                              ? "Continue"
+                              : "Proceed to Review",
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
                 ),
               ),
               heightSpacing(30),

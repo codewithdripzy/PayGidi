@@ -134,8 +134,10 @@ class WalletRepository {
     required double amount,
     required String accountNumber,
     required String bankCode,
-    required String pin,
+    String? accountName,
     String? narration,
+    String? currencyId,
+    String? transactionReference,
   }) async {
     try {
       await _apiService.post(
@@ -144,7 +146,10 @@ class WalletRepository {
           'amount': amount.toStringAsFixed(0),
           'account_number': accountNumber,
           'bank_code': bankCode,
+          'currency_id': currencyId ?? 'NGN',
+          'account_name': accountName ?? '',
           'remark': narration ?? '',
+          'transaction_reference': transactionReference,
         },
       );
       return ApiResponse(data: null);

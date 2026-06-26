@@ -185,15 +185,19 @@ class WalletProvider with ChangeNotifier {
     required double amount,
     required String accountNumber,
     required String bankCode,
-    required String pin,
+    String? accountName,
     String? narration,
+    String? currencyId,
+    String? transactionReference,
   }) async {
     return await _walletRepository.transfer(
       amount: amount,
       accountNumber: accountNumber,
       bankCode: bankCode,
-      pin: pin,
+      accountName: accountName,
       narration: narration,
+      currencyId: currencyId,
+      transactionReference: transactionReference,
     );
   }
 }
