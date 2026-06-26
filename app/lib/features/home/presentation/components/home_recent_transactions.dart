@@ -49,7 +49,7 @@ class _HomeRecentTransactionsState extends State<HomeRecentTransactions> {
               color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
             ),
             GestureDetector(
-              onTap: () => context.pushNamed(PgRouteNames.statementRequest),
+              onTap: () => context.pushNamed(PgRouteNames.transactionHistory),
               child: Row(
                 children: [
                   PgTexts.text600(

@@ -12,6 +12,8 @@ import 'package:app/features/auth/presentation/screens/country_selection_screen.
 import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_main_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/statement_request_screen.dart';
+import 'package:app/features/home/presentation/screens/individual/profile/transaction_history_screen.dart';
+import 'package:app/features/wallet/presentation/screens/payment_success_screen.dart';
 import 'package:app/features/wallet/presentation/screens/deposit_screen.dart';
 import 'package:app/features/wallet/presentation/screens/withdrawal_screen.dart';
 import 'package:app/features/auth/presentation/screens/individual/individual_forgot_password_screen.dart';
@@ -330,12 +332,40 @@ class PayGidiRouter {
           },
         ),
         GoRoute(
+          path: "/${PgRouteNames.transactionHistory}",
+          name: PgRouteNames.transactionHistory,
+          pageBuilder: (context, state) => CustomTransitionPage(
+            child: const TransactionHistoryScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) =>
+                    RouteTransitions.slideRight(animation, child),
+          ),
+        ),
+        GoRoute(
           path: "/${PgRouteNames.transactionDetails}",
           name: PgRouteNames.transactionDetails,
           pageBuilder: (context, state) {
             final transaction = state.extra as Transaction;
             return CustomTransitionPage(
               child: TransactionDetailScreen(transaction: transaction),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      RouteTransitions.slideRight(animation, child),
+            );
+          },
+        ),
+        GoRoute(
+          path: "/${PgRouteNames.paymentSuccess}",
+          name: PgRouteNames.paymentSuccess,
+          pageBuilder: (context, state) {
+            final args = state.extra as Map<String, dynamic>;
+            return CustomTransitionPage(
+              child: PaymentSuccessScreen(
+                amount: args['amount'] as String,
+                recipientName: args['recipientName'] as String,
+                bankName: args['bankName'] as String,
+                accountNumber: args['accountNumber'] as String,
+              ),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) =>
                       RouteTransitions.slideRight(animation, child),

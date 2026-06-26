@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/wallet/data/models/transaction_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
@@ -11,6 +13,46 @@ class TransactionDetailScreen extends StatelessWidget {
   final Transaction transaction;
 
   const TransactionDetailScreen({super.key, required this.transaction});
+
+  String get _receiptText {
+    return 'PAYGIDI TRANSACTION RECEIPT\n'
+        '═══════════════════════════\n\n'
+        'Transaction: ${transaction.title}\n'
+        'Amount: ${transaction.amount}\n'
+        '${transaction.isCredit ? "Sender" : "Recipient"}: ${transaction.recipientOrSender}\n'
+        'Date: ${transaction.date}\n'
+        'Reference: ${transaction.reference}\n'
+        'Status: ${transaction.status}\n\n'
+        'Thank you for using PayGidi.';
+  }
+
+  Future<void> _shareReceipt(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: _receiptText));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Receipt copied to clipboard")),
+      );
+    }
+  }
+
+  Future<void> _downloadReceipt(BuildContext context) async {
+    try {
+      final dir = Directory.systemTemp;
+      final file = File('${dir.path}/receipt_${transaction.reference}.txt');
+      await file.writeAsString(_receiptText);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Receipt saved")),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to download receipt")),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +221,7 @@ class TransactionDetailScreen extends StatelessWidget {
       children: [
         Expanded(
           child: PgScaleButton(
-            onTap: () {},
+            onTap: () => _downloadReceipt(context),
             child: Container(
               height: 56,
               decoration: BoxDecoration(
@@ -205,7 +247,7 @@ class TransactionDetailScreen extends StatelessWidget {
         const SizedBox(width: 16),
         Expanded(
           child: PgScaleButton(
-            onTap: () {},
+            onTap: () => _shareReceipt(context),
             child: Container(
               height: 56,
               decoration: BoxDecoration(

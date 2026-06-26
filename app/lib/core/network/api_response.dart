@@ -21,10 +21,18 @@ class ApiResponse<T> {
       }
     }
 
+    if (errorMessage == null) {
+      final success = json['success'];
+      if (success == false || json['status'] == 400) {
+        errorMessage =
+            json['message'] as String? ?? 'Request failed';
+      }
+    }
+
     return ApiResponse<T>(
       message: json['message'] as String?,
       code: json['code']?.toString() ??
-          (json['status'] == false ? 'ERROR' : null),
+          (json['status'] != 200 ? 'ERROR' : null),
       error: errorMessage,
       data: json['data'] != null && fromJsonT != null
           ? fromJsonT(json['data'])
@@ -32,5 +40,5 @@ class ApiResponse<T> {
     );
   }
 
-  bool get isSuccess => error == null && (code == null || code == '200');
+  bool get isSuccess => error == null && code != 'ERROR';
 }

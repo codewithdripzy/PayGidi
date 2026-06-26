@@ -5,13 +5,14 @@ import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_pin_sheet.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
-import 'package:app/core/widgets/pg_success_dialog.dart';
 import 'package:app/core/widgets/pg_text_field.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/features/wallet/data/models/bank_model.dart';
 import 'package:app/features/wallet/presentation/providers/wallet_provider.dart';
+import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -420,15 +421,13 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       if (response.error == null) {
         _sendReceiptEmail(amount);
         if (!mounted) return;
-        PgSuccessDialog.show(
-          context,
-          title: "Payment Successful",
-          message:
-              "You have successfully sent ₦${_formatComma(_rawAmount)} to $_accountName",
-          buttonText: "Continue",
-          onButtonPressed: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
+        context.goNamed(
+          PgRouteNames.paymentSuccess,
+          extra: {
+            'amount': _formatComma(_rawAmount),
+            'recipientName': _accountName ?? '',
+            'bankName': _selectedBank?.name ?? '',
+            'accountNumber': _accountController.text,
           },
         );
       } else {
