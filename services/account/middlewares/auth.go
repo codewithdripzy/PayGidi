@@ -86,8 +86,8 @@ func Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		// Set user info in context
-		c.Set("user", user)
+		// Set user info in context (pointer for consistent *models.User assertions)
+		c.Set("user", &user)
 		c.Set("userID", userID)
 
 		// Call the next handler in the chain

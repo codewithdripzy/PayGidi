@@ -25,7 +25,7 @@ import (
 func UpdateBusinessProfile(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	user, _ := c.Get("user")
-	u := user.(models.User)
+	u := user.(*models.User)
 
 	if u.AccountType != "business" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "This action is only available for business accounts"})
@@ -95,7 +95,7 @@ func UpdateBusinessProfile(c *gin.Context) {
 func UpdateBusinessDocs(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	user, _ := c.Get("user")
-	u := user.(models.User)
+	u := user.(*models.User)
 
 	if u.AccountType != "business" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "This action is only available for business accounts"})
@@ -140,7 +140,7 @@ func UpdateBusinessDocs(c *gin.Context) {
 func GetBusinessProfile(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	user, _ := c.Get("user")
-	u := user.(models.User)
+	u := user.(*models.User)
 
 	var business models.Business
 	if err := db.Where("user_id = ?", u.ID).First(&business).Error; err != nil {

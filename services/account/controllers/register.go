@@ -57,7 +57,7 @@ func CompleteAccount(c *gin.Context) {
 
 	db := c.MustGet("db").(*gorm.DB)
 	user, _ := c.Get("user")
-	u := user.(models.User)
+	u := user.(*models.User)
 
 	validatedBody, _ := c.Get("validatedBody")
 

@@ -402,7 +402,7 @@ func VerifyAuthOTP(c *gin.Context) {
 func RegisterBiometric(c *gin.Context) {
 	db, _ := c.Get("db")
 	user, _ := c.Get("user")
-	currentUser := user.(models.User)
+	currentUser := user.(*models.User)
 
 	validatedBody, _ := c.Get("validatedBody")
 	data := validatedBody.(*validators.RegisterBiometricDto)

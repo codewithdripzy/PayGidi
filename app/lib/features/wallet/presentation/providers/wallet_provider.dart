@@ -119,6 +119,32 @@ class WalletProvider with ChangeNotifier {
     ]);
   }
 
+  bool _isSimulatingDeposit = false;
+  bool get isSimulatingDeposit => _isSimulatingDeposit;
+
+  Future<ApiResponse<Map<String, dynamic>>> simulateDeposit({
+    required String accountNumber,
+    required String amount,
+  }) async {
+    _isSimulatingDeposit = true;
+    _error = null;
+    notifyListeners();
+
+    final response = await _walletRepository.simulateDeposit(
+      accountNumber: accountNumber,
+      amount: amount,
+    );
+
+    _isSimulatingDeposit = false;
+    if (response.data != null) {
+      notifyListeners();
+    } else {
+      _error = response.error;
+      notifyListeners();
+    }
+    return response;
+  }
+
   Future<ApiResponse<Map<String, dynamic>>> lookupAccount({
     required String accountNumber,
     required String bankCode,

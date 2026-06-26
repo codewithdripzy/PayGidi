@@ -92,6 +92,35 @@ class WalletRepository {
     }
   }
 
+  Future<ApiResponse<Map<String, dynamic>>> simulateDeposit({
+    required String accountNumber,
+    required String amount,
+    String? description,
+  }) async {
+    try {
+      final response = await _apiService.post(
+        '/wallet/deposit/simulate',
+        data: {
+          'account_number': accountNumber,
+          'amount': amount,
+        },
+      );
+      return ApiResponse.fromJson(
+        response.data,
+        (json) => json as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      return ApiResponse.fromJson(
+        (e.response?.data is Map)
+            ? e.response?.data
+            : {'error': e.response?.data.toString()},
+        null,
+      );
+    } catch (e) {
+      return ApiResponse(error: 'An unexpected error occurred');
+    }
+  }
+
   Future<ApiResponse<void>> transfer({
     required double amount,
     required String accountNumber,
