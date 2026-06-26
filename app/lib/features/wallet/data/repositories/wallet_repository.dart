@@ -141,11 +141,10 @@ class WalletRepository {
       await _apiService.post(
         '/wallet/transfer',
         data: {
-          'amount': amount,
-          'accountNumber': accountNumber,
-          'bankCode': bankCode,
-          'pin': pin,
-          'narration': narration,
+          'amount': amount.toStringAsFixed(0),
+          'account_number': accountNumber,
+          'bank_code': bankCode,
+          'remark': narration ?? '',
         },
       );
       return ApiResponse(data: null);

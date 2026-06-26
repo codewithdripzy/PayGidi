@@ -1,5 +1,7 @@
+import 'package:app/core/network/api_service.dart';
 import 'package:app/core/services/biometric_service.dart';
 import 'package:app/core/theme/pg_colors.dart';
+import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_pin_sheet.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
@@ -29,6 +31,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
   String? _accountName;
   int _currentStep = 0;
   String _searchQuery = "";
+  String _rawAmount = "";
 
   @override
   void initState() {
@@ -237,7 +240,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
               ),
               child: Column(
                 children: [
-                  _buildReviewItem("Amount", "₦${_amountController.text}"),
+                  _buildReviewItem("Amount", "₦${_formatComma(_rawAmount)}"),
                   const Divider(),
                   _buildReviewItem("Bank", _selectedBank?.name ?? ""),
                   const Divider(),
@@ -260,7 +263,7 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
                 ),
                 PgTexts.text700(
                   context,
-                  text: "₦${_amountController.text}",
+                  text: "₦${_formatComma(_rawAmount)}",
                   fontSize: 20,
                 ),
               ],
@@ -324,6 +327,15 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     );
   }
 
+  String _formatComma(String digits) {
+    final buf = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) buf.write(',');
+      buf.write(digits[i]);
+    }
+    return buf.toString();
+  }
+
   Future<void> _startVerificationFlow() async {
     final auth = context.read<AuthProvider>();
     final biometricService = context.read<BiometricService>();
@@ -334,10 +346,10 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
       if (authenticated) {
         _executePayment("0000");
         return;
-      } // Dummy pin if biometric authenticated
+      }
     }
 
-    if (auth.userData?.hasPin ?? false) {
+    if (auth.hasPin) {
       _showPinVerification();
     } else {
       _showCreatePinFlow();
@@ -391,8 +403,9 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     setState(() => _isValidatingAccount = true);
 
     final walletProvider = context.read<WalletProvider>();
+    final amount = double.tryParse(_rawAmount) ?? 0;
     final response = await walletProvider.transfer(
-      amount: double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0,
+      amount: amount,
       accountNumber: _accountController.text,
       bankCode: _selectedBank!.code,
       pin: pin,
@@ -401,11 +414,13 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
     if (mounted) {
       setState(() => _isValidatingAccount = false);
       if (response.error == null) {
+        _sendReceiptEmail(amount);
+        if (!mounted) return;
         PgSuccessDialog.show(
           context,
           title: "Payment Successful",
           message:
-              "You have successfully sent ₦${_amountController.text} to $_accountName",
+              "You have successfully sent ₦${_formatComma(_rawAmount)} to $_accountName",
           buttonText: "Continue",
           onButtonPressed: () {
             Navigator.pop(context);
@@ -418,6 +433,42 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
         );
       }
     }
+  }
+
+  Future<void> _sendReceiptEmail(double amount) async {
+    try {
+      final auth = context.read<AuthProvider>();
+      final email = auth.userData?.email;
+      final notifyEnabled = auth.userData?.preferences?.notificationsEnabled ?? false;
+      if (email == null || email.isEmpty || !notifyEnabled) return;
+
+      final apiService = context.read<ApiService>();
+      await apiService.post(
+        '/notification/email',
+        data: {
+          'to': email,
+          'subject': 'Payment Receipt - PayGidi',
+          'body': '''
+Dear ${auth.userData?.person?.firstName ?? 'Valued Customer'},
+
+Your payment of ₦${_formatComma(_rawAmount)} to $_accountName has been successful.
+
+Transaction Details:
+- Amount: ₦${_formatComma(_rawAmount)}
+- Recipient: $_accountName
+- Bank: ${_selectedBank?.name ?? ''}
+- Account Number: ${_accountController.text}
+- Reference: PAYGIDI_${DateTime.now().millisecondsSinceEpoch}
+
+Thank you for using PayGidi.
+
+Best regards,
+PayGidi Team
+''',
+          'type': 'receipt',
+        },
+      );
+    } catch (_) {}
   }
 
   @override
@@ -563,26 +614,76 @@ class _InstantPaymentScreenState extends State<InstantPaymentScreen> {
                           ),
                         ],
                       ] else ...[
-                        PgTextField(
+                        TextFormField(
                           controller: _amountController,
-                          hintText: "0.00",
-                          label: "Amount",
                           keyboardType: TextInputType.number,
-                          prefixIcon: const Icon(
-                            Iconsax.money_2_copy,
-                            size: 20,
-                            color: Colors.grey,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: PgFonts.googleSans,
                           ),
-                          prefix: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 4.0),
-                            child: Text(
-                              "₦",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                          decoration: InputDecoration(
+                            labelText: "Amount",
+                            labelStyle: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey.shade400,
+                              fontFamily: PgFonts.googleSans,
+                            ),
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.only(left: 16, top: 16),
+                              child: Text(
+                                "₦",
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade600,
+                                  fontFamily: PgFonts.googleSans,
+                                ),
                               ),
                             ),
+                            prefixIconConstraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 0,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 20,
+                            ),
+                            fillColor: Colors.white,
+                            filled: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Colors.grey.shade200),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Colors.grey.shade200),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: PgColors.primary, width: 1.5),
+                            ),
                           ),
+                          onChanged: (value) {
+                            final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+                            if (digits.isEmpty) {
+                              _rawAmount = '';
+                              if (_amountController.text.isNotEmpty) {
+                                _amountController.text = '';
+                                _amountController.selection = TextSelection.collapsed(offset: 0);
+                              }
+                              return;
+                            }
+                            _rawAmount = digits;
+                            final formatted = _formatComma(digits);
+                            final prev = _amountController.text;
+                            if (formatted != prev) {
+                              _amountController.text = formatted;
+                              _amountController.selection = TextSelection.collapsed(offset: formatted.length);
+                            }
+                          },
                         ),
                       ],
                       const SizedBox(height: 40),
