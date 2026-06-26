@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	payGidiErrors "github.com/PayGidi/AccountService/core/interfaces/errors"
 	"github.com/PayGidi/AccountService/models"
@@ -298,7 +299,7 @@ func Me(c *gin.Context) {
 	var wallets interface{}
 	if err == nil {
 		defer walletClient.Close()
-		resp, err := walletClient.GetWalletsForUser(c.Request.Context(), currentUser.UID)
+		resp, err := walletClient.GetWalletsForUser(c.Request.Context(), strconv.FormatUint(uint64(currentUser.ID), 10))
 		if err == nil && resp.Success {
 			wallets = resp.Wallets
 		} else {

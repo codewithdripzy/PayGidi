@@ -4,6 +4,8 @@ import 'package:app/core/theme/theme_provider.dart';
 import 'package:app/features/auth/data/repositories/auth_repository.dart';
 import 'package:app/features/auth/data/services/auth_storage_service.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:app/features/finance/data/repositories/finance_repository.dart';
+import 'package:app/features/finance/presentation/providers/finance_provider.dart';
 import 'package:app/features/wallet/data/repositories/transaction_repository.dart';
 import 'package:app/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:app/features/wallet/presentation/providers/wallet_provider.dart';
@@ -24,6 +26,7 @@ Future<void> main(List<String> args) async {
   final authRepository = AuthRepository(apiService);
   final walletRepository = WalletRepository(apiService);
   final transactionRepository = TransactionRepository(apiService);
+  final financeRepository = FinanceRepository(apiService);
   final biometricService = BiometricService();
 
   runApp(
@@ -34,6 +37,7 @@ Future<void> main(List<String> args) async {
         Provider.value(value: authRepository),
         Provider.value(value: walletRepository),
         Provider.value(value: transactionRepository),
+        Provider.value(value: financeRepository),
         Provider.value(value: authStorageService),
         Provider.value(value: biometricService),
         ChangeNotifierProxyProvider3<
@@ -70,6 +74,11 @@ Future<void> main(List<String> args) async {
           ),
           update: (context, walletRepo, transRepo, previous) =>
               previous ?? WalletProvider(walletRepo, transRepo),
+        ),
+        ChangeNotifierProvider<FinanceProvider>(
+          create: (context) => FinanceProvider(
+            context.read<FinanceRepository>(),
+          ),
         ),
       ],
       child: const PgApp(),

@@ -1,14 +1,26 @@
 import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/finance/data/models/savings_goal_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class FinanceGoals extends StatelessWidget {
-  const FinanceGoals({super.key});
+  final List<SavingsGoal> goals;
+  final VoidCallback? onSeeAll;
+
+  const FinanceGoals({super.key, required this.goals, this.onSeeAll});
 
   @override
   Widget build(BuildContext context) {
+    if (goals.isEmpty) return const SizedBox.shrink();
+
     final theme = Theme.of(context);
+    final currencyFormatter = NumberFormat.currency(
+      symbol: "₦",
+      decimalDigits: 0,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -22,12 +34,16 @@ class FinanceGoals extends StatelessWidget {
               color: (theme.textTheme.bodyMedium?.color ?? PgColors.black)
                   .withValues(alpha: 0.5),
             ),
-            PgTexts.gradientText(
-              context,
-              text: "See All",
-              fontSize: 14,
-              gradient: PgColors.primaryGradient,
-            ),
+            if (onSeeAll != null)
+              GestureDetector(
+                onTap: onSeeAll,
+                child: PgTexts.gradientText(
+                  context,
+                  text: "See All",
+                  fontSize: 14,
+                  gradient: PgColors.primaryGradient,
+                ),
+              ),
           ],
         ),
         heightSpacing(8),
@@ -35,25 +51,19 @@ class FinanceGoals extends StatelessWidget {
           height: 220,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: [
-              _buildGoalCard(
-                context,
-                title: "New Car",
-                target: "₦5,000,000",
-                saved: "₦1,200,000",
-                percentage: 0.24,
-                image: "assets/onboarding_images/page1.jpeg",
-              ),
-              const SizedBox(width: 16),
-              _buildGoalCard(
-                context,
-                title: "Vacation",
-                target: "₦800,000",
-                saved: "₦650,000",
-                percentage: 0.81,
-                image: "assets/onboarding_images/page2.jpeg",
-              ),
-            ],
+            children: goals.map((goal) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: 16,
+                  left: goals.first == goal ? 0 : 0,
+                ),
+                child: _buildGoalCard(
+                  context,
+                  goal: goal,
+                  currencyFormatter: currencyFormatter,
+                ),
+              );
+            }).toList(),
           ),
         ),
       ],
@@ -62,14 +72,13 @@ class FinanceGoals extends StatelessWidget {
 
   Widget _buildGoalCard(
     BuildContext context, {
-    required String title,
-    required String target,
-    required String saved,
-    required double percentage,
-    required String image,
+    required SavingsGoal goal,
+    required NumberFormat currencyFormatter,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final percentage = goal.progress;
+
     return Container(
       width: 220,
       decoration: BoxDecoration(
@@ -86,66 +95,80 @@ class FinanceGoals extends StatelessWidget {
             height: 100,
             width: double.infinity,
             decoration: BoxDecoration(
+              color: PgColors.primary.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),
-              image: DecorationImage(
-                image: AssetImage(image),
-                fit: BoxFit.cover,
+            ),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: PgColors.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.savings_outlined,
+                  size: 32,
+                  color: PgColors.primary,
+                ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                PgTexts.text500(
-                  context,
-                  text: title,
-                  fontSize: 14,
-                  color: isDark ? Colors.white70 : Colors.grey,
-                ),
-                const SizedBox(height: 4),
-                PgTexts.text700(
-                  context,
-                  text: saved,
-                  fontSize: 18,
-                  color: isDark ? Colors.white : PgColors.black,
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    PgTexts.text400(
-                      context,
-                      text: "Target: $target",
-                      fontSize: 10,
-                      color: isDark ? Colors.white60 : Colors.grey,
-                    ),
-                    PgTexts.text600(
-                      context,
-                      text: "${(percentage * 100).toInt()}%",
-                      fontSize: 10,
-                      color: isDark ? Colors.white70 : PgColors.black,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: LinearProgressIndicator(
-                    value: percentage,
-                    backgroundColor: isDark
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : PgColors.black.withValues(alpha: 0.1),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      isDark ? Colors.white : PgColors.black,
-                    ),
-                    minHeight: 4,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  PgTexts.text500(
+                    context,
+                    text: goal.name,
+                    fontSize: 14,
+                    color: isDark ? Colors.white70 : Colors.grey,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  PgTexts.text700(
+                    context,
+                    text: currencyFormatter.format(goal.currentAmount),
+                    fontSize: 18,
+                    color: isDark ? Colors.white : PgColors.black,
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      PgTexts.text400(
+                        context,
+                        text:
+                            "Target: ${currencyFormatter.format(goal.targetAmount)}",
+                        fontSize: 10,
+                        color: isDark ? Colors.white60 : Colors.grey,
+                      ),
+                      PgTexts.text600(
+                        context,
+                        text: "${(percentage * 100).toInt()}%",
+                        fontSize: 10,
+                        color: isDark ? Colors.white70 : PgColors.black,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: LinearProgressIndicator(
+                      value: percentage,
+                      backgroundColor: isDark
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : PgColors.black.withValues(alpha: 0.1),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isDark ? Colors.white : PgColors.black,
+                      ),
+                      minHeight: 4,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

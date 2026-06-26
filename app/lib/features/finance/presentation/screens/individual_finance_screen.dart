@@ -3,8 +3,9 @@ import 'package:app/core/theme/pg_fonts.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
+import 'package:app/features/finance/data/models/thrift_model.dart';
 import 'package:app/features/finance/presentation/components/finance_goals.dart';
-import 'package:app/features/wallet/presentation/providers/wallet_provider.dart';
+import 'package:app/features/finance/presentation/providers/finance_provider.dart';
 import 'package:app/routes/pg_route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -32,8 +33,18 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WalletProvider>().fetchBalance();
+      context.read<FinanceProvider>().refreshAll();
     });
+  }
+
+  List<Thrift> get _joinedThrifts {
+    final thrifts = context.watch<FinanceProvider>().thrifts;
+    return thrifts.where((t) => t.isMember).toList();
+  }
+
+  List<Thrift> get _publicThrifts {
+    final thrifts = context.watch<FinanceProvider>().thrifts;
+    return thrifts.where((t) => t.isPublic && !t.isMember).toList();
   }
 
   @override
@@ -103,15 +114,18 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                 const SizedBox(height: 32),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child:
-                      const FinanceGoals(), // Reusing existing goals component for Personal Savings
+                  child: FinanceGoals(
+                    goals: context.watch<FinanceProvider>().savingsGoals,
+                  ),
                 ),
-                const SizedBox(height: 32),
-                _buildThriftTabs(context),
-                const SizedBox(height: 24),
-                _selectedThriftTabIndex == 0
-                    ? _buildJoinedThrifts(context)
-                    : _buildPublicThrifts(context),
+                if (_joinedThrifts.isNotEmpty || _publicThrifts.isNotEmpty) ...[
+                  const SizedBox(height: 32),
+                  _buildThriftTabs(context),
+                  const SizedBox(height: 24),
+                  _selectedThriftTabIndex == 0
+                      ? _buildJoinedThrifts(context)
+                      : _buildPublicThrifts(context),
+                ],
                 const SizedBox(height: 32),
               ],
             ),
@@ -122,13 +136,13 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
   }
 
   Widget _buildSavingsCarousel(BuildContext context) {
-    final walletProvider = context.watch<WalletProvider>();
-    final balance = walletProvider.balance;
+    final financeProvider = context.watch<FinanceProvider>();
+    final balance = financeProvider.balance;
 
     return Column(
       children: [
         SizedBox(
-          height: 150, // Shorter height
+          height: 150,
           child: PageView(
             onPageChanged: (index) {
               setState(() {
@@ -324,41 +338,30 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
   }
 
   Widget _buildJoinedThrifts(BuildContext context) {
+    final thrifts = _joinedThrifts;
+    if (thrifts.isEmpty) return const SizedBox.shrink();
+
     return SizedBox(
       height: 220,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        children: [
-          _buildThriftCard(
-            context,
-            name: "Tech Bro Circle",
-            description: "Monthly savings for tech professionals.",
-            contribution: "₦100k/mo",
-            members: 8,
-            image: "assets/onboarding_images/page1.jpeg",
-          ),
-          const SizedBox(width: 16),
-          _buildThriftCard(
-            context,
-            name: "Lagos Foodies",
-            description: "Saving for culinary adventures.",
-            contribution: "₦20k/mo",
-            members: 15,
-            image: "assets/onboarding_images/page2.jpeg",
-          ),
-        ],
+        children: thrifts.map((t) {
+          return Padding(
+            padding: EdgeInsets.only(
+              right: 16,
+              left: thrifts.first == t ? 0 : 0,
+            ),
+            child: _buildThriftCard(context, thrift: t),
+          );
+        }).toList(),
       ),
     );
   }
 
   Widget _buildThriftCard(
     BuildContext context, {
-    required String name,
-    required String description,
-    required String contribution,
-    required int members,
-    String? image,
+    required Thrift thrift,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -366,7 +369,7 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
     return PgScaleButton(
       onTap: () => context.pushNamed(
         PgRouteNames.thriftDetails,
-        extra: {'thriftName': name},
+        extra: {'thriftName': thrift.name},
       ),
       child: Container(
         width: 180,
@@ -380,39 +383,30 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (image != null)
-              Container(
-                height: 100,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  image: DecorationImage(
-                    image: AssetImage(image),
-                    fit: BoxFit.cover,
-                  ),
+            Container(
+              height: 100,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: PgColors.primary.withValues(alpha: 0.05),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
                 ),
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.all(20),
+              ),
+              child: Center(
                 child: Container(
-                  width: 40,
-                  height: 40,
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : PgColors.black.withValues(alpha: 0.1),
+                    color: PgColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Iconsax.status_up_copy,
-                    color: isDark ? Colors.white : PgColors.black,
-                    size: 20,
+                    color: PgColors.primary,
+                    size: 24,
                   ),
                 ),
               ),
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -421,14 +415,14 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                   children: [
                     PgTexts.text700(
                       context,
-                      text: name,
+                      text: thrift.name,
                       fontSize: 14,
                       color: isDark ? Colors.white : PgColors.black,
                       textOverflow: TextOverflow.ellipsis,
                     ),
                     PgTexts.text400(
                       context,
-                      text: description,
+                      text: thrift.description,
                       fontSize: 11,
                       color: isDark ? Colors.white60 : Colors.grey,
                       maxLines: 2,
@@ -439,7 +433,7 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                       children: [
                         PgTexts.gradientText(
                           context,
-                          text: contribution,
+                          text: _currencyFormatter.format(thrift.contributionAmount),
                           fontSize: 11,
                           gradient: PgColors.primaryGradient,
                         ),
@@ -472,50 +466,30 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
   }
 
   Widget _buildPublicThrifts(BuildContext context) {
+    final thrifts = _publicThrifts;
+    if (thrifts.isEmpty) return const SizedBox.shrink();
+
     return SizedBox(
       height: 220,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        children: [
-          _buildPublicThriftItem(
-            context,
-            name: "Entrepreneurs Hub",
-            description: "High volume monthly contribution.",
-            contribution: "₦500k/mo",
-            members: 42,
-            image: "assets/onboarding_images/page3.jpeg",
-          ),
-          const SizedBox(width: 16),
-          _buildPublicThriftItem(
-            context,
-            name: "Student Savings",
-            description: "Small daily contributions.",
-            contribution: "₦500/day",
-            members: 128,
-            image: "assets/onboarding_images/page1.jpeg",
-          ),
-          const SizedBox(width: 16),
-          _buildPublicThriftItem(
-            context,
-            name: "Agro Investors",
-            description: "Saving for the next harvest.",
-            contribution: "₦50k/mo",
-            members: 64,
-            image: "assets/onboarding_images/page2.jpeg",
-          ),
-        ],
+        children: thrifts.map((t) {
+          return Padding(
+            padding: EdgeInsets.only(
+              right: 16,
+              left: thrifts.first == t ? 0 : 0,
+            ),
+            child: _buildPublicThriftItem(context, thrift: t),
+          );
+        }).toList(),
       ),
     );
   }
 
   Widget _buildPublicThriftItem(
     BuildContext context, {
-    required String name,
-    required String description,
-    required String contribution,
-    required int members,
-    String? image,
+    required Thrift thrift,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -532,39 +506,30 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (image != null)
-            Container(
-              height: 100,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
-                image: DecorationImage(
-                  image: AssetImage(image),
-                  fit: BoxFit.cover,
-                ),
+          Container(
+            height: 100,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: PgColors.primary.withValues(alpha: 0.05),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
               ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.all(20),
+            ),
+            child: Center(
               child: Container(
-                width: 40,
-                height: 40,
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.1)
-                      : PgColors.black.withValues(alpha: 0.1),
+                  color: PgColors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Iconsax.status_up_copy,
-                  color: isDark ? Colors.white : PgColors.black,
-                  size: 20,
+                  color: PgColors.primary,
+                  size: 24,
                 ),
               ),
             ),
+          ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -573,14 +538,14 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                 children: [
                   PgTexts.text700(
                     context,
-                    text: name,
+                    text: thrift.name,
                     fontSize: 14,
                     color: isDark ? Colors.white : PgColors.black,
                     textOverflow: TextOverflow.ellipsis,
                   ),
                   PgTexts.text400(
                     context,
-                    text: description,
+                    text: thrift.description,
                     fontSize: 11,
                     color: isDark ? Colors.white60 : Colors.grey,
                     maxLines: 2,
@@ -591,12 +556,14 @@ class _IndividualFinanceScreenState extends State<IndividualFinanceScreen> {
                     children: [
                       PgTexts.gradientText(
                         context,
-                        text: contribution,
+                        text: _currencyFormatter.format(thrift.contributionAmount),
                         fontSize: 11,
                         gradient: PgColors.primaryGradient,
                       ),
                       PgScaleButton(
-                        onTap: () {},
+                        onTap: () {
+                          context.read<FinanceProvider>().fetchThrifts();
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,

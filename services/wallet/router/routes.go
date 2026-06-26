@@ -23,6 +23,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 
 	// Create the WalletController instance with both dependencies
 	walletController := controllers.NewWalletController(db, accClient)
+	financeController := controllers.NewFinanceController(db)
 
 	api := r.Group("/api/v1")
 
@@ -65,6 +66,16 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 
 		// Payments (KYB Trust Layer integration)
 		authGroup.POST("/payments/new", walletController.CreatePaymentHttp)
+
+		// Finance (Savings Goals & Thrifts)
+		authGroup.GET("/finance/summary", financeController.GetFinanceSummary)
+		authGroup.GET("/finance/savings", financeController.ListSavingsGoals)
+		authGroup.POST("/finance/savings", financeController.CreateSavingsGoal)
+		authGroup.PUT("/finance/savings/:id", financeController.UpdateSavingsGoal)
+		authGroup.DELETE("/finance/savings/:id", financeController.DeleteSavingsGoal)
+		authGroup.GET("/finance/thrifts", financeController.ListThrifts)
+		authGroup.POST("/finance/thrifts", financeController.CreateThrift)
+		authGroup.POST("/finance/thrifts/:id/join", financeController.JoinThrift)
 
 		if constants.IsDevMode() {
 			authGroup.POST("/deposit/simulate", walletController.SimulatePaymentHttp)

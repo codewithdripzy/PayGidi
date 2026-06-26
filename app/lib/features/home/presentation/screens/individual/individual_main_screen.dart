@@ -6,7 +6,6 @@ import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/finance/presentation/screens/individual_finance_screen.dart';
-import 'package:app/features/home/presentation/screens/individual/individual_cards_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_home_screen.dart';
 import 'package:app/features/home/presentation/screens/individual/individual_me_screen.dart';
 import 'package:app/routes/pg_route_names.dart';
@@ -25,14 +24,11 @@ class IndividualMainScreen extends StatefulWidget {
 
 class _IndividualMainScreenState extends State<IndividualMainScreen> {
   int _selectedIndex = 0;
-  static const bool _isFeatureEnabled = false; // Flag for enabling/disabling
 
   final List<Widget> _screens = [
     const IndividualHomeScreen(),
-    // const IndividualCardsScreen(),
-    _isFeatureEnabled ? const IndividualCardsScreen() : const ComingSoonScreen(title: "Cards"),
-    // const IndividualFinanceScreen(),
-    _isFeatureEnabled ? const IndividualFinanceScreen() : const ComingSoonScreen(title: "Finance"),
+    const ComingSoonScreen(title: "Cards"),
+    const IndividualFinanceScreen(),
     const IndividualMeScreen(),
   ];
 

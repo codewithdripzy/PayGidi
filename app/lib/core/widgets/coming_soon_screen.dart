@@ -22,7 +22,7 @@ class ComingSoonScreen extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -73,24 +73,10 @@ class ComingSoonScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            PgColors.primary,
-                            PgColors.secondary,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        color: PgColors.primary.withValues(alpha: 0.05),
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: PgColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
                       ),
-                      child: Icon(icon, color: Colors.white, size: 40),
+                      child: Icon(icon, color: PgColors.primary, size: 40),
                     ),
                     heightSpacing(24),
                     PgTexts.text600(
@@ -117,8 +103,15 @@ class ComingSoonScreen extends StatelessWidget {
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text(
-                              "We'll notify you when cards are available!",
+                            content: const Row(
+                              children: [
+                                Icon(Iconsax.notification_copy,
+                                    color: Colors.white, size: 18),
+                                SizedBox(width: 8),
+                                Text(
+                                  "We'll notify you when it's available!",
+                                ),
+                              ],
                             ),
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
@@ -142,11 +135,22 @@ class ComingSoonScreen extends StatelessWidget {
                             end: Alignment.bottomRight,
                           ),
                         ),
-                        child: PgTexts.text600(
-                          context,
-                          text: "Notify Me",
-                          color: Colors.white,
-                          fontSize: 16,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Iconsax.notification_copy,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            PgTexts.text600(
+                              context,
+                              text: "Notify Me",
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ],
                         ),
                       ),
                     ),
