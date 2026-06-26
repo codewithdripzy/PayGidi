@@ -234,7 +234,7 @@ func (wc *WalletController) GetWalletHttp(c *gin.Context) {
 	var account models.Account
 
 	if accountNumber == "" {
-		userID, exists := c.Get("userID")
+		userID, exists := c.Get("customerId")
 		if !exists {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status":  401,
@@ -245,12 +245,15 @@ func (wc *WalletController) GetWalletHttp(c *gin.Context) {
 			return
 		}
 
-		var userIDStr string
-		switch v := userID.(type) {
-		case string:
-			userIDStr = v
-		default:
-			userIDStr = fmt.Sprintf("%v", v)
+		userIDStr, ok := userID.(string)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  500,
+				"success": false,
+				"message": "Invalid user ID format",
+				"data":    gin.H{},
+			})
+			return
 		}
 
 		if err := wc.db.Where("user_id = ?", userIDStr).First(&account).Error; err != nil {
