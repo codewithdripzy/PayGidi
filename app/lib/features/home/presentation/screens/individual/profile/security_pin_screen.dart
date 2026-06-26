@@ -46,7 +46,7 @@ class _SecurityPinScreenState extends State<SecurityPinScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final auth = context.watch<AuthProvider>();
-    final hasPin = auth.userData?.hasPin ?? false;
+    final hasPin = auth.hasPin;
 
     return buildPGAnnotatedRegion(
       brightness: theme.brightness == Brightness.dark
@@ -353,6 +353,8 @@ class _SecurityPinScreenState extends State<SecurityPinScreen> {
                           decoration: const InputDecoration(
                             counterText: '',
                             border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                           ),
                           onChanged: (v) {
                             if (v.isNotEmpty && index < 4) {
@@ -530,30 +532,40 @@ class _SecurityPinScreenState extends State<SecurityPinScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => PopScope(
+      builder: (ctx) => PopScope(
         canPop: false,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(32),
-            margin: const EdgeInsets.all(40),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: PgColors.primary,
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.3),
+          child: Center(
+            child: Container(
+              margin: const EdgeInsets.all(40),
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 36),
+              decoration: BoxDecoration(
+                color: Theme.of(ctx).cardTheme.color,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
                   ),
-                ),
-                const SizedBox(height: 24),
-                PgTexts.text500(context, text: message, fontSize: 16),
-              ],
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: PgColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  PgTexts.text600(ctx, text: message, fontSize: 16),
+                ],
+              ),
             ),
           ),
         ),

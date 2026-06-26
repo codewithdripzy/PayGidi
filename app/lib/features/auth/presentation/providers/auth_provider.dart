@@ -25,6 +25,9 @@ class AuthProvider extends ChangeNotifier {
   PgUser? _userData; // Holds comprehensive user details
   PgUser? get userData => _userData;
 
+  bool _hasPin = false;
+  bool get hasPin => _hasPin;
+
   List<Wallet>? _wallets; // Holds user's wallets
   List<Wallet>? get wallets => _wallets;
 
@@ -99,6 +102,7 @@ class AuthProvider extends ChangeNotifier {
       VerifyOtpRequest(
         phone: phone,
         code: code,
+        forWhat: 'login',
         deviceName: deviceInfo.deviceName,
         deviceType: deviceInfo.deviceType,
         deviceOs: deviceInfo.deviceOs,
@@ -200,7 +204,8 @@ class AuthProvider extends ChangeNotifier {
     if (response.isSuccess && response.data != null) {
       _userData = response.data!.data.user;
       _wallets = response.data!.data.wallets;
-      _userData?.hasPin = response.data!.data.hasPin;
+      _hasPin = response.data!.data.hasPin;
+      _userData?.hasPin = _hasPin;
       _isLoggedIn = true;
       await _storageService.savePgUser(_userData!);
       notifyListeners();
@@ -258,6 +263,7 @@ class AuthProvider extends ChangeNotifier {
     setLoading(false);
 
     if (response.isSuccess) {
+      _hasPin = true;
       if (_userData != null) {
         _userData!.hasPin = true;
         await _storageService.savePgUser(_userData!);
@@ -423,6 +429,7 @@ class AuthProvider extends ChangeNotifier {
 
   void logout() {
     _isLoggedIn = false;
+    _hasPin = false;
     _userData = null;
     _wallets = null;
     _authResponseData = null;

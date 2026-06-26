@@ -340,11 +340,15 @@ type WebhookErrorLogEntry struct {
 	TransactionUUID      string `json:"transaction_uuid"`
 }
 
+type webhookErrorLogData struct {
+	Records []WebhookErrorLogEntry `json:"records"`
+}
+
 // GetWebhookErrorLog retrieves missed webhook notifications from Squad's error log.
 // Returns up to 100 entries by default.
 func GetWebhookErrorLog(ctx context.Context) (bool, *string, []WebhookErrorLogEntry) {
 	refreshSquadClient()
-	var response responses.SquadResponse[[]WebhookErrorLogEntry]
+	var response responses.SquadResponse[webhookErrorLogData]
 
 	_, err := httpclient.Get(client, ctx, "/virtual-account/webhook/logs", &response)
 	if err != nil {
@@ -358,11 +362,12 @@ func GetWebhookErrorLog(ctx context.Context) (bool, *string, []WebhookErrorLogEn
 		return false, &response.Message, nil
 	}
 
-	if response.Data == nil {
-		response.Data = []WebhookErrorLogEntry{}
+	records := response.Data.Records
+	if records == nil {
+		records = []WebhookErrorLogEntry{}
 	}
 
-	return true, nil, response.Data
+	return true, nil, records
 }
 
 // DeleteWebhookErrorLog deletes a webhook error log entry after it has been processed.

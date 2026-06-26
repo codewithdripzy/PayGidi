@@ -401,7 +401,7 @@ func (wc *WalletController) SimulatePaymentHttp(c *gin.Context) {
 	}
 
 	var account models.Account
-	if err := wc.db.Where("account_number = ?", req.AccountNumber).First(&account).Error; err != nil {
+	if err := wc.db.Where("provider_account_number = ?", req.AccountNumber).First(&account).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"status":  404,
 			"success": false,

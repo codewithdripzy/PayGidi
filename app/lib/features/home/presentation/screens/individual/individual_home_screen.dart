@@ -5,7 +5,9 @@ import 'package:app/features/home/presentation/components/home_banner.dart';
 import 'package:app/features/home/presentation/components/home_header.dart';
 import 'package:app/features/home/presentation/components/home_quick_actions.dart';
 import 'package:app/features/home/presentation/components/home_recent_transactions.dart';
+import 'package:app/features/wallet/presentation/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 /// The primary Home Screen for individual users.
 /// It assembles the header, balance card, quick actions, promotional banner,
@@ -15,6 +17,7 @@ class IndividualHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final walletProvider = context.watch<WalletProvider>();
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final backgroundColor = isDark ? theme.scaffoldBackgroundColor : PgColors.homeBackground;
@@ -26,8 +29,7 @@ class IndividualHomeScreen extends StatelessWidget {
         backgroundColor: backgroundColor,
         body: RefreshIndicator(
           onRefresh: () async {
-            // Add refresh logic here
-            await Future.delayed(const Duration(seconds: 2));
+            await walletProvider.refreshAll();
           },
           color: PgColors.primary,
           child: SingleChildScrollView(
@@ -37,7 +39,7 @@ class IndividualHomeScreen extends StatelessWidget {
               children: [
               const HomeHeader(),
               const SizedBox(height: 32),
-              const HomeBalanceCard(),
+              HomeBalanceCard(balance: walletProvider.balance?.totalBalance),
               const SizedBox(height: 32),
               const HomeQuickActions(),
               const SizedBox(height: 32),
