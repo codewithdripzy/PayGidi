@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/PayGidi/WalletService/controllers"
-	"github.com/PayGidi/WalletService/core/constants"
 	_ "github.com/PayGidi/WalletService/docs"
 	"github.com/PayGidi/WalletService/middlewares"
 	"github.com/PayGidi/WalletService/services/account"
@@ -77,9 +76,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, accClient *account.AccountClient) {
 		authGroup.POST("/finance/thrifts", financeController.CreateThrift)
 		authGroup.POST("/finance/thrifts/:id/join", financeController.JoinThrift)
 
-		if constants.IsDevMode() {
-			authGroup.POST("/deposit/simulate", walletController.SimulatePaymentHttp)
-		}
+		authGroup.POST("/deposit/simulate", walletController.SimulatePaymentHttp)
 	}
 
 }

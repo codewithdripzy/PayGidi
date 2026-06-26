@@ -213,107 +213,150 @@ class _DepositScreenState extends State<DepositScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (sheetContext) {
         final walletProvider = sheetContext.read<WalletProvider>();
         final account = walletProvider.virtualAccount;
 
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(32)),
           ),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
-                heightSpacing(20),
-                PgTexts.text700(
-                  sheetContext,
-                  text: "Simulate Deposit",
-                  fontSize: 20,
-                  color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
-                ),
-                heightSpacing(4),
-                PgTexts.text400(
-                  sheetContext,
-                  text: "For development purposes only",
-                  fontSize: 13,
-                  color: Colors.grey,
-                ),
-                heightSpacing(24),
-                TextFormField(
-                  controller: amountController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    labelText: "Amount",
-                    hintText: "Enter amount",
-                    prefixText: "₦ ",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return "Enter an amount";
-                    if (double.tryParse(v) == null || double.parse(v) <= 0) {
-                      return "Enter a valid amount";
-                    }
-                    return null;
-                  },
-                ),
-                heightSpacing(16),
-                TextFormField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                    labelText: "Description (optional)",
-                    hintText: "e.g. Salary payment",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                heightSpacing(8),
-                if (account != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: PgTexts.text400(
+                  const SizedBox(height: 32),
+                  Center(
+                    child: PgTexts.text700(
                       sheetContext,
-                      text:
-                          "Account: ${account.accountNumber} (${account.bankName})",
-                      fontSize: 11,
-                      color: Colors.grey,
+                      text: "Simulate Deposit",
+                      fontSize: 22,
                     ),
                   ),
-                heightSpacing(16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: walletProvider.isSimulatingDeposit
+                  const SizedBox(height: 32),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: theme.cardTheme.color,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: theme.dividerTheme.color ??
+                            Colors.grey.shade100,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: amountController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          decoration: InputDecoration(
+                            labelText: "Amount",
+                            hintText: "Enter amount",
+                            prefixText: "₦ ",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) {
+                              return "Enter an amount";
+                            }
+                            if (double.tryParse(v) == null ||
+                                double.parse(v) <= 0) {
+                              return "Enter a valid amount";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: descriptionController,
+                          decoration: InputDecoration(
+                            labelText: "Description (optional)",
+                            hintText: "e.g. Salary payment",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        if (account != null) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: PgColors.primary.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Iconsax.bank_copy,
+                                    size: 16, color: PgColors.primary),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: PgTexts.text400(
+                                    sheetContext,
+                                    text:
+                                        "${account.accountNumber} - ${account.bankName}",
+                                    fontSize: 12,
+                                    color: PgColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      PgTexts.text500(
+                        sheetContext,
+                        text: "Dev: Test Credit",
+                        color: Colors.grey,
+                      ),
+                      PgTexts.text700(
+                        sheetContext,
+                        text:
+                            "₦${amountController.text.isEmpty ? "0" : amountController.text}",
+                        fontSize: 20,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                  PgScaleButton(
+                    onTap: walletProvider.isSimulatingDeposit
                         ? null
                         : () async {
                             if (!formKey.currentState!.validate()) return;
                             final amount = amountController.text.trim();
                             final response =
                                 await walletProvider.simulateDeposit(
-                              accountNumber: account?.accountNumber ?? '',
+                              accountNumber:
+                                  account?.accountNumber ?? '',
                               amount: amount,
                             );
                             if (!sheetContext.mounted) return;
@@ -327,30 +370,45 @@ class _DepositScreenState extends State<DepositScreen> {
                             } else {
                               PgSnackBar.showError(
                                 context,
-                                response.error ?? "Failed to simulate deposit",
+                                response.error ??
+                                    "Failed to simulate deposit",
                               );
                             }
                           },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: PgColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      height: 60,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(100),
+                        gradient: const LinearGradient(
+                          colors: [
+                            PgColors.primary,
+                            PgColors.secondary,
+                          ],
+                        ),
                       ),
-                    ),
-                    child: walletProvider.isSimulatingDeposit
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
+                      child: walletProvider.isSimulatingDeposit
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : PgTexts.text600(
+                              sheetContext,
+                              text: "Deposit",
                               color: Colors.white,
+                              fontSize: 16,
                             ),
-                          )
-                        : const Text("Deposit"),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         );

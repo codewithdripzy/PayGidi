@@ -1,7 +1,9 @@
+import 'package:app/core/services/biometric_service.dart';
 import 'package:app/core/theme/pg_colors.dart';
 import 'package:app/core/widgets/pg_annotated_region.dart';
 import 'package:app/core/widgets/pg_pin_sheet.dart';
 import 'package:app/core/widgets/pg_scale_button.dart';
+import 'package:app/core/widgets/pg_snackbar.dart';
 import 'package:app/core/widgets/pg_texts.dart';
 import 'package:app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app/features/home/presentation/screens/individual/profile/block_account_screen.dart';
@@ -12,8 +14,33 @@ import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
 
-class SecurityPinScreen extends StatelessWidget {
+class SecurityPinScreen extends StatefulWidget {
   const SecurityPinScreen({super.key});
+
+  @override
+  State<SecurityPinScreen> createState() => _SecurityPinScreenState();
+}
+
+class _SecurityPinScreenState extends State<SecurityPinScreen> {
+  final _biometricService = BiometricService();
+  bool _biometricAvailable = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadBiometricState();
+    });
+  }
+
+  Future<void> _loadBiometricState() async {
+    final available = await _biometricService.isBiometricAvailable();
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +113,14 @@ class SecurityPinScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              if (_biometricAvailable && hasPin) ...[
+                const SizedBox(height: 32),
+                _buildSection(
+                  context,
+                  title: "Transaction Security",
+                  items: [_buildBiometricToggle(context)],
+                ),
+              ],
               const SizedBox(height: 32),
               _buildSection(
                 context,
@@ -156,6 +191,38 @@ class SecurityPinScreen extends StatelessWidget {
     );
   }
 
+  _SecurityMenuItem _buildBiometricToggle(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final isEnabled = auth.userData?.biometricEnabled ?? false;
+
+    return _SecurityMenuItem(
+      icon: Iconsax.finger_scan_copy,
+      title: "Use Biometrics for Transactions",
+      subtitle: isEnabled ? "Enabled" : "Disabled",
+      trailingWidget: Switch(
+        value: isEnabled,
+        activeThumbColor: PgColors.primary,
+        onChanged: (value) async {
+          if (value) {
+            final authenticated = await _biometricService.authenticateLocally();
+            if (!authenticated) return;
+            final biometricId = await _biometricService
+                .generateAndStoreBiometricId();
+            await _biometricService.setBiometricEnabled(true);
+            await auth.registerBiometric(biometricId);
+            if (mounted) PgSnackBar.showSuccess(context, "Biometrics enabled");
+          } else {
+            await _biometricService.setBiometricEnabled(false);
+            if (mounted) {
+              PgSnackBar.showSuccess(context, "Biometrics disabled");
+            }
+          }
+          if (mounted) _loadBiometricState();
+        },
+      ),
+    );
+  }
+
   void _showSetPinFlow(BuildContext context) {
     PgPinSheet.show(
       context,
@@ -176,41 +243,228 @@ class SecurityPinScreen extends StatelessWidget {
       onVerify: (pin) async {
         if (pin == firstPin) {
           Navigator.pop(context);
-          final response = await context
-              .read<AuthProvider>()
-              .setPin(pin: pin, confirmPin: pin);
+          _showLoadingModal(context, "We're setting your pin...");
+          final response = await context.read<AuthProvider>().setPin(
+            pin: pin,
+            confirmPin: pin,
+          );
 
           if (!context.mounted) return;
+          Navigator.pop(context);
 
           if (response.isSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("PIN set successfully!"),
-                backgroundColor: Color(0xFF22C55E),
-              ),
-            );
+            _showSuccessBottomSheet(context, "PIN set successfully!");
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(response.error ?? "Failed to set PIN"),
-                backgroundColor: Colors.red,
-              ),
+            PgSnackBar.showError(
+              context,
+              response.error ?? "Failed to set PIN",
             );
           }
         } else {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("PINs do not match. Try again."),
-              backgroundColor: Colors.red,
-            ),
-          );
+          PgSnackBar.showError(context, "PINs do not match. Try again.");
         }
       },
     );
   }
 
   void _showUpdatePinFlow(BuildContext context) {
+    _showVerifyIdentitySheet(context);
+  }
+
+  void _showVerifyIdentitySheet(BuildContext context) {
+    final theme = Theme.of(context);
+    final auth = context.read<AuthProvider>();
+    final phone = auth.authResponseData?.phone ?? auth.userData?.phone ?? '';
+    final otpControllers = List.generate(5, (_) => TextEditingController());
+    final focusNodes = List.generate(5, (_) => FocusNode());
+    final formKey = GlobalKey<FormState>();
+
+    if (phone.isEmpty) {
+      PgSnackBar.showError(context, "Phone number not found");
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final authProv = sheetContext.read<AuthProvider>();
+
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                PgTexts.text700(
+                  sheetContext,
+                  text: "Verify Your Identity",
+                  fontSize: 22,
+                ),
+                const SizedBox(height: 8),
+                PgTexts.text400(
+                  sheetContext,
+                  text: "Enter the 5-digit code sent to $phone",
+                  fontSize: 14,
+                  color: Colors.grey,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                Form(
+                  key: formKey,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      return Container(
+                        width: 52,
+                        height: 60,
+                        margin: const EdgeInsets.symmetric(horizontal: 6),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: TextField(
+                          controller: otpControllers[index],
+                          focusNode: focusNodes[index],
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          maxLength: 1,
+                          style: const TextStyle(fontSize: 22),
+                          decoration: const InputDecoration(
+                            counterText: '',
+                            border: InputBorder.none,
+                          ),
+                          onChanged: (v) {
+                            if (v.isNotEmpty && index < 4) {
+                              focusNodes[index + 1].requestFocus();
+                            }
+                          },
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: PgScaleButton(
+                    onTap: authProv.isVerifyingIdentity
+                        ? null
+                        : () async {
+                            final code = otpControllers
+                                .map((c) => c.text)
+                                .join();
+                            if (code.length != 5) {
+                              PgSnackBar.showError(
+                                sheetContext,
+                                "Enter the complete 5-digit code",
+                              );
+                              return;
+                            }
+                            final success = await authProv.verifyIdentity(
+                              phone: phone,
+                              code: code,
+                            );
+                            if (!sheetContext.mounted) return;
+                            if (success) {
+                              Navigator.pop(sheetContext);
+                              _showCurrentPinForUpdate(context);
+                            } else {
+                              PgSnackBar.showError(
+                                sheetContext,
+                                authProv.errorMessage ?? "Verification failed",
+                              );
+                            }
+                          },
+                    child: Container(
+                      height: 52,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        gradient: const LinearGradient(
+                          colors: [PgColors.primary, PgColors.secondary],
+                        ),
+                      ),
+                      child: authProv.isVerifyingIdentity
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : PgTexts.text600(
+                              sheetContext,
+                              text: "Verify",
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () async {
+                    final ok = await authProv.requestOtp(
+                      phone: phone,
+                      forWhat: 'updatePin',
+                    );
+                    if (sheetContext.mounted) {
+                      if (ok) {
+                        PgSnackBar.showSuccess(
+                          sheetContext,
+                          "OTP resent to $phone",
+                        );
+                      } else {
+                        PgSnackBar.showError(
+                          sheetContext,
+                          authProv.errorMessage ?? "Failed to resend OTP",
+                        );
+                      }
+                    }
+                  },
+                  child: PgTexts.text500(
+                    sheetContext,
+                    text: "Resend Code",
+                    fontSize: 14,
+                    color: PgColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    auth.requestOtp(phone: phone, forWhat: 'updatePin');
+  }
+
+  void _showCurrentPinForUpdate(BuildContext context) {
     PgPinSheet.show(
       context,
       title: "Current PIN",
@@ -235,7 +489,10 @@ class SecurityPinScreen extends StatelessWidget {
   }
 
   void _showConfirmUpdatePinFlow(
-      BuildContext context, String oldPin, String newPin) {
+    BuildContext context,
+    String oldPin,
+    String newPin,
+  ) {
     PgPinSheet.show(
       context,
       title: "Confirm New PIN",
@@ -243,36 +500,145 @@ class SecurityPinScreen extends StatelessWidget {
       onVerify: (pin) async {
         if (pin == newPin) {
           Navigator.pop(context);
-          final response = await context
-              .read<AuthProvider>()
-              .updatePin(oldPin: oldPin, newPin: newPin, confirmPin: newPin);
+          _showLoadingModal(context, "We're updating your pin...");
+          final response = await context.read<AuthProvider>().updatePin(
+            oldPin: oldPin,
+            newPin: newPin,
+            confirmPin: newPin,
+          );
 
           if (!context.mounted) return;
+          Navigator.pop(context);
 
           if (response.isSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("PIN updated successfully!"),
-                backgroundColor: Color(0xFF22C55E),
-              ),
-            );
+            _showSuccessBottomSheet(context, "PIN updated successfully!");
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(response.error ?? "Failed to update PIN"),
-                backgroundColor: Colors.red,
-              ),
+            PgSnackBar.showError(
+              context,
+              response.error ?? "Failed to update PIN",
             );
           }
         } else {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("PINs do not match. Try again."),
-              backgroundColor: Colors.red,
-            ),
-          );
+          PgSnackBar.showError(context, "PINs do not match. Try again.");
         }
+      },
+    );
+  }
+
+  void _showLoadingModal(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            margin: const EdgeInsets.all(40),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardTheme.color,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: PgColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                PgTexts.text500(context, text: message, fontSize: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessBottomSheet(BuildContext context, String message) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF22C55E).withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Iconsax.tick_circle_copy,
+                  size: 40,
+                  color: Color(0xFF22C55E),
+                ),
+              ),
+              const SizedBox(height: 24),
+              PgTexts.text700(
+                context,
+                text: message,
+                fontSize: 20,
+                color: theme.textTheme.bodyLarge?.color ?? PgColors.black,
+              ),
+              const SizedBox(height: 8),
+              PgTexts.text400(
+                context,
+                text: "Your transaction PIN has been configured.",
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+              const SizedBox(height: 40),
+              PgScaleButton(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  height: 60,
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    gradient: const LinearGradient(
+                      colors: [PgColors.primary, PgColors.secondary],
+                    ),
+                  ),
+                  child: PgTexts.text600(
+                    context,
+                    text: "Done",
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
       },
     );
   }
@@ -315,7 +681,7 @@ class SecurityPinScreen extends StatelessWidget {
               return Column(
                 children: [
                   PgScaleButton(
-                    onTap: item.onTap,
+                    onTap: item.onTap ?? () {},
                     child: Padding(
                       padding: const EdgeInsets.all(20),
                       child: Row(
@@ -326,7 +692,7 @@ class SecurityPinScreen extends StatelessWidget {
                             color: item.isDangerous
                                 ? Colors.red
                                 : (theme.textTheme.bodyLarge?.color ??
-                                    PgColors.black),
+                                      PgColors.black),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -340,7 +706,7 @@ class SecurityPinScreen extends StatelessWidget {
                                   color: item.isDangerous
                                       ? Colors.red
                                       : (theme.textTheme.bodyLarge?.color ??
-                                          PgColors.black),
+                                            PgColors.black),
                                 ),
                                 if (item.subtitle != null) ...[
                                   const SizedBox(height: 2),
@@ -354,11 +720,14 @@ class SecurityPinScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const Icon(
-                            Iconsax.arrow_right_3_copy,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
+                          if (item.trailingWidget != null)
+                            item.trailingWidget!
+                          else
+                            const Icon(
+                              Iconsax.arrow_right_3_copy,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
                         ],
                       ),
                     ),
@@ -385,14 +754,16 @@ class _SecurityMenuItem {
   final IconData icon;
   final String title;
   final String? subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool isDangerous;
+  final Widget? trailingWidget;
 
   _SecurityMenuItem({
     required this.icon,
     required this.title,
-    required this.onTap,
+    this.onTap,
     this.subtitle,
     this.isDangerous = false,
+    this.trailingWidget,
   });
 }

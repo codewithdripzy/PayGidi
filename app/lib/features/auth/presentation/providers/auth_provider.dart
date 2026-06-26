@@ -11,8 +11,7 @@ class AuthProvider extends ChangeNotifier {
   final AuthStorageService _storageService;
   final BiometricService _biometricService;
 
-  AuthProvider(
-      this._repository, this._storageService, this._biometricService);
+  AuthProvider(this._repository, this._storageService, this._biometricService);
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -120,7 +119,9 @@ class AuthProvider extends ChangeNotifier {
           await _biometricService.saveLastPhone(_authResponseData!.phone!);
         }
         if (_authResponseData?.token != null) {
-          debugPrint("--- AuthProvider: New token received: ${response.data!.token} ---");
+          debugPrint(
+            "--- AuthProvider: New token received: ${response.data!.token} ---",
+          );
           _isLoggedIn = true;
           await _storageService.saveTokens(
             token: _authResponseData!.token!,
@@ -174,7 +175,9 @@ class AuthProvider extends ChangeNotifier {
       if (_authResponseData != null) {
         await _storageService.saveAuthResponseData(_authResponseData!);
         if (_authResponseData?.token != null) {
-          debugPrint("--- AuthProvider: New token received: ${response.data!.token} ---");
+          debugPrint(
+            "--- AuthProvider: New token received: ${response.data!.token} ---",
+          );
           _isLoggedIn = true;
           await _storageService.saveTokens(
             token: _authResponseData!.token!,
@@ -227,7 +230,9 @@ class AuthProvider extends ChangeNotifier {
       if (_authResponseData != null) {
         await _storageService.saveAuthResponseData(_authResponseData!);
         if (_authResponseData?.token != null) {
-          debugPrint("--- AuthProvider: New token received: ${response.data!.token} ---");
+          debugPrint(
+            "--- AuthProvider: New token received: ${response.data!.token} ---",
+          );
           _isLoggedIn = true;
           await _storageService.saveTokens(
             token: _authResponseData!.token!,
@@ -253,8 +258,10 @@ class AuthProvider extends ChangeNotifier {
     setLoading(false);
 
     if (response.isSuccess) {
-      _userData?.hasPin = true;
-      await _storageService.savePgUser(_userData!);
+      if (_userData != null) {
+        _userData!.hasPin = true;
+        await _storageService.savePgUser(_userData!);
+      }
       notifyListeners();
     }
 
@@ -341,6 +348,71 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
     return ApiResponse(error: response.error, data: null);
+  }
+
+  bool _isRegisteringBiometric = false;
+  bool get isRegisteringBiometric => _isRegisteringBiometric;
+
+  Future<bool> registerBiometric(String biometricId) async {
+    _isRegisteringBiometric = true;
+    notifyListeners();
+
+    final response = await _repository.registerBiometric(
+      BiometricRegisterRequest(biometricID: biometricId),
+    );
+
+    _isRegisteringBiometric = false;
+    if (response.isSuccess) {
+      if (_userData != null) {
+        _userData!.biometricEnabled = true;
+        await _storageService.savePgUser(_userData!);
+      }
+      notifyListeners();
+      return true;
+    }
+    _errorMessage = response.error ?? 'Failed to enable biometrics';
+    notifyListeners();
+    return false;
+  }
+
+  bool _isVerifyingIdentity = false;
+  bool get isVerifyingIdentity => _isVerifyingIdentity;
+
+  Future<bool> requestOtp({
+    required String phone,
+    required String forWhat,
+  }) async {
+    _errorMessage = null;
+    final response = await _repository.requestOtp(
+      phone: phone,
+      forWhat: forWhat,
+    );
+    if (!response.isSuccess) {
+      _errorMessage = response.error ?? 'Failed to send OTP';
+      notifyListeners();
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> verifyIdentity({
+    required String phone,
+    required String code,
+  }) async {
+    _isVerifyingIdentity = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final response = await _repository.verifyIdentity(phone: phone, code: code);
+
+    _isVerifyingIdentity = false;
+    if (response.isSuccess) {
+      notifyListeners();
+      return true;
+    }
+    _errorMessage = response.error ?? 'Verification failed';
+    notifyListeners();
+    return false;
   }
 
   Future<void> setHasSeenOnboarding(bool value) async {

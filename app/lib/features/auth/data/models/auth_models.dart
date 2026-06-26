@@ -13,6 +13,7 @@ class AuthRequest {
 class VerifyOtpRequest {
   final String phone;
   final String code;
+  final String? forWhat;
   final String? deviceName;
   final String? deviceType;
   final String? deviceOs;
@@ -20,6 +21,7 @@ class VerifyOtpRequest {
   VerifyOtpRequest({
     required this.phone,
     required this.code,
+    this.forWhat,
     this.deviceName,
     this.deviceType,
     this.deviceOs,
@@ -28,6 +30,7 @@ class VerifyOtpRequest {
   Map<String, dynamic> toJson() => {
     'phone': phone,
     'otp': code,
+    if (forWhat != null) 'forWhat': forWhat,
     if (deviceName != null) 'deviceName': deviceName,
     if (deviceType != null) 'deviceType': deviceType,
     if (deviceOs != null) 'deviceOs': deviceOs,
@@ -303,7 +306,7 @@ class PgUser {
   final List<dynamic>? activities; // Assuming dynamic for now
   final Preferences? preferences;
   final List<dynamic>? roles; // Assuming dynamic for now
-  final bool biometricEnabled;
+  bool biometricEnabled;
   final String biometricID;
   final String status;
   final List<dynamic>? otps; // Assuming dynamic for now

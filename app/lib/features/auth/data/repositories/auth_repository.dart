@@ -9,6 +9,28 @@ class AuthRepository {
 
   AuthRepository(this._apiService);
 
+  Future<ApiResponse<void>> requestOtp({
+    required String phone,
+    required String forWhat,
+  }) async {
+    try {
+      await _apiService.post('/auth/otp/request/phone', data: {
+        'phone': phone,
+        'forWhat': forWhat,
+      });
+      return ApiResponse(data: null);
+    } on DioException catch (e) {
+      return ApiResponse.fromJson(
+        (e.response?.data is Map)
+            ? e.response?.data
+            : {'error': e.response?.data.toString()},
+        null,
+      );
+    } catch (e) {
+      return ApiResponse(error: 'An unexpected error occurred');
+    }
+  }
+
   Future<ApiResponse<void>> setPin({
     required String pin,
     required String confirmPin,
@@ -119,6 +141,29 @@ class AuthRepository {
         response.data,
         (json) => AuthResponseData.fromJson(json as Map<String, dynamic>),
       );
+    } on DioException catch (e) {
+      return ApiResponse.fromJson(
+        (e.response?.data is Map)
+            ? e.response?.data
+            : {'error': e.response?.data.toString()},
+        null,
+      );
+    } catch (e) {
+      return ApiResponse(error: 'An unexpected error occurred');
+    }
+  }
+
+  Future<ApiResponse<void>> verifyIdentity({
+    required String phone,
+    required String code,
+  }) async {
+    try {
+      await _apiService.post('/auth/verify', data: {
+        'phone': phone,
+        'otp': code,
+        'forWhat': 'updatePin',
+      });
+      return ApiResponse(data: null);
     } on DioException catch (e) {
       return ApiResponse.fromJson(
         (e.response?.data is Map)

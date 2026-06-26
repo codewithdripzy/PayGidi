@@ -270,7 +270,11 @@ func VerifyAuthOTP(c *gin.Context) {
 	}
 
 	// Fetch the OTP from the database
-	otp, err := userService.GetOTPByCode(db.(*gorm.DB), data.ID, verifyData.Code, "login", "sms")
+	otpPurpose := verifyData.ForWhat
+	if otpPurpose == "" {
+		otpPurpose = "login"
+	}
+	otp, err := userService.GetOTPByCode(db.(*gorm.DB), data.ID, verifyData.Code, otpPurpose, "sms")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":  payGidiErrors.INTERNAL_SERVER_ERROR,

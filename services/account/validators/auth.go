@@ -8,6 +8,7 @@ type AuthDto struct {
 type VerifyAuthOtpDto struct {
 	Phone      string `json:"phone" validate:"required,min=10,max=15"`
 	Code       string `json:"otp" validate:"required,len=5"`
+	ForWhat    string `json:"forWhat" validate:"required,oneof=completeRegister login setPin updatePin twoFactorAuth"`
 	DeviceName string `json:"deviceName" validate:"omitempty,min=1,max=100"`
 	DeviceType string `json:"deviceType" validate:"omitempty,oneof=mobile desktop tablet"`
 	DeviceOS   string `json:"deviceOs" validate:"omitempty,max=50"`
