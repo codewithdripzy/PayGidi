@@ -37,10 +37,20 @@ class PrismaDocument {
   [key: string]: any;
 
   constructor(
-    private readonly delegate: any,
-    private readonly json: Set<string>,
+    delegate: any,
+    json: Set<string>,
     values: Record<string, any>,
   ) {
+    Object.defineProperty(this, 'delegate', {
+      value: delegate,
+      enumerable: false,
+      writable: true,
+    });
+    Object.defineProperty(this, 'json', {
+      value: json,
+      enumerable: false,
+      writable: true,
+    });
     Object.assign(this, toPublic(values, json));
   }
 

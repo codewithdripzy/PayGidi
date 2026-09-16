@@ -28,6 +28,7 @@ const issueToken = (res: Response, user: any) => {
   });
   return accessToken;
 };
+
 export async function auth(req: AuthRequest, res: Response) {
   const { phone, accountType } = req.body ?? {};
   if (!phone) return fail(res, 'Please provide phone number', 400);
@@ -61,10 +62,10 @@ export async function auth(req: AuthRequest, res: Response) {
     user.otpPurpose = 'login';
     user.otpExpiresAt = new Date(Date.now() + 600000);
     await user.save();
-  console.info('Auth user persistence completed', {
-    requestId,
-    userId: String(user._id),
-  });
+    console.info('Auth user persistence completed', {
+      requestId,
+      userId: String(user._id),
+    });
   }
   if (process.env.NODE_ENV !== 'production')
     console.info(`[PayGidi] OTP for ${phone}: ${user.otpCode}`);
@@ -85,6 +86,7 @@ export async function auth(req: AuthRequest, res: Response) {
     'An OTP has been sent to your phone. Please verify to continue.',
   );
 }
+
 export async function verifyAuthOTP(req: AuthRequest, res: Response) {
   const { phone, code, otp: provided } = req.body ?? {};
   const user = await User.findOne({ phone });
