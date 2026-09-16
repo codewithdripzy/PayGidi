@@ -14,6 +14,11 @@ import database from './config/database';
 import { wrapRouter } from './utils/async-router';
 import docsRoutes from './routes/docs.routes';
 const app = express();
+
+// Vercel and other reverse proxies provide the client IP in X-Forwarded-For.
+// Trust the single platform proxy so express-rate-limit can safely identify it.
+app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS || 1));
+
 const apiRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 300,
