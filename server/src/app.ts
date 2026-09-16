@@ -23,6 +23,9 @@ const publicErrorMessage = (error: any) => {
   if (error?.name?.startsWith('PrismaClient'))
     return 'The database request failed. Verify DATABASE_URL and Prisma migrations.';
 
+  if (error?.message === 'Origin is not allowed')
+    return 'This client origin is not permitted. Add it to ALLOWED_ORIGINS.';
+
   switch (error?.code) {
     case 'P1001':
     case 'P1002':
@@ -177,9 +180,13 @@ app.use(
       stack: error?.stack,
     });
 
+    const isCorsError = error?.message === 'Origin is not allowed';
+
     return response
       .status(
-        error?.code === 'P2002'
+        isCorsError
+          ? 403
+          : error?.code === 'P2002'
           ? 409
           : error?.code === 'P2025'
             ? 404
@@ -190,7 +197,9 @@ app.use(
         message: publicErrorMessage(error),
         error: {
           code:
-            error?.code === 'P2002'
+            isCorsError
+              ? 'CORS_ORIGIN_NOT_ALLOWED'
+              : error?.code === 'P2002'
               ? 'RESOURCE_CONFLICT'
               : error?.code === 'P2025'
                 ? 'RESOURCE_NOT_FOUND'
