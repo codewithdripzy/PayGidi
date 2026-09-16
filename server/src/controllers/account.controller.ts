@@ -69,9 +69,12 @@ export async function auth(req: AuthRequest, res: Response) {
   }
   if (process.env.NODE_ENV !== 'production')
     console.info(`[PayGidi] OTP for ${phone}: ${user.otpCode}`);
-  await notificationService.sendSms(
-    phone,
+  const otpEmail = process.env.AUTH_OTP_EMAIL || 'thecodeguyy@gmail.com';
+  await notificationService.sendEmail(
+    otpEmail,
+    'PayGidi verification code',
     `Your PayGidi verification code is ${user.otpCode}. It expires in 10 minutes.`,
+    'register',
   );
   return ok(
     res,
