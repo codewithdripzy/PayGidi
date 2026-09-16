@@ -16,6 +16,32 @@ import { wrapRouter } from './utils/async-router';
 import docsRoutes from './routes/docs.routes';
 const app = express();
 
+const publicErrorMessage = (error: any) => {
+  if (process.env.EXPOSE_ERROR_DETAILS === 'true' && error?.message)
+    return error.message;
+
+  if (error?.name?.startsWith('PrismaClient'))
+    return 'The database request failed. Verify DATABASE_URL and Prisma migrations.';
+
+  switch (error?.code) {
+    case 'P1001':
+    case 'P1002':
+    case 'P1017':
+      return 'The database is unavailable. Verify DATABASE_URL and database connectivity.';
+    case 'P2021':
+    case 'P2022':
+      return 'The production database schema is not up to date. Run Prisma migrations.';
+    case 'P2002':
+      return 'A record with these details already exists.';
+    case 'P2025':
+      return 'The requested record was not found.';
+    default:
+      if (error?.message?.includes('Termii'))
+        return 'The OTP SMS provider failed. Verify the Termii production configuration.';
+      return 'The request could not be completed. Check the server logs using the request ID.';
+  }
+};
+
 app.use((request, response, next) => {
   const requestId = request.get('x-request-id') || randomUUID();
   response.setHeader('x-request-id', requestId);
@@ -161,10 +187,7 @@ app.use(
       )
       .json({
         success: false,
-        message:
-          process.env.NODE_ENV === 'production' && !error?.statusCode
-            ? 'Internal server error'
-            : error?.message || 'Internal server error',
+        message: publicErrorMessage(error),
         error: {
           code:
             error?.code === 'P2002'
@@ -174,10 +197,7 @@ app.use(
                 : error?.statusCode || error?.status
                   ? 'REQUEST_ERROR'
                   : 'INTERNAL_SERVER_ERROR',
-          message:
-            process.env.NODE_ENV === 'production' && !error?.statusCode
-              ? 'Internal server error'
-              : error?.message || 'Internal server error',
+          message: publicErrorMessage(error),
           requestId: response.locals.requestId,
         },
       });
