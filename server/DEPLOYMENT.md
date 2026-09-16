@@ -17,7 +17,7 @@ Keep both files out of git. In Vercel, create separate projects or separate envi
 
 Set `DATABASE_URL` to the PostgreSQL connection string. The server also accepts the Go service variables (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, and `DB_NAME`) and builds a connection string from them when `DATABASE_URL` is absent.
 
-Set `JWT_SECRET`, `ALLOWED_ORIGINS`, and the provider variables required by the features being enabled. Resend is used for email when `RESEND_API_KEY` is present. Termii is used for SMS when `TERMII_API_KEY` and `TERMII_SENDER_ID` are present.
+Set `JWT_SECRET`, `ALLOWED_ORIGINS`, and the provider variables required by the features being enabled. Resend is used for email when `RESEND_API_KEY` is present. Termii is used for SMS when `TERMII_API_KEY` is present; `TERMII_SENDER_ID` defaults to `Termii` and can be overridden later.
 
 For OTP delivery, configure an approved Termii sender ID and use the DND channel when it is enabled for the account. Termii requires Nigerian phone numbers in international format and accepts SMS messages through `POST /api/sms/send`.
 

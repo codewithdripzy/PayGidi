@@ -4,9 +4,9 @@ import axios from 'axios';
 class NotificationService {
   async sendSms(to: string, message: string) {
     const apiKey = process.env.TERMII_API_KEY;
-    const senderId = process.env.TERMII_SENDER_ID;
+    const senderId = process.env.TERMII_SENDER_ID || 'Termii';
 
-    if (!apiKey || !senderId) {
+    if (!apiKey) {
       if (process.env.NODE_ENV === 'production') {
         throw new Error('Termii SMS provider is not configured');
       }
