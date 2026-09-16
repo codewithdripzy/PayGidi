@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "installCommand": "cd server && pnpm install --frozen-lockfile",
+  "buildCommand": "cd server && pnpm build",
+  "builds": [
+    {
+      "src": "server/api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "server/api/index.ts"
+    }
+  ]
+}

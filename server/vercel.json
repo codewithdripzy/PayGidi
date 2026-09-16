@@ -1,6 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "pnpm db:generate && pnpm build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm build",
   "builds": [{ "src": "api/index.ts", "use": "@vercel/node" }],
   "routes": [{ "src": "/(.*)", "dest": "api/index.ts" }]
 }
