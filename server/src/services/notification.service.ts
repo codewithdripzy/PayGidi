@@ -1,29 +1,45 @@
 import nodemailer from 'nodemailer';
-import twilio from 'twilio';
 import axios from 'axios';
 
 class NotificationService {
   async sendSms(to: string, message: string) {
-    if (
-      !process.env.TWILIO_ACCOUNT_SID ||
-      !process.env.TWILIO_AUTH_TOKEN ||
-      !process.env.TWILIO_PHONE_NUMBER
-    ) {
-      if (process.env.NODE_ENV === 'production')
-        throw new Error('SMS provider is not configured');
+    const apiKey = process.env.TERMII_API_KEY;
+    const senderId = process.env.TERMII_SENDER_ID;
+
+    if (!apiKey || !senderId) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('Termii SMS provider is not configured');
+      }
+
       console.info(`[PayGidi SMS] ${to}: ${message}`);
       return;
     }
 
-    const client = twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN,
-    );
-    await client.messages.create({
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to,
-      body: message,
-    });
+    const normalizedPhone = to.replace(/[^0-9]/g, '').replace(/^0/, '234');
+    const baseUrl = (
+      process.env.TERMII_BASE_URL || 'https://api.ng.termii.com'
+    ).replace(/\/$/, '');
+
+    try {
+      await axios.post(
+        `${baseUrl}/api/sms/send`,
+        {
+          api_key: apiKey,
+          to: normalizedPhone,
+          from: senderId,
+          sms: message,
+          type: 'plain',
+          channel: process.env.TERMII_CHANNEL || 'dnd',
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10_000,
+        },
+      );
+    } catch (error: any) {
+      const providerMessage = error?.response?.data?.message;
+      throw new Error(providerMessage || 'Termii SMS delivery failed');
+    }
   }
 
   async sendEmail(
