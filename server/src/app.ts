@@ -133,15 +133,6 @@ app.get('/api/v1/ready', async (_request, response) => {
 app.use('/docs', docsRoutes);
 app.use('/api/v1/auth', authRateLimiter);
 
-app.use(async (_request, _response, next) => {
-  try {
-    await database.getConnection();
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
 app.use('/api/v1', wrapRouter(accountRoutes));
 app.use('/api/v1/wallet', wrapRouter(walletRoutes));
 app.use('/api/v1/payment', wrapRouter(paymentRoutes));

@@ -2,7 +2,9 @@ import prisma from './prisma';
 
 class Database {
   async getConnection() {
-    await prisma.$connect();
+    // Prisma connects lazily on the first query. Explicitly calling $connect
+    // for every serverless request can recurse inside the generated client
+    // when Vercel reuses a warm function instance.
     return prisma;
   }
 
