@@ -92,17 +92,29 @@ class NotificationService {
         process.env.RESEND_DEFAULT_FROM_EMAIL ||
         'PayGidi <noreply@send.paygidi.site>';
 
-      await axios.post(
-        'https://api.resend.com/emails',
-        { from, to: [to], subject, html: message },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
+      try {
+        await axios.post(
+          'https://api.resend.com/emails',
+          { from, to: [to], subject, html: message },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            timeout: 10_000,
           },
-          timeout: 10_000,
-        },
-      );
+        );
+      } catch (error: any) {
+        const emailError = new Error(
+          error?.response?.data?.message || 'Email provider rejected the request',
+        ) as Error & { code?: string; statusCode?: number };
+        emailError.code =
+          error?.response?.status === 401
+            ? 'EMAIL_PROVIDER_AUTH_ERROR'
+            : 'EMAIL_PROVIDER_ERROR';
+        emailError.statusCode = 502;
+        throw emailError;
+      }
       return;
     }
 

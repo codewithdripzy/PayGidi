@@ -28,6 +28,12 @@ const publicErrorMessage = (error: any) => {
 
   if (error?.code === 'TERMII_SMS_VALIDATION_ERROR') return error.message;
 
+  if (error?.code === 'EMAIL_PROVIDER_AUTH_ERROR')
+    return 'The email provider API key is invalid. Update RESEND_API_KEY.';
+
+  if (error?.code === 'EMAIL_PROVIDER_ERROR')
+    return 'The email provider rejected the request. Check the email configuration.';
+
   switch (error?.code) {
     case 'P1001':
     case 'P1002':
@@ -194,6 +200,10 @@ app.use(
               ? 'CORS_ORIGIN_NOT_ALLOWED'
               : error?.code === 'TERMII_SMS_VALIDATION_ERROR'
                 ? error.code
+                : error?.code === 'EMAIL_PROVIDER_AUTH_ERROR'
+                  ? error.code
+                  : error?.code === 'EMAIL_PROVIDER_ERROR'
+                    ? error.code
               : error?.code === 'P2002'
               ? 'RESOURCE_CONFLICT'
               : error?.code === 'P2025'
