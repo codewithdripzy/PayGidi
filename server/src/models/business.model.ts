@@ -1,6 +1,2 @@
-import { model, models } from "mongoose";
-import businessSchema from "../schemas/business.schema";
-
-const BusinessModel = models.Business || model("Business", businessSchema, "businesses");
-
-export default BusinessModel;
+import { createPrismaModel } from './prisma.model';
+export default createPrismaModel('business', { json: ['metadata', 'directors', 'documents'] });

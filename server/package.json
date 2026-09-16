@@ -2,11 +2,15 @@
   "name": "paygidi-server",
   "version": "1.0.0",
   "description": "Robust backend for PayGidi - AI-powered escrow and trust infrastructure.",
-  "main": "app.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/app.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/app.ts",
-    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
+    "dev:staging": "dotenv -e .env.staging -- ts-node src/server.ts",
+    "db:generate": "prisma generate",
+    "db:deploy:staging": "dotenv -e .env.staging -- prisma migrate deploy",
+    "db:deploy:production": "dotenv -e .env.production -- prisma migrate deploy",
+    "build": "prisma generate && tsc -p tsconfig.json",
     "test": "jest"
   },
   "keywords": [
@@ -16,10 +20,11 @@
     "knowledge-base",
     "analytics"
   ],
-  "author": "Orello",
+  "author": "PayGidi",
   "license": "ISC",
   "dependencies": {
     "@ai-sdk/google": "^3.0.67",
+    "@prisma/client": "^6.15.0",
     "@google/genai": "^1.14.0",
     "@workstudio/integrations": "^1.0.1",
     "@workstudio/utilities": "^1.0.1",
@@ -39,7 +44,6 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "md5": "^2.3.0",
-    "mongoose": "^8.19.4",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nodemailer": "^8.0.7",
@@ -61,6 +65,8 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^20.10.0",
     "@types/nodemailer": "^8.0.0",
+    "dotenv-cli": "^8.0.0",
+    "prisma": "^6.15.0",
     "@vercel/node": "^5.3.24",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.2"

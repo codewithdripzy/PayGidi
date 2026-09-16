@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  uid             String?   @unique
+  phone           String?   @unique
+  email           String?   @unique
+  username        String?
+  firstName       String?   @map("first_name")
+  lastName        String?   @map("last_name")
+  middleName      String?   @map("middle_name")
+  name            String?
+  passwordHash    String?   @map("password_hash")
+  accountType     String    @default("individual") @map("account_type")
+  role            String    @default("buyer")
+  status          String    @default("pending")
+  isFirstTime     Boolean   @default(true) @map("is_first_time")
+  phoneVerified   Boolean   @default(false) @map("phone_verified")
+  emailVerified   Boolean   @default(false) @map("email_verified")
+  pinHash         String?   @map("pin_hash")
+  referralCode    String?   @map("referral_code")
+  blocked         Boolean   @default(false)
+  otpCode         String?   @map("otp_code")
+  otpPurpose      String?   @map("otp_purpose")
+  otpExpiresAt    DateTime? @map("otp_expires_at")
+  otpRequests     Int       @default(0) @map("otp_requests")
+  biometricId     String?   @map("biometric_id")
+  biometricEnabled Boolean  @default(false) @map("biometric_enabled")
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  wallets         Wallet[]
+  businesses      Business[]
+  sessions        Session[]
+  savingsGoals    SavingsGoal[]
+  thrifts         Thrift[] @relation("ThriftCreator")
+  issues          Issue[]
+  @@map("users")
+}
+
+model Wallet {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String   @map("user_id") @db.Uuid
+  provider              String?
+  providerAccountNumber String?  @map("provider_account_number")
+  accountNumber         String?  @map("account_number")
+  accountType           String?  @map("account_type")
+  currency              String   @default("NGN")
+  balance               Decimal  @default(0) @db.Decimal(20, 2)
+  escrowBalance         Decimal  @default(0) @map("escrow_balance") @db.Decimal(20, 2)
+  status                String   @default("active")
+  customerIdentifier    String?  @map("customer_identifier")
+  accountReference      String?  @map("account_reference")
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  @@unique([userId, accountNumber])
+  @@map("wallets")
+}
+
+model Business {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String?  @map("user_id") @db.Uuid
+  name               String?
+  businessName       String?  @map("business_name")
+  registrationNumber String?  @map("registration_number")
+  cacNumber          String?  @map("cac_number")
+  type               String?
+  category           String?
+  industry           String?
+  website            String?
+  address            String?
+  phone              String?
+  email              String?
+  verificationStatus String   @default("pending") @map("verification_status")
+  trustScore         Decimal  @default(0) @map("trust_score")
+  trustTier          Int      @default(0) @map("trust_tier")
+  riskAnalysis       String?  @map("risk_analysis")
+  metadata           Json?
+  directors          Json?
+  documents          Json?
+  user               User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  @@map("businesses")
+}
+
+model Payment {
+  id                   String   @id @default(uuid()) @db.Uuid
+  userId               String?  @map("user_id") @db.Uuid
+  amount               Decimal? @db.Decimal(20, 2)
+  accountNumber        String?  @map("account_number")
+  bank                 String?
+  merchantPhoneNumber  String?  @map("merchant_phone_number")
+  merchantEmail        String?  @map("merchant_email")
+  advanceOptions       String?  @map("advance_options")
+  status               String   @default("pending")
+  summary              String?
+  trustScore           Decimal?
+  expiresAt            DateTime? @map("expires_at")
+  transactionReference String?  @unique @map("transaction_reference")
+  metadata             Json?
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  @@map("payments")
+}
+
+model Transaction {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  buyerId    String?  @map("buyer_id") @db.Uuid
+  merchantId String?  @map("merchant_id") @db.Uuid
+  amount     Decimal? @db.Decimal(20, 2)
+  type       String?
+  status     String   @default("pending")
+  reference  String?  @unique
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  @@map("transactions")
+}
+
+model SavingsGoal {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  name          String?
+  targetAmount  Decimal? @map("target_amount") @db.Decimal(20, 2)
+  currentAmount Decimal  @default(0) @map("current_amount") @db.Decimal(20, 2)
+  currency      String   @default("NGN")
+  status        String   @default("active")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  @@map("savings_goals")
+}
+
+model Thrift {
+  id                   String   @id @default(uuid()) @db.Uuid
+  creatorId            String   @map("creator_id") @db.Uuid
+  name                 String?
+  description          String?
+  contributionAmount   Decimal? @map("contribution_amount") @db.Decimal(20, 2)
+  contributionFrequency String  @default("monthly") @map("contribution_frequency")
+  maxMembers           Int?     @map("max_members")
+  currentMembers       Int      @default(1) @map("current_members")
+  isPublic             Boolean  @default(false) @map("is_public")
+  status               String   @default("active")
+  members              Json     @default("[]")
+  creator              User     @relation("ThriftCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  @@map("thrifts")
+}
+
+model Notification {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  title      String?
+  message    String?
+  type       String?
+  channel    String?
+  status     String?
+  read       Boolean  @default(false)
+  archived   Boolean  @default(false)
+  recipient  String?
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  @@map("notifications")
+}
+
+model Activity {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  action     String?
+  entityType String?  @map("entity_type")
+  entityId   String?  @map("entity_id")
+  details    String?
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  @@map("activities")
+}
+
+model Issue {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  title       String?
+  description String?
+  status      String   @default("open")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  @@map("issues")
+}
+
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  tokenHash  String?  @map("token_hash")
+  deviceName String?  @map("device_name")
+  deviceType String?  @map("device_type")
+  deviceOs   String?  @map("device_os")
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  expiresAt  DateTime? @map("expires_at")
+  isCurrent  Boolean  @default(true) @map("is_current")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  @@map("sessions")
+}
+
+model WebhookTransaction {
+  id                   String   @id @default(uuid()) @db.Uuid
+  transactionReference String   @unique @map("transaction_reference")
+  virtualAccountNumber String?  @map("virtual_account_number")
+  customerIdentifier   String?  @map("customer_identifier")
+  principalAmount      Decimal? @map("principal_amount") @db.Decimal(20, 2)
+  settledAmount        Decimal? @map("settled_amount") @db.Decimal(20, 2)
+  feeCharged           Decimal? @map("fee_charged") @db.Decimal(20, 2)
+  currency             String?
+  senderName           String?  @map("sender_name")
+  transactionDate      String?  @map("transaction_date")
+  channel              String?
+  remarks              String?
+  transactionUuid      String?  @map("transaction_uuid")
+  rawPayload           Json?    @map("raw_payload")
+  status               String   @default("pending")
+  failureReason        String?  @map("failure_reason")
+  processedAt          DateTime? @map("processed_at")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  @@map("webhook_transactions")
+}

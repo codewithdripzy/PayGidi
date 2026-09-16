@@ -1,2 +1,2 @@
 import { createPrismaModel } from './prisma.model';
-export default createPrismaModel('wallet');
+export default createPrismaModel('savingsGoal');

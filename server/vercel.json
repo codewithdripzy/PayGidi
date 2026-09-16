@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm db:generate && pnpm build",
+  "builds": [{ "src": "api/index.ts", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "api/index.ts" }]
+}
