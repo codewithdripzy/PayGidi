@@ -29,7 +29,7 @@ class NotificationService {
           from: senderId,
           sms: message,
           type: 'plain',
-          channel: process.env.TERMII_CHANNEL || 'dnd',
+          channel: process.env.TERMII_CHANNEL || 'generic',
         },
         {
           headers: { 'Content-Type': 'application/json' },
@@ -63,7 +63,7 @@ class NotificationService {
         providerData,
         phone: normalizedPhone,
         senderId,
-        channel: process.env.TERMII_CHANNEL || 'dnd',
+        channel: process.env.TERMII_CHANNEL || 'generic',
       });
 
       const smsError = new Error(

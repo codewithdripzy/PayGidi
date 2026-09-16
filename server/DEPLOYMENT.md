@@ -19,7 +19,7 @@ Set `DATABASE_URL` to the PostgreSQL connection string. The server also accepts 
 
 Set `JWT_SECRET`, `ALLOWED_ORIGINS`, and the provider variables required by the features being enabled. Resend is used for email when `RESEND_API_KEY` is present. Termii is used for SMS when `TERMII_API_KEY` is present; `TERMII_SENDER_ID` defaults to `Termii` and can be overridden later.
 
-For OTP delivery, configure an approved Termii sender ID and use the DND channel when it is enabled for the account. Termii requires Nigerian phone numbers in international format and accepts SMS messages through `POST /api/sms/send`.
+For OTP delivery, configure an approved Termii sender ID. The default channel is `generic`; switch `TERMII_CHANNEL` to `dnd` only after DND has been enabled for the account. Termii requires Nigerian phone numbers in international format and accepts SMS messages through `POST /api/sms/send`.
 
 Do not deploy repository `.env` files. Set these values in Vercel project settings or the deployment secret manager.
 
