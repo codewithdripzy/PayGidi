@@ -17,13 +17,40 @@ const app = express();
 
 // Vercel and other reverse proxies provide the client IP in X-Forwarded-For.
 // Trust the single platform proxy so express-rate-limit can safely identify it.
-app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS || 1));
+const configuredProxyHops = Number.parseInt(
+  process.env.TRUST_PROXY_HOPS || '1',
+  10,
+);
+const trustProxyHops = Number.isInteger(configuredProxyHops)
+  ? configuredProxyHops
+  : 1;
+app.set('trust proxy', trustProxyHops);
+
+const forwardedClientIp = (request: express.Request) => {
+  const forwardedFor = request.headers['x-forwarded-for'];
+  if (typeof forwardedFor === 'string' && forwardedFor.length > 0) {
+    return forwardedFor.split(',')[0].trim();
+  }
+
+  const forwarded = request.headers.forwarded;
+  if (typeof forwarded === 'string') {
+    const match = forwarded.match(/(?:^|;)\s*for=([^;]+)/i);
+    if (match?.[1]) return match[1].replace(/^"|"$/g, '');
+  }
+
+  return request.ip || request.socket.remoteAddress || 'unknown';
+};
 
 const apiRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 300,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  keyGenerator: forwardedClientIp,
+  validate: {
+    xForwardedForHeader: false,
+    forwardedHeader: false,
+  },
   message: { success: false, message: 'Too many requests. Try again later.' },
 });
 
@@ -32,6 +59,11 @@ const authRateLimiter = rateLimit({
   limit: 20,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  keyGenerator: forwardedClientIp,
+  validate: {
+    xForwardedForHeader: false,
+    forwardedHeader: false,
+  },
   message: {
     success: false,
     message: 'Too many authentication attempts. Try again later.',
