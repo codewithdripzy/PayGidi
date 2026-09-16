@@ -1,4 +1,5 @@
 import express from 'express';
+import { randomUUID } from 'crypto';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
@@ -14,6 +15,13 @@ import database from './config/database';
 import { wrapRouter } from './utils/async-router';
 import docsRoutes from './routes/docs.routes';
 const app = express();
+
+app.use((request, response, next) => {
+  const requestId = request.get('x-request-id') || randomUUID();
+  response.setHeader('x-request-id', requestId);
+  response.locals.requestId = requestId;
+  next();
+});
 
 // Vercel and other reverse proxies provide the client IP in X-Forwarded-For.
 // Trust the single platform proxy so express-rate-limit can safely identify it.
@@ -114,20 +122,36 @@ app.post('/api/v1/webhook/squad', (request, response, next) => {
 app.use('/api/v1/transactions', wrapRouter(transactionRoutes));
 app.use('/api/v1/kyb', wrapRouter(aiRoutes));
 app.use('/api/v1/notification', wrapRouter(notificationRoutes));
-app.use((_request, response) =>
+app.use((request, response) =>
   response.status(404).json({
     success: false,
-    message: 'Route not found',
+    message: `No route found for ${request.method} ${request.originalUrl}`,
+    error: {
+      code: 'ROUTE_NOT_FOUND',
+      message: `No route found for ${request.method} ${request.originalUrl}`,
+      requestId: response.locals.requestId,
+    },
   }),
 );
 app.use(
   (
     error: any,
-    _req: express.Request,
-    res: express.Response,
+    request: express.Request,
+    response: express.Response,
     _next: express.NextFunction,
-  ) =>
-    res
+  ) => {
+    console.error('Unhandled request error', {
+      method: request.method,
+      path: request.originalUrl,
+      requestId: response.locals.requestId,
+      code: error?.code,
+      status: error?.statusCode || error?.status,
+      message: error?.message,
+      details: error?.response?.data || error?.meta,
+      stack: error?.stack,
+    });
+
+    return response
       .status(
         error?.code === 'P2002'
           ? 409
@@ -141,6 +165,22 @@ app.use(
           process.env.NODE_ENV === 'production' && !error?.statusCode
             ? 'Internal server error'
             : error?.message || 'Internal server error',
-      }),
+        error: {
+          code:
+            error?.code === 'P2002'
+              ? 'RESOURCE_CONFLICT'
+              : error?.code === 'P2025'
+                ? 'RESOURCE_NOT_FOUND'
+                : error?.statusCode || error?.status
+                  ? 'REQUEST_ERROR'
+                  : 'INTERNAL_SERVER_ERROR',
+          message:
+            process.env.NODE_ENV === 'production' && !error?.statusCode
+              ? 'Internal server error'
+              : error?.message || 'Internal server error',
+          requestId: response.locals.requestId,
+        },
+      });
+  },
 );
 export default app;
