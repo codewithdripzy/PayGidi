@@ -26,6 +26,8 @@ const publicErrorMessage = (error: any) => {
   if (error?.message === 'Origin is not allowed')
     return 'This client origin is not permitted. Add it to ALLOWED_ORIGINS.';
 
+  if (error?.code === 'TERMII_SMS_VALIDATION_ERROR') return error.message;
+
   switch (error?.code) {
     case 'P1001':
     case 'P1002':
@@ -190,6 +192,8 @@ app.use(
           code:
             isCorsError
               ? 'CORS_ORIGIN_NOT_ALLOWED'
+              : error?.code === 'TERMII_SMS_VALIDATION_ERROR'
+                ? error.code
               : error?.code === 'P2002'
               ? 'RESOURCE_CONFLICT'
               : error?.code === 'P2025'

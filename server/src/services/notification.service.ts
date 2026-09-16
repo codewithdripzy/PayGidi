@@ -37,8 +37,41 @@ class NotificationService {
         },
       );
     } catch (error: any) {
-      const providerMessage = error?.response?.data?.message;
-      throw new Error(providerMessage || 'Termii SMS delivery failed');
+      const providerData = error?.response?.data;
+      const providerErrors =
+        providerData?.errors || providerData?.fields || providerData?.error;
+      const fieldDetails = Array.isArray(providerErrors)
+        ? providerErrors
+            .map((item: any) => {
+              const field = item?.field || item?.name || 'unknown field';
+              const messages = Array.isArray(item?.messages)
+                ? item.messages.join(', ')
+                : item?.message || 'invalid value';
+              return `${field}: ${messages}`;
+            })
+            .join('; ')
+        : typeof providerErrors === 'object' && providerErrors !== null
+          ? Object.entries(providerErrors)
+              .map(([field, details]) => `${field}: ${String(details)}`)
+              .join('; ')
+          : '';
+      const providerMessage = providerData?.message || 'SMS request rejected';
+      const detail = fieldDetails ? ` (${fieldDetails})` : '';
+
+      console.error('Termii SMS request failed', {
+        status: error?.response?.status,
+        providerData,
+        phone: normalizedPhone,
+        senderId,
+        channel: process.env.TERMII_CHANNEL || 'dnd',
+      });
+
+      const smsError = new Error(
+        `Termii SMS validation failed: ${providerMessage}${detail}`,
+      ) as Error & { code?: string; statusCode?: number };
+      smsError.code = 'TERMII_SMS_VALIDATION_ERROR';
+      smsError.statusCode = 502;
+      throw smsError;
     }
   }
 
