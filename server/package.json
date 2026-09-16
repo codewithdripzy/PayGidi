@@ -7,10 +7,11 @@
     "start": "node dist/server.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
     "dev:staging": "dotenv -e .env.staging -- ts-node src/server.ts",
+    "clean": "node scripts/clean-dist.js",
     "db:generate": "prisma generate",
     "db:deploy:staging": "dotenv -e .env.staging -- prisma migrate deploy",
     "db:deploy:production": "dotenv -e .env.production -- prisma migrate deploy",
-    "build": "prisma generate && tsc -p tsconfig.json",
+    "build": "node scripts/clean-dist.js && prisma generate && tsc -p tsconfig.json",
     "test": "jest"
   },
   "keywords": [

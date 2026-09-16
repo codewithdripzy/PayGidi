@@ -5,6 +5,22 @@ const jsonResponse = {
   '500': { description: 'Internal server error' },
 };
 
+const requestBody = (
+  properties: Record<string, unknown>,
+  required: string[] = [],
+) => ({
+  required: true,
+  content: {
+    'application/json': {
+      schema: {
+        type: 'object',
+        properties,
+        required,
+      },
+    },
+  },
+});
+
 const protectedPost = (summary: string) => ({
   post: {
     summary,
@@ -49,6 +65,22 @@ export const openApiDocument = {
       post: {
         tags: ['Account'],
         summary: 'Request login OTP',
+        requestBody: requestBody(
+          {
+            phone: {
+              type: 'string',
+              example: '+2348012345678',
+              description: 'User phone number.',
+            },
+            accountType: {
+              type: 'string',
+              enum: ['individual', 'business'],
+              example: 'individual',
+              description: 'Required when registering a new account.',
+            },
+          },
+          ['phone'],
+        ),
         responses: jsonResponse,
       },
     },
@@ -56,14 +88,44 @@ export const openApiDocument = {
       post: {
         tags: ['Account'],
         summary: 'Verify login OTP',
+        requestBody: requestBody(
+          {
+            phone: { type: 'string', example: '+2348012345678' },
+            otp: { type: 'string', example: '12345' },
+            forWhat: { type: 'string', example: 'login' },
+          },
+          ['phone', 'otp', 'forWhat'],
+        ),
         responses: jsonResponse,
       },
     },
-    '/auth/complete': protectedPost('Complete account profile'),
+    '/auth/complete': {
+      post: {
+        tags: ['Account'],
+        summary: 'Complete account profile',
+        security: [{ bearerAuth: [] }],
+        requestBody: requestBody({
+          firstName: { type: 'string', example: 'Ada' },
+          lastName: { type: 'string', example: 'Lovelace' },
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'ada@example.com',
+          },
+          accountType: { type: 'string', enum: ['individual', 'business'] },
+          businessName: { type: 'string', example: 'Ada Ventures' },
+        }),
+        responses: jsonResponse,
+      },
+    },
     '/auth/verify/nin': {
       post: {
         tags: ['Account'],
         summary: 'Verify NIN',
+        requestBody: requestBody(
+          { nin: { type: 'string', example: '12345678901' } },
+          ['nin'],
+        ),
         responses: jsonResponse,
       },
     },
@@ -71,6 +133,9 @@ export const openApiDocument = {
       post: {
         tags: ['Account'],
         summary: 'Verify BVN image',
+        requestBody: requestBody({
+          bvn: { type: 'string', example: '12345678901' },
+        }),
         responses: jsonResponse,
       },
     },
@@ -78,6 +143,17 @@ export const openApiDocument = {
       post: {
         tags: ['Account'],
         summary: 'Verify email OTP',
+        requestBody: requestBody(
+          {
+            email: {
+              type: 'string',
+              format: 'email',
+              example: 'ada@example.com',
+            },
+            code: { type: 'string', example: '12345' },
+          },
+          ['email', 'code'],
+        ),
         responses: jsonResponse,
       },
     },
@@ -93,6 +169,18 @@ export const openApiDocument = {
             schema: { type: 'string' },
           },
         ],
+        requestBody: requestBody(
+          {
+            phone: { type: 'string', example: '+2348012345678' },
+            email: {
+              type: 'string',
+              format: 'email',
+              example: 'ada@example.com',
+            },
+            forWhat: { type: 'string', example: 'verification' },
+          },
+          ['forWhat'],
+        ),
         responses: jsonResponse,
       },
     },
@@ -100,6 +188,10 @@ export const openApiDocument = {
       post: {
         tags: ['Account'],
         summary: 'Authenticate with biometrics',
+        requestBody: requestBody(
+          { biometricId: { type: 'string', example: 'device-biometric-id' } },
+          ['biometricId'],
+        ),
         responses: jsonResponse,
       },
     },

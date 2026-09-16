@@ -81,7 +81,7 @@ app.get('/api/v1/ready', async (_request, response) => {
       .json({ status: 'not_ready', database: 'unavailable' });
   }
 });
-app.use('/api/v1/docs', docsRoutes);
+app.use('/docs', docsRoutes);
 app.use('/api/v1/auth', authRateLimiter);
 
 app.use(async (_request, _response, next) => {

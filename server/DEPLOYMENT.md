@@ -39,7 +39,7 @@ If the target PostgreSQL database already contains the Go service tables, inspec
 - `GET /health` — liveness check
 - `GET /api/v1/health` — API liveness check
 - `GET /api/v1/ready` — PostgreSQL readiness check
-- `GET /api/v1/docs` — Swagger UI
-- `GET /api/v1/docs/openapi.json` — OpenAPI document
+- `GET /docs` — Swagger UI
+- `GET /docs/openapi.json` — OpenAPI document
 
-After deployment, verify `/api/v1/ready`, `/api/v1/docs/openapi.json`, authentication, an email delivery, an SMS delivery, and the Squad webhook signature before accepting real payments.
+After deployment, verify `/api/v1/ready`, `/docs/openapi.json`, authentication, an email delivery, an SMS delivery, and the Squad webhook signature before accepting real payments.
